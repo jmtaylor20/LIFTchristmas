@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { AdminTitle, Empty } from "@/components/admin";
 
 export const metadata = { title: "Family history" };
 
 export default async function Families({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const households = await db.household.findMany({
     where: q
       ? { OR: [{ parentFirstName: { contains: q, mode: "insensitive" } }, { parentLastName: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }, { email: { contains: q, mode: "insensitive" } }] }

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { seasonStats } from "@/lib/stats";
 import { formatDateShort, money, toDateInput } from "@/lib/format";
 import { AdminTitle, Stat } from "@/components/admin";
@@ -21,7 +21,7 @@ const methodLabel = { VENMO: "Venmo", CASH: "Cash", CHECK: "Check", OTHER: "Othe
 
 export default async function Donations({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   const sp = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const [stats, pending, donations, inKind] = await Promise.all([
     seasonStats(season.id),
     db.donation.findMany({ where: { seasonId: season.id, status: "PENDING" }, orderBy: { createdAt: "asc" } }),

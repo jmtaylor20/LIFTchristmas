@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { genderLabel } from "@/lib/format";
 import { AdminTitle } from "@/components/admin";
 import { PrintButton } from "@/components/PrintButton";
@@ -11,7 +11,7 @@ export const metadata = { title: "Gift tags" };
 // Printable tags: one per angel for the paper Angel Tree, or bag labels for sorting gifts.
 export default async function Tags({ searchParams }: { searchParams: Promise<{ kind?: string; only?: string }> }) {
   const { kind = "tree", only } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const angels = await db.angel.findMany({
     where: { seasonId: season.id, number: { not: null }, application: { status: "APPROVED" } },
     include: {

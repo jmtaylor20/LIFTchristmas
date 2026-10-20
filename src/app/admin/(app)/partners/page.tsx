@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { seasonPartners, tierLabel, TIERS } from "@/lib/recognition";
 import { formatDateShort, money } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
@@ -14,7 +14,7 @@ const statusTone = {
 } as const;
 
 export default async function AdminPartners() {
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const partners = await seasonPartners(season.id);
   const pending = partners.filter((p) => p.status === "PENDING");
 

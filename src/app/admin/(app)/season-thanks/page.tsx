@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { layout } from "@/lib/email";
 import { seasonGivers, seasonImpact, seasonThanksHtml, seasonThanksStartDate } from "@/lib/thanks";
 import { AdminTitle } from "@/components/admin";
@@ -10,7 +10,7 @@ export const metadata = { title: "Christmas thank-you email" };
 
 export default async function SeasonThanks({ searchParams }: { searchParams: Promise<{ sent?: string; remaining?: string }> }) {
   const sp = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const [givers, impact, sentCount] = await Promise.all([
     seasonGivers(season.id),
     seasonImpact(season.id),
