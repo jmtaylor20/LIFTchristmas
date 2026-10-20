@@ -47,6 +47,7 @@ model Season {
   donations    Donation[]
   inKindGifts  InKindGift[]
   partners     CorporatePartner[]
+  needs        NeedItem[]
 }
 
 model Household {
@@ -338,8 +339,34 @@ model InKindGift {
   source        InKindSource
   description   String
   estValueCents Int?
+  // Set when the gift fills a Ministry Needs item.
+  needItemId    String?
+  needItem      NeedItem?    @relation(fields: [needItemId], references: [id], onDelete: SetNull)
+  quantity      Int          @default(1)
   receivedAt    DateTime?
   createdAt     DateTime     @default(now())
+
+  @@index([seasonId])
+  @@index([needItemId])
+}
+
+// Things the ministry itself needs (often from its Amazon wish list), shown on
+// the Give page. Givers report what they bought; each report is an InKindGift.
+model NeedItem {
+  id         String       @id @default(cuid())
+  seasonId   String
+  season     Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  name       String
+  details    String?
+  url        String?
+  priceCents Int?
+  quantity   Int          @default(1)
+  sortOrder  Int          @default(0)
+  hidden     Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  gifts InKindGift[]
 
   @@index([seasonId])
 }

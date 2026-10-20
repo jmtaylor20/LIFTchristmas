@@ -48,6 +48,7 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 - Gift Tags: printable Angel Tree tags and pickup-day bag labels.
 - Pickup Day: a phone-friendly check-off by last name, phone, or angel #.
 - Business Partners: approve logos, edit names and websites, set tiers.
+- Ministry Needs: paste items, one per line (for example from the Amazon wish list), with the price, link, and quantity anywhere on the line. They show on the Give page with "Buy" and "I bought this" buttons. Each report becomes an in-kind gift: it's thanked when marked received and counts on the giver's statement.
 - Seasons & Deadlines: one season per year. A season with nothing in it yet can be deleted. It holds the deadlines, Venmo username, Amazon list, shipping address, drop-off and pickup details.
 
 **Automatic emails** (via [Resend](https://resend.com)):

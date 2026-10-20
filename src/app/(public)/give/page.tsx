@@ -7,14 +7,21 @@ import { formatDate, money } from "@/lib/format";
 import { db } from "@/lib/db";
 import { logAmazonGift } from "./actions";
 import { RecognitionFields } from "@/components/RecognitionFields";
+import { NeedsList } from "@/components/NeedsList";
+import { seasonNeeds } from "@/lib/needs";
 
 export const metadata = { title: "Give" };
 export const dynamic = "force-dynamic";
 
-export default async function Give({ searchParams }: { searchParams: Promise<{ logged?: string }> }) {
-  const { logged } = await searchParams;
+export default async function Give({
+  searchParams,
+}: {
+  searchParams: Promise<{ logged?: string; needThanks?: string; needError?: string }>;
+}) {
+  const { logged, needThanks, needError } = await searchParams;
   const season = await getActiveSeason();
   const open = sponsoringIsOpen(season);
+  const needs = season ? await seasonNeeds(season.id) : [];
   const cheapest = season
     ? await db.wishItem.findFirst({
         where: { status: "NEEDED", estPriceCents: { not: null }, angel: { seasonId: season.id, hidden: false, application: { status: "APPROVED", listSubmittedAt: { not: null } } } },
@@ -64,12 +71,22 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
         <div id="amazon">
           <Option
             n={3}
-            title="Shop our Amazon wish list"
+            title={needs.length ? "Shop what the ministry needs" : "Shop our Amazon wish list"}
             body="Order from our Amazon list and it ships straight to the ministry. Tell us what you bought so we can thank you and include it on your giving record."
           >
+            {needs.length > 0 && (
+              <div id="needs" className="mb-5 scroll-mt-6">
+                {needThanks && (
+                  <p className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                    Thank you! We&rsquo;ve recorded your gift and will thank you when it arrives.
+                  </p>
+                )}
+                <NeedsList needs={needs} open={open} errorFor={needError} />
+              </div>
+            )}
             {season?.amazonWishlistUrl ? (
-              <a href={season.amazonWishlistUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
-                Open the Amazon wish list ↗
+              <a href={season.amazonWishlistUrl} target="_blank" rel="noopener noreferrer" className={needs.length ? "btn-outline" : "btn-primary"}>
+                {needs.length ? "See our full Amazon wish list ↗" : "Open the Amazon wish list ↗"}
               </a>
             ) : (
               <p className="text-sm text-black/60">Our Amazon wish list is coming soon.</p>
@@ -79,7 +96,9 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
             ) : (
               season && (
                 <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-semibold text-dusk-700">Already ordered? Let us know →</summary>
+                  <summary className="cursor-pointer text-sm font-semibold text-dusk-700">
+                    {needs.length ? "Bought something else from the wish list? Let us know →" : "Already ordered? Let us know →"}
+                  </summary>
                   <form action={logAmazonGift} className="mt-3 grid gap-3 sm:grid-cols-2">
                     <input name="firstName" required placeholder="First name" className="input" />
                     <input name="lastName" required placeholder="Last name" className="input" />

@@ -15,6 +15,7 @@ import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } fr
 import { site } from "@/content/site";
 import { deliverNote } from "@/lib/thankyou";
 import { isSandbox } from "@/lib/sandbox";
+import { parseNeedLines } from "@/lib/needs";
 import { deleteAllData, loadSampleData } from "@/lib/sampleData";
 import { sendSeasonThanks, thankForInKindGift, thankForReceivedGifts, thankPartnerIfLive } from "@/lib/thanks";
 import { sendListReminders, sendSponsorReminders } from "@/lib/reminders";
@@ -579,4 +580,65 @@ export async function clearOutbox() {
   if (!isSandbox()) redirect("/admin");
   await db.sandboxEmail.deleteMany();
   revalidatePath("/admin/sandbox");
+}
+
+// ---------------------------------------------------------- ministry needs
+
+function safeUrl(raw: string) {
+  if (!raw) return null;
+  try {
+    const u = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function addNeeds(fd: FormData) {
+  await requireAdmin();
+  const season = await getAdminSeason();
+  if (!season) redirect("/admin/seasons?setup=1");
+  const items = parseNeedLines(str(fd, "lines"));
+  if (items.length === 0) redirect("/admin/needs?error=empty");
+  const last = await db.needItem.aggregate({ where: { seasonId: season.id }, _max: { sortOrder: true } });
+  let order = (last._max.sortOrder ?? 0) + 1;
+  await db.needItem.createMany({
+    data: items.map((i) => ({ seasonId: season.id, name: i.name, url: safeUrl(i.url ?? ""), priceCents: i.priceCents, quantity: i.quantity, sortOrder: order++ })),
+  });
+  revalidatePath("/give");
+  redirect(`/admin/needs?added=${items.length}`);
+}
+
+export async function updateNeed(id: string, fd: FormData) {
+  await requireAdmin();
+  await db.needItem.update({
+    where: { id },
+    data: {
+      name: str(fd, "name").slice(0, 160) || undefined,
+      details: optStr(fd, "details"),
+      url: safeUrl(str(fd, "url")),
+      priceCents: parseMoneyToCents(fd.get("price")),
+      quantity: Math.max(1, Math.min(9999, Number(str(fd, "quantity")) || 1)),
+    },
+  });
+  revalidatePath("/give");
+  revalidatePath("/admin/needs");
+}
+
+export async function toggleNeedHidden(id: string) {
+  await requireAdmin();
+  const n = await db.needItem.findUnique({ where: { id } });
+  if (n) await db.needItem.update({ where: { id }, data: { hidden: !n.hidden } });
+  revalidatePath("/give");
+  revalidatePath("/admin/needs");
+}
+
+/** Deletes an item nobody has bought yet (items with gifts are hidden instead, to keep giving records). */
+export async function deleteNeed(id: string) {
+  await requireAdmin();
+  const gifts = await db.inKindGift.count({ where: { needItemId: id } });
+  if (gifts > 0) await db.needItem.update({ where: { id }, data: { hidden: true } });
+  else await db.needItem.delete({ where: { id } });
+  revalidatePath("/give");
+  revalidatePath("/admin/needs");
 }
