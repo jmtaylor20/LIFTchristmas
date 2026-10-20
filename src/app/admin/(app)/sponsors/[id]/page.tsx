@@ -30,7 +30,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold">Sponsorships</h2>
+            <h2 className="text-xl">Sponsorships</h2>
             <p className="text-sm text-black/55">Sponsored {years.length} Christmas{years.length === 1 ? "" : "es"}{years.length > 0 && `: ${years.join(", ")}`}</p>
             <div className="mt-3 space-y-3">
               {g.sponsorships.map((s) => (
@@ -56,13 +56,13 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
             </div>
           </div>
           <div className="card">
-            <h2 className="text-xl font-bold">Donations &amp; in-kind gifts</h2>
+            <h2 className="text-xl">Donations &amp; in-kind gifts</h2>
             <table className="table mt-2">
               <tbody>
                 {g.donations.map((d) => (
                   <tr key={d.id}>
                     <td>{formatDateShort(d.receivedAt ?? d.createdAt)}</td>
-                    <td>{d.method.toLowerCase()} {d.status !== "PAID" && <span className="text-xs text-copper-700">({d.status.toLowerCase()})</span>}</td>
+                    <td>{d.method.toLowerCase()} {d.status !== "PAID" && <span className="text-xs text-star-700">({d.status.toLowerCase()})</span>}</td>
                     <td className="text-right">{money(d.amountCents, { cents: true })}</td>
                   </tr>
                 ))}
@@ -85,7 +85,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
             <p className="mt-2 text-xs text-black/50">Giver since {formatDateShort(g.createdAt)}</p>
           </div>
           <div className="card">
-            <h2 className="text-lg font-bold">Giving statements</h2>
+            <h2 className="text-lg">Giving statements</h2>
             <ul className="mt-2 space-y-2 text-sm">
               {taxYears.map((y) => {
                 const sent = g.statements.find((s) => s.taxYear === y);
@@ -100,7 +100,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
             </ul>
           </div>
           <form action={saveSponsorNotes.bind(null, g.id)} className="card space-y-2">
-            <h2 className="text-lg font-bold">Private notes</h2>
+            <h2 className="text-lg">Private notes</h2>
             <textarea name="adminNotes" defaultValue={g.adminNotes ?? ""} className="input min-h-24" />
             <button className="btn-outline btn-sm">Save notes</button>
           </form>

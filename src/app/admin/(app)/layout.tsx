@@ -68,7 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="min-w-0 p-4 sm:p-8">
         {!season ? (
           <div className="card max-w-xl">
-            <h1 className="text-2xl font-bold">Welcome!</h1>
+            <h1 className="text-2xl">Welcome!</h1>
             <p className="mt-2">Start by creating this year&rsquo;s season and setting your deadlines.</p>
             <Link href="/admin/seasons" className="btn-green mt-4">Set up a season</Link>
             {children}

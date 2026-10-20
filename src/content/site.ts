@@ -7,6 +7,7 @@ export const site = {
   communities: "Reeltown & Tallassee",
   region: "Reeltown & Tallassee, Alabama",
   tagline: "Sharing the love of Christ with children in our community, one Christmas gift at a time.",
+  motto: "Neighbors lifting neighbors.",
   contactEmail: "christmas@liftchristmas.org",
   contactPhone: "",
   facebookUrl: "",
@@ -40,11 +41,11 @@ export const site = {
   ],
 };
 
-// Logo files live in /public/brand. Until they're added, a star shows instead.
+// Original artwork (from the brand kit). Keep proportions; never put text over it.
 export const brand = {
-  // The angel on a transparent or white background (used in the header and as the browser icon).
-  angel: "/brand/angel.png",
-  // The full "Community Christmas" artwork on the blue sky (used for social sharing).
+  // Angel on a white background: show it on white.
+  angel: "/brand/angel.jpg",
+  // Full "Community Christmas" artwork on the Christmas-blue sky.
   full: "/brand/community-christmas.jpg",
 };
 

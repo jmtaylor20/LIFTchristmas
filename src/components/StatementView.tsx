@@ -10,13 +10,13 @@ export function StatementView({ s }: { s: Statement }) {
         <div>
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 text-gold-500" />
-            <span className="font-display text-xl font-bold text-dusk-800">{org.legalName}</span>
+            <span className="font-display text-xl font-semibold text-dusk-800">{org.legalName}</span>
           </div>
           {org.mailingAddress && <p className="mt-1 text-sm whitespace-pre-line text-black/60">{org.mailingAddress}</p>}
           {org.ein && <p className="text-sm text-black/60">EIN {org.ein}</p>}
         </div>
         <div className="text-right">
-          <p className="font-display text-2xl font-bold text-dusk-800">{s.year}</p>
+          <p className="font-display text-2xl font-semibold text-dusk-800">{s.year}</p>
           <p className="text-xs tracking-wider text-black/50 uppercase">Giving statement</p>
         </div>
       </header>
@@ -28,7 +28,7 @@ export function StatementView({ s }: { s: Statement }) {
         <p className="text-black/60">{s.sponsor.email}</p>
       </section>
 
-      <h2 className="mt-8 text-lg font-bold">Monetary contributions</h2>
+      <h2 className="mt-8 text-lg">Monetary contributions</h2>
       {s.donations.length ? (
         <table className="table mt-2">
           <thead>
@@ -56,7 +56,7 @@ export function StatementView({ s }: { s: Statement }) {
         <p className="mt-2 text-sm text-black/55">None recorded.</p>
       )}
 
-      <h2 className="mt-8 text-lg font-bold">Non-cash gifts received</h2>
+      <h2 className="mt-8 text-lg">Non-cash gifts received</h2>
       {s.noncash.length ? (
         <>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">

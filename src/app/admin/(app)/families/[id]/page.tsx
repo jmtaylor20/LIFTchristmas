@@ -24,7 +24,7 @@ export default async function Family({ params }: { params: Promise<{ id: string 
       </AdminTitle>
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="card">
-          <h2 className="text-xl font-bold">Applications</h2>
+          <h2 className="text-xl">Applications</h2>
           <table className="table mt-2">
             <tbody>
               {h.applications.map((a) => (
@@ -39,7 +39,7 @@ export default async function Family({ params }: { params: Promise<{ id: string 
           </table>
         </div>
         <div className="card">
-          <h2 className="text-xl font-bold">Children</h2>
+          <h2 className="text-xl">Children</h2>
           <table className="table mt-2">
             <tbody>
               {h.children.map((c) => (
@@ -58,7 +58,7 @@ export default async function Family({ params }: { params: Promise<{ id: string 
           <p className="mt-1 text-xs text-black/50">First applied {formatDate(h.createdAt)}</p>
         </div>
         <form action={saveHouseholdNotes.bind(null, h.id)} className="card space-y-2">
-          <h2 className="text-lg font-bold">Private notes</h2>
+          <h2 className="text-lg">Private notes</h2>
           <textarea name="adminNotes" defaultValue={h.adminNotes ?? ""} className="input min-h-24" />
           <button className="btn-outline btn-sm">Save</button>
         </form>

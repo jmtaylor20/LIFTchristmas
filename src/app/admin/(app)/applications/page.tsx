@@ -88,7 +88,7 @@ export default async function Applications({ searchParams }: { searchParams: Pro
                     <td>{a.community}</td>
                     <td>{a._count.angels}</td>
                     <td>
-                      <span className={atCap ? "font-semibold text-copper-700" : ""}>
+                      <span className={atCap ? "font-semibold text-star-700" : ""}>
                         {prior} prior
                         {atCap && " · at cap"}
                       </span>

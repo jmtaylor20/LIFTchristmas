@@ -41,7 +41,7 @@ export default async function ThankYous({ searchParams }: { searchParams: Promis
       </p>
       {sent != null && <div className="mb-4"><Notice tone="success">Sent to {sent} sponsor{sent === "1" ? "" : "s"}.</Notice></div>}
 
-      <h2 className="mb-3 text-xl font-bold">To review ({pending.length})</h2>
+      <h2 className="mb-3 text-xl">To review ({pending.length})</h2>
       {pending.length === 0 ? (
         <Empty>No notes waiting.</Empty>
       ) : (
@@ -87,7 +87,7 @@ export default async function ThankYous({ searchParams }: { searchParams: Promis
 
       {done.length > 0 && (
         <>
-          <h2 className="mt-8 mb-3 text-xl font-bold">Handled</h2>
+          <h2 className="mt-8 mb-3 text-xl">Handled</h2>
           <div className="card overflow-x-auto p-0">
             <table className="table">
               <tbody>

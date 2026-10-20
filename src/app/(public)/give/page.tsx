@@ -26,7 +26,7 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
     <>
       <PageHero eyebrow="Give" title="Share the joy of Christmas">
         <p>
-          &ldquo;{site.giveVerse.text}&rdquo; <span className="text-copper-700">— {site.giveVerse.ref}</span>
+          &ldquo;{site.giveVerse.text}&rdquo; <span className="text-star-700">— {site.giveVerse.ref}</span>
         </p>
         {season?.giftDeadline && (
           <p className="mt-3 text-base">
@@ -98,7 +98,7 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
 
         {season?.dropOffInstructions && (
           <div className="card bg-dusk-50">
-            <h3 className="text-lg font-bold">Dropping off gifts</h3>
+            <h3 className="text-lg">Dropping off gifts</h3>
             <p className="mt-2 whitespace-pre-line text-black/75">{season.dropOffInstructions}</p>
           </div>
         )}
@@ -110,11 +110,11 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
 function Option({ n, title, body, children }: { n: number; title: string; body: string; children: React.ReactNode }) {
   return (
     <div className="card grid gap-4 sm:grid-cols-[auto_1fr]">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-copper-50 font-display text-xl font-bold text-copper-700">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-star-50 font-display text-xl font-semibold text-star-700">
         {n}
       </div>
       <div>
-        <h2 className="flex items-center gap-2 text-2xl font-bold">
+        <h2 className="flex items-center gap-2 text-2xl">
           {title} <Star className="h-4 w-4 text-gold-500" />
         </h2>
         <p className="mt-2 max-w-2xl text-black/70">{body}</p>

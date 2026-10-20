@@ -43,7 +43,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
 
       {pending.length > 0 && (
         <div className="card mt-6 border-amber-200 bg-amber-50/60">
-          <h2 className="text-xl font-bold">Waiting to confirm ({pending.length})</h2>
+          <h2 className="text-xl">Waiting to confirm ({pending.length})</h2>
           <p className="text-sm text-black/60">
             These givers said they sent a gift by Venmo, check, or cash. When it arrives, mark it received. That emails their receipt and adds it to
             the totals.
@@ -76,7 +76,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="card overflow-x-auto">
-          <h2 className="text-xl font-bold">Donations received</h2>
+          <h2 className="text-xl">Donations received</h2>
           <table className="table mt-2">
             <thead>
               <tr>
@@ -103,14 +103,14 @@ export default async function Donations({ searchParams }: { searchParams: Promis
                   <td className="text-right font-semibold">{money(d.amountCents, { cents: true })}</td>
                   <td className="text-xs">
                     {d.receiptSentAt ? `sent ${formatDateShort(d.receiptSentAt)}` : d.donorEmail && d.status === "PAID" ? (
-                      <form action={resendReceipt.bind(null, d.id)}><button className="text-copper-700 underline">send</button></form>
+                      <form action={resendReceipt.bind(null, d.id)}><button className="text-star-700 underline">send</button></form>
                     ) : "—"}
                   </td>
                   <td>
                     {d.status === "NOT_RECEIVED" && (
                       <form action={confirmDonation.bind(null, d.id)}><button className="text-xs text-dusk-700 underline">received after all</button></form>
                     )}
-                    <form action={deleteDonation.bind(null, d.id)}><button className="text-xs text-black/40 hover:text-copper-700">delete</button></form>
+                    <form action={deleteDonation.bind(null, d.id)}><button className="text-xs text-black/40 hover:text-star-700">delete</button></form>
                   </td>
                 </tr>
               ))}
@@ -120,7 +120,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
         </div>
 
         <form action={recordDonation} className="card h-fit space-y-2">
-          <h2 className="text-lg font-bold">Record money received</h2>
+          <h2 className="text-lg">Record money received</h2>
           <p className="text-xs text-black/55">For Venmo gifts nobody reported on the website, and for cash or checks.</p>
           <div className="grid grid-cols-2 gap-2">
             <input name="firstName" placeholder="First name *" required className="input" />
@@ -145,7 +145,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
 
       <div id="in-kind" className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="card overflow-x-auto">
-          <h2 className="text-xl font-bold">Amazon &amp; drop-off gifts</h2>
+          <h2 className="text-xl">Amazon &amp; drop-off gifts</h2>
           <p className="text-sm text-black/55">General gifts not tied to an angel. Givers can report Amazon purchases on the Give page.</p>
           <table className="table mt-2">
             <thead>
@@ -173,7 +173,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
                       </button>
                     </form>
                   </td>
-                  <td><form action={deleteInKind.bind(null, g.id)}><button className="text-xs text-black/40 hover:text-copper-700">delete</button></form></td>
+                  <td><form action={deleteInKind.bind(null, g.id)}><button className="text-xs text-black/40 hover:text-star-700">delete</button></form></td>
                 </tr>
               ))}
             </tbody>
@@ -181,7 +181,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
           {inKind.length === 0 && <p className="mt-3 text-sm text-black/50">None yet.</p>}
         </div>
         <form action={recordInKind} className="card h-fit space-y-2">
-          <h2 className="text-lg font-bold">Record a gift</h2>
+          <h2 className="text-lg">Record a gift</h2>
           <div className="grid grid-cols-2 gap-2">
             <input name="firstName" placeholder="First name *" required className="input" />
             <input name="lastName" placeholder="Last name" className="input" />

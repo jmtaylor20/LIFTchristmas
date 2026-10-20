@@ -65,7 +65,7 @@ export default async function Dashboard({
             </Link>
           )}
           {pendingNotes > 0 && (
-            <Link href="/admin/thank-yous" className="rounded-xl bg-copper-50 px-4 py-2 text-sm text-copper-800 no-underline ring-1 ring-copper-100">
+            <Link href="/admin/thank-yous" className="rounded-xl bg-star-50 px-4 py-2 text-sm text-star-800 no-underline ring-1 ring-star-100">
               💌 {pendingNotes} thank-you note{pendingNotes === 1 ? "" : "s"} to review →
             </Link>
           )}
@@ -80,7 +80,7 @@ export default async function Dashboard({
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
         <div className="card">
-          <h2 className="text-xl font-bold">Angel coverage</h2>
+          <h2 className="text-xl">Angel coverage</h2>
           <ProgressBar value={s.angels.fullyCovered} max={s.angels.total - s.angels.noList} className="mt-3" />
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
             <Mini label="Fully covered" value={s.angels.fullyCovered} href="/admin/angels?coverage=full" />
@@ -101,7 +101,7 @@ export default async function Dashboard({
         </div>
 
         <div className="card">
-          <h2 className="text-xl font-bold">Deadlines</h2>
+          <h2 className="text-xl">Deadlines</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {deadlines.map(([label, d]) => (
               <li key={label} className="flex justify-between gap-3">
@@ -110,9 +110,9 @@ export default async function Dashboard({
               </li>
             ))}
           </ul>
-          <Link href="/admin/seasons" className="mt-4 inline-block text-sm font-semibold text-copper-700">Edit deadlines →</Link>
+          <Link href="/admin/seasons" className="mt-4 inline-block text-sm font-semibold text-star-700">Edit deadlines →</Link>
 
-          <h3 className="mt-6 text-lg font-bold">Reminders</h3>
+          <h3 className="mt-6 text-lg">Reminders</h3>
           <p className="text-xs text-black/55">
             Sent automatically {REMINDER_DAYS_BEFORE} days before each deadline. You can also send them now.
           </p>
@@ -161,7 +161,7 @@ export default async function Dashboard({
 function Mini({ label, value, href }: { label: string; value: number; href?: string }) {
   const inner = (
     <>
-      <p className="font-display text-2xl font-bold text-dusk-800">{value}</p>
+      <p className="font-display text-2xl font-semibold text-dusk-800">{value}</p>
       <p className="text-xs text-black/55">{label}</p>
     </>
   );
@@ -176,8 +176,8 @@ function Feed({ title, href, children }: { title: string; href: string; children
   return (
     <div className="card">
       <div className="flex justify-between">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <Link href={href} className="text-sm text-copper-700">All →</Link>
+        <h2 className="text-lg">{title}</h2>
+        <Link href={href} className="text-sm text-star-700">All →</Link>
       </div>
       {children.length === 0 ? <p className="mt-3 text-sm text-black/50">Nothing yet.</p> : <ul className="mt-3 space-y-2 text-sm">{children}</ul>}
     </div>

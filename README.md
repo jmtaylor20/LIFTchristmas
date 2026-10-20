@@ -53,16 +53,21 @@ Without `RESEND_API_KEY`, emails are printed to the server log.
 
 ## Deploy: Supabase + Netlify
 
-1. **Supabase:** create a project. Copy the two connection strings (see `.env.example`) into `DATABASE_URL` and `DIRECT_URL`.
-2. **Netlify:** "Add new site → Import from Git", choose this repo. `netlify.toml` already sets the build command, which runs the database migrations and then builds.
-3. In **Netlify → Site configuration → Environment variables**, add everything from `.env.example`. Set `NEXT_PUBLIC_SITE_URL` to the site's real URL.
-4. **Resend:** verify your sending domain, then set `RESEND_API_KEY` and `EMAIL_FROM`.
-5. Deploy. The scheduled jobs in `netlify/functions/` are picked up automatically (daily reminders; giving statements in mid-January).
+The Netlify project **lift-christmas** (https://lift-christmas.netlify.app) already exists, with `SESSION_SECRET`, `CRON_SECRET`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL`, `ORG_LEGAL_NAME` and `ORG_TAX_EXEMPT` set. To finish:
+
+1. **Supabase:** create a project named `lift-christmas` (region: East US). Save the database password it asks you to choose.
+2. In Supabase, click **Connect** and copy two connection strings:
+   - **Transaction pooler** (port 6543). Add `?pgbouncer=true&connection_limit=1` to the end. This is `DATABASE_URL`.
+   - **Session pooler** (port 5432). This is `DIRECT_URL`.
+   Put your password in place of `[YOUR-PASSWORD]` in both.
+3. In **Netlify → lift-christmas → Project configuration → Environment variables**, add `DATABASE_URL` and `DIRECT_URL`. Also add `ADMIN_NOTIFY_EMAIL` (the owner's email) and, once Resend is set up, `RESEND_API_KEY` and `EMAIL_FROM`.
+4. In **Netlify → Project configuration → Build & deploy → Link repository**, choose GitHub → `jmtaylor20/LIFTchristmas`. Set the production branch to the branch with this code (`main` once it's merged). Netlify builds automatically: `netlify.toml` runs the database migrations first, creating all the tables, then builds the site.
+5. The scheduled jobs in `netlify/functions/` turn on automatically (daily reminders; giving statements in mid-January).
 6. Sign in at `/admin`, open **Seasons & Deadlines**, create this year's season, and fill in the deadlines, Venmo username, Amazon list, shipping address, and drop-off/pickup details.
 
 ## Adding logos, photos, and testimonials
 
-- **Logos:** save the angel as `public/brand/angel.png` (transparent background) and the full artwork as `public/brand/community-christmas.jpg`. A star shows until they're added.
+- **Artwork:** the original angel and Community Christmas images are in `public/brand/`, copied unchanged from the LIFT Christmas Google Drive folder. Following the brand kit, the site never crops them, recolors them, or puts text over them.
 - **Photos:** put them in `public/photos/` and set the paths in `src/content/site.ts`.
 - **Testimonials and site wording:** edit `src/content/site.ts`.
 - **Spanish text** for families: edit `src/content/i18n.ts`. Please have a native speaker review it before launch.

@@ -54,7 +54,7 @@ export default async function Families({ searchParams }: { searchParams: Promise
                     <td>{h._count.children}</td>
                     <td className="text-xs">{h.applications.map((a) => a.season.year).join(", ")}</td>
                     <td>{approved.length} <span className="text-xs text-black/45">{approved.length > 0 && `(${approved.join(", ")})`}</span></td>
-                    <td className={remaining === 0 ? "font-semibold text-copper-700" : ""}>{remaining === 0 ? "At cap" : remaining}</td>
+                    <td className={remaining === 0 ? "font-semibold text-star-700" : ""}>{remaining === 0 ? "At cap" : remaining}</td>
                   </tr>
                 );
               })}

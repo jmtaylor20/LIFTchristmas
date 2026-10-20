@@ -39,7 +39,7 @@ export async function deliverNote(noteId: string) {
       subject: `A thank-you from ${angels}'s family 💌`,
       html: layout(`<p>Dear ${esc(r.sponsor.firstName)},</p>
 <p>The family of <strong>${angels}</strong>, whom you sponsored this Christmas, wanted you to have this:</p>
-<blockquote style="margin:16px 0;padding:12px 16px;border-left:4px solid #d9824a;background:#fcf2ea;font-size:16px;white-space:pre-line">${esc(note.message)}</blockquote>
+<blockquote style="margin:16px 0;padding:12px 16px;border-left:4px solid #dfab61;background:#fdf6ea;font-family:Georgia,serif;font-size:16px;white-space:pre-line">${esc(note.message)}</blockquote>
 ${note.imageKey ? `<p><img src="${siteUrl(`/card/${note.imageKey}`)}" alt="Thank-you card" style="max-width:100%;border-radius:12px"/></p>` : ""}
 <p>Thank you for being the hands and feet of Jesus to a child in ${esc(site.communities)}.</p>
 ${button(siteUrl("/account"), "View my giver profile")}`),

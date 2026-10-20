@@ -72,20 +72,23 @@ function stripHtml(html: string) {
 }
 
 export function button(href: string, label: string) {
-  return `<p style="margin:24px 0"><a href="${href}" style="background:#a2552a;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:600">${esc(label)}</a></p>`;
+  return `<p style="margin:24px 0"><a href="${href}" style="background:#dfab61;color:#17232a;padding:13px 24px;border-radius:999px;text-decoration:none;font-weight:700;display:inline-block">${esc(label)}</a></p>`;
 }
 
 export function layout(inner: string) {
-  return `<!doctype html><html><body style="margin:0;background:#eef3f8;font-family:Georgia,'Times New Roman',serif;color:#1f2a24">
-<div style="max-width:600px;margin:0 auto;padding:32px 20px">
-  <div style="text-align:center;margin-bottom:20px">
-    <div style="font-size:13px;letter-spacing:3px;color:#a2552a;text-transform:uppercase">&#10022; ${esc(site.communities)} &#10022;</div>
-    <div style="font-size:26px;font-weight:bold;color:#42617f">${esc(site.name)}</div>
+  return `<!doctype html><html><body style="margin:0;background:#eef4f6;font-family:'Trebuchet MS',Arial,sans-serif;color:#17232a">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px">
+  <div style="background:#6b8fa5;border-radius:16px 16px 0 0;overflow:hidden;text-align:center">
+    <div style="padding:20px 24px 4px;font-family:Georgia,'Times New Roman',serif;color:#ffffff">
+      <span style="font-size:28px;font-weight:bold;letter-spacing:1px">LIFT<span style="color:#f2d79d;font-size:15px;vertical-align:top">&#10022;</span></span>
+      <span style="display:inline-block;margin-left:10px;padding-left:10px;border-left:1px solid rgba(255,255,255,.5);font-family:'Trebuchet MS',Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;line-height:1.25;text-align:left;vertical-align:middle">Community<br/>Christmas</span>
+    </div>
+    <img src="${siteUrl("/brand/community-christmas.jpg")}" alt="" width="568" style="display:block;width:100%;max-width:568px;height:auto;margin:0 auto"/>
   </div>
-  <div style="background:#fff;border-radius:16px;padding:28px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6">${inner}</div>
-  <p style="text-align:center;font-size:12px;color:#6b6b6b;margin-top:20px;font-family:Helvetica,Arial,sans-serif">
-    &ldquo;${esc(site.verse.text)}&rdquo; &mdash; ${esc(site.verse.ref)}<br/>
-    ${esc(site.fullName)} &middot; ${esc(site.contactEmail)}
+  <div style="background:#ffffff;border-radius:0 0 16px 16px;padding:28px;font-size:15px;line-height:1.6">${inner}</div>
+  <p style="text-align:center;font-size:12px;color:#55636a;margin-top:20px">
+    <span style="font-family:Georgia,serif;font-style:italic">&ldquo;${esc(site.verse.text)}&rdquo; &mdash; ${esc(site.verse.ref)}</span><br/>
+    ${esc(site.fullName)} &middot; ${esc(site.motto)} &middot; ${esc(site.contactEmail)}
   </p>
 </div></body></html>`;
 }

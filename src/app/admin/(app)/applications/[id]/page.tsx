@@ -61,7 +61,7 @@ export default async function ApplicationDetail({
         <div className="space-y-6">
           <div className="card">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xl font-bold">Application · Christmas {app.season.year}</h2>
+              <h2 className="text-xl">Application · Christmas {app.season.year}</h2>
               <AppBadge status={app.status} />
             </div>
             <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
@@ -81,7 +81,7 @@ export default async function ApplicationDetail({
           </div>
 
           <div className="card">
-            <h2 className="text-xl font-bold">Children</h2>
+            <h2 className="text-xl">Children</h2>
             <div className="mt-3 space-y-4">
               {app.angels.map((a) => {
                 const pastYears = a.child.id ? h.children.find((c) => c.id === a.child.id)?.angels.filter((x) => x.seasonId !== app.seasonId).map((x) => x.season.year) : [];
@@ -134,7 +134,7 @@ export default async function ApplicationDetail({
 
         <div className="space-y-6">
           <form action={decideApplication.bind(null, app.id)} className="card space-y-3">
-            <h2 className="text-xl font-bold">Decision</h2>
+            <h2 className="text-xl">Decision</h2>
             <div className="grid grid-cols-2 gap-2">
               {(["APPROVED", "WAITLIST", "DENIED", "PENDING"] as const).map((s) => (
                 <label key={s} className="flex items-center gap-2 rounded-lg border border-black/10 px-3 py-2 text-sm has-checked:border-dusk-600 has-checked:bg-dusk-50">
@@ -152,13 +152,13 @@ export default async function ApplicationDetail({
           </form>
 
           <div className="card space-y-2 text-sm">
-            <h2 className="text-lg font-bold">Family&rsquo;s private link</h2>
+            <h2 className="text-lg">Family&rsquo;s private link</h2>
             <p className="text-xs text-black/55">Share this if they lost their email. It lets them see status and build lists.</p>
             <input readOnly value={portal} className="input font-mono text-xs" />
           </div>
 
           <div className="card">
-            <h2 className="text-lg font-bold">History</h2>
+            <h2 className="text-lg">History</h2>
             <p className="text-sm text-black/60">
               Approved {otherApproved.length + (app.status === "APPROVED" ? 1 : 0)} of {app.season.approvalCapYears} allowed years
             </p>
@@ -170,7 +170,7 @@ export default async function ApplicationDetail({
                 </li>
               ))}
             </ul>
-            <Link href={`/admin/families/${h.id}`} className="mt-3 inline-block text-sm text-copper-700">Full family record →</Link>
+            <Link href={`/admin/families/${h.id}`} className="mt-3 inline-block text-sm text-star-700">Full family record →</Link>
           </div>
 
         </div>

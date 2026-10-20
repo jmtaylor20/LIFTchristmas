@@ -4,7 +4,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <SiteHeader />
-      <main>{children}</main>
+      <main id="main" className="pb-24 has-[>.flush-end]:pb-0">{children}</main>
       <SiteFooter />
     </>
   );

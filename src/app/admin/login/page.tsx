@@ -13,9 +13,9 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
       <form action={adminLogin} className="card w-full max-w-sm space-y-4">
         <div className="flex items-center gap-2">
           <Star className="h-6 w-6 text-gold-500" />
-          <h1 className="text-xl font-bold">LIFT Ministry Admin</h1>
+          <h1 className="text-xl">LIFT Ministry Admin</h1>
         </div>
-        {error && <p className="rounded-lg bg-copper-50 px-3 py-2 text-sm text-copper-800">Incorrect password.</p>}
+        {error && <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">Incorrect password.</p>}
         <label className="block">
           <span className="label">Password</span>
           <input name="password" type="password" required autoFocus className="input" />

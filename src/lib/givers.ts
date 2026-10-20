@@ -148,7 +148,7 @@ export function statementHtml(s: Statement) {
 
   return `<p>Dear ${esc(s.sponsor.firstName)},</p>
 <p>Thank you for blessing the children of ${esc(site.communities)} this year. Below is your ${s.year} giving statement${org.taxExempt ? " for your tax records" : ""}.</p>
-<h3 style="margin:20px 0 4px;color:#42617f">${s.year} Giving Statement</h3>
+<h3 style="margin:20px 0 4px;color:#294f65;font-family:Georgia,serif;font-weight:normal">${s.year} Giving Statement</h3>
 <p style="margin:0;color:#555">${esc(name)}${s.sponsor.organization ? ` &middot; ${esc(s.sponsor.organization)}` : ""}<br/>${esc(s.sponsor.email)}</p>
 <h4 style="margin:20px 0 4px">Monetary contributions</h4>
 ${

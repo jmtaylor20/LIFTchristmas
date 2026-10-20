@@ -15,13 +15,13 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
     <form action={action} className="space-y-6">
       <input type="hidden" name="lang" value={lang} />
       {state.error && (
-        <div className="rounded-xl border border-copper-100 bg-copper-50 px-4 py-3 text-sm text-copper-800" role="alert">
+        <div className="rounded-xl border border-star-100 bg-star-50 px-4 py-3 text-sm text-star-800" role="alert">
           {state.error}
         </div>
       )}
 
       <fieldset className="card space-y-4">
-        <legend className="font-display text-xl font-bold text-dusk-800">{t.parent}</legend>
+        <legend className="font-display text-xl text-dusk-800">{t.parent}</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t.firstName} name="parentFirstName" required autoComplete="given-name" />
           <Field label={t.lastName} name="parentLastName" required autoComplete="family-name" />
@@ -46,7 +46,7 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="font-display text-xl font-bold text-dusk-800">{t.household}</legend>
+        <legend className="font-display text-xl text-dusk-800">{t.household}</legend>
         <Field label={t.income} name="monthlyIncome" inputMode="decimal" placeholder="$" hint={t.incomeHint} />
         <div>
           <span className="label">{t.assistanceQ}</span>
@@ -67,14 +67,14 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
       </fieldset>
 
       <fieldset className="card space-y-5">
-        <legend className="font-display text-xl font-bold text-dusk-800">{t.children}</legend>
+        <legend className="font-display text-xl text-dusk-800">{t.children}</legend>
         <p className="text-sm text-black/60">{t.childrenIntro}</p>
         {kids.map((k, idx) => (
           <div key={k} className="rounded-xl border border-black/10 bg-cream/50 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-bold">{t.child(idx + 1)}</h3>
+              <h3 className="text-base">{t.child(idx + 1)}</h3>
               {kids.length > 1 && (
-                <button type="button" className="text-xs font-semibold text-copper-700" onClick={() => setKids(kids.filter((x) => x !== k))}>
+                <button type="button" className="text-xs font-semibold text-star-700" onClick={() => setKids(kids.filter((x) => x !== k))}>
                   {t.remove}
                 </button>
               )}

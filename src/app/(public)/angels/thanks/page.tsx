@@ -22,7 +22,7 @@ export default async function SponsorThanks({ searchParams }: { searchParams: Pr
       </PageHero>
       <section className="container-page mt-10 max-w-2xl space-y-6">
         <div className="card">
-          <h2 className="text-xl font-bold">Your gifts</h2>
+          <h2 className="text-xl">Your gifts</h2>
           <ul className="mt-3 list-disc space-y-1 pl-5">
             {sp.items.map((i) => (
               <li key={i.id}>
@@ -37,7 +37,7 @@ export default async function SponsorThanks({ searchParams }: { searchParams: Pr
           </p>
         </div>
         <div className="card bg-dusk-50">
-          <h2 className="text-xl font-bold">What&rsquo;s next</h2>
+          <h2 className="text-xl">What&rsquo;s next</h2>
           {sp.delivery === "SHIP" && sp.season.shippingAddress ? (
             <>
               <p className="mt-2">

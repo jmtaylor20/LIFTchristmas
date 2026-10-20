@@ -32,13 +32,13 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           {error === "missing" && <Notice tone="error">Please fill in your name and email.</Notice>}
           <div className="grid gap-6 md:grid-cols-2">
             <form action={requestLogin} className="card space-y-4">
-              <h2 className="text-xl font-bold">Sign in</h2>
+              <h2 className="text-xl">Sign in</h2>
               <p className="text-sm text-black/60">Already given or sponsored? Your profile was created automatically. Enter the email you used.</p>
               <input name="email" type="email" required placeholder="Email" className="input" />
               <button className="btn-green">Email me a sign-in link</button>
             </form>
             <form action={createProfile} className="card space-y-3">
-              <h2 className="text-xl font-bold">Create a profile</h2>
+              <h2 className="text-xl">Create a profile</h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 <input name="firstName" required placeholder="First name" className="input" />
                 <input name="lastName" required placeholder="Last name" className="input" />
@@ -96,10 +96,10 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       <section className="container-page mt-10 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold">My angels</h2>
+            <h2 className="text-xl">My angels</h2>
             {sponsorships.length === 0 ? (
               <p className="mt-2 text-sm text-black/60">
-                No sponsorships yet. <Link href="/angels" className="font-semibold text-copper-700">Visit the Angel Tree →</Link>
+                No sponsorships yet. <Link href="/angels" className="font-semibold text-star-700">Visit the Angel Tree →</Link>
               </p>
             ) : (
               <div className="mt-3 space-y-4">
@@ -142,8 +142,8 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           </div>
 
           {notes.length > 0 && (
-            <div className="card bg-copper-50/60">
-              <h2 className="text-xl font-bold">💌 Thank-you notes</h2>
+            <div className="card bg-star-50/60">
+              <h2 className="text-xl">💌 Thank-you notes</h2>
               <div className="mt-3 space-y-4">
                 {notes.map((n) => (
                   <figure key={n.id} className="rounded-xl bg-white p-4">
@@ -162,10 +162,10 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           )}
 
           <div className="card">
-            <h2 className="text-xl font-bold">Donations &amp; gifts</h2>
+            <h2 className="text-xl">Donations &amp; gifts</h2>
             {donations.length + inKind.length === 0 ? (
               <p className="mt-2 text-sm text-black/60">
-                None yet. <Link href="/donate" className="font-semibold text-copper-700">Make a gift →</Link>
+                None yet. <Link href="/donate" className="font-semibold text-star-700">Make a gift →</Link>
               </p>
             ) : (
               <table className="table mt-3">
@@ -192,7 +192,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
 
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold">Giving statements</h2>
+            <h2 className="text-xl">Giving statements</h2>
             <p className="mt-1 text-sm text-black/60">A record of your giving. Statements are emailed every January.</p>
             {taxYears.length === 0 ? (
               <p className="mt-3 text-sm text-black/50">Your first statement will appear here after you give.</p>
@@ -201,7 +201,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                 {taxYears.map((y) => (
                   <li key={y} className="flex items-center justify-between py-2">
                     <span className="font-medium">{y}</span>
-                    <Link href={`/account/statements/${y}`} className="text-sm font-semibold text-copper-700">View / print →</Link>
+                    <Link href={`/account/statements/${y}`} className="text-sm font-semibold text-star-700">View / print →</Link>
                   </li>
                 ))}
               </ul>
@@ -209,7 +209,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           </div>
 
           <form action={updateProfile} className="card space-y-3">
-            <h2 className="text-xl font-bold">My info</h2>
+            <h2 className="text-xl">My info</h2>
             <div className="grid grid-cols-2 gap-3">
               <input name="firstName" defaultValue={giver.firstName} className="input" />
               <input name="lastName" defaultValue={giver.lastName} className="input" />

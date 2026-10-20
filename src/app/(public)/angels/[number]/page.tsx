@@ -45,8 +45,8 @@ export default async function AngelPage({
       <Link href="/angels" className="text-sm text-dusk-700">← Back to the Angel Tree</Link>
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_1.4fr]">
         <div className="card h-fit bg-gradient-to-b from-dusk-600 to-dusk-500 text-white">
-          <Star className="h-8 w-8 text-copper-500" />
-          <h1 className="mt-3 text-4xl font-bold text-white">Angel #{angel.number}</h1>
+          <Star className="h-8 w-8 text-star-500" />
+          <h1 className="mt-3 text-4xl text-white">Angel #{angel.number}</h1>
           <p className="mt-1 text-white/80">{genderLabel(angel.gender)} · age {angel.ageAtSeason}</p>
           <dl className="mt-5 space-y-1 text-sm text-white/85">
             <Row k="Shirt" v={angel.shirtSize} />
@@ -63,7 +63,7 @@ export default async function AngelPage({
 
         <div className="card">
           {error && <div className="mb-4"><Notice tone="error">{error}</Notice></div>}
-          <h2 className="text-2xl font-bold">Wish list</h2>
+          <h2 className="text-2xl">Wish list</h2>
           {!open && <p className="mt-2 text-sm text-black/60">Sponsorships are closed for this season.</p>}
 
           {needed.length === 0 ? (
@@ -81,7 +81,7 @@ export default async function AngelPage({
                       name="itemId"
                       value={i.id}
                       defaultChecked={preselect ? preselect === i.id : false}
-                      className="item-box mt-1 h-4 w-4 accent-copper-700"
+                      className="item-box mt-1 h-4 w-4 accent-star-700"
                     />
                   ) : (
                     <span className="mt-0.5 text-dusk-600">✓</span>
@@ -106,8 +106,8 @@ export default async function AngelPage({
             {open && needed.length > 0 && (
               <>
                 {whole && (
-                  <label className="flex items-center gap-2 rounded-xl bg-copper-50 px-4 py-3 text-sm font-semibold text-copper-800">
-                    <input type="checkbox" name="whole" value="1" className="h-4 w-4 accent-copper-700" defaultChecked={!preselect} />
+                  <label className="flex items-center gap-2 rounded-xl bg-star-50 px-4 py-3 text-sm font-semibold text-star-800">
+                    <input type="checkbox" name="whole" value="1" className="h-4 w-4 accent-star-700" defaultChecked={!preselect} />
                     Sponsor Angel #{angel.number}&rsquo;s entire list
                   </label>
                 )}
@@ -116,7 +116,7 @@ export default async function AngelPage({
                 </p>
 
                 <div className="grid gap-3 border-t border-black/5 pt-5 sm:grid-cols-2">
-                  <h3 className="text-lg font-bold sm:col-span-2">Your information</h3>
+                  <h3 className="text-lg sm:col-span-2">Your information</h3>
                   <input name="firstName" required placeholder="First name" defaultValue={giver?.firstName} className="input" />
                   <input name="lastName" required placeholder="Last name" defaultValue={giver?.lastName} className="input" />
                   <input name="email" type="email" required placeholder="Email" defaultValue={giver?.email} className="input" />
@@ -124,7 +124,7 @@ export default async function AngelPage({
                   <input name="organization" placeholder="Family, church, class, or business (optional)" defaultValue={giver?.organization ?? ""} className="input sm:col-span-2" />
                 </div>
                 <fieldset className="space-y-2 border-t border-black/5 pt-5">
-                  <legend className="text-lg font-bold">How will you get the gifts to us?</legend>
+                  <legend className="text-lg">How will you get the gifts to us?</legend>
                   <label className="flex items-start gap-2 text-sm">
                     <input type="radio" name="delivery" value="DROP_OFF" defaultChecked className="mt-1 accent-dusk-700" />
                     <span>I&rsquo;ll shop and drop the gifts off</span>

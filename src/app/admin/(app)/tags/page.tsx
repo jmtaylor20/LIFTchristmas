@@ -40,7 +40,7 @@ export default async function Tags({ searchParams }: { searchParams: Promise<{ k
         {list.map((a) => (
           <div key={a.id} className="break-inside-avoid rounded-xl border-2 border-dashed border-dusk-700/40 bg-white p-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="font-display text-2xl font-bold text-dusk-800">Angel #{a.number}</span>
+              <span className="font-display text-2xl font-semibold text-dusk-800">Angel #{a.number}</span>
               <Star className="h-5 w-5 text-gold-500" />
             </div>
             <p className="text-black/70">{genderLabel(a.gender)}, age {a.ageAtSeason}</p>

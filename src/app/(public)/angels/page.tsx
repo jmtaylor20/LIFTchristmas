@@ -80,7 +80,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
           {Object.keys(ageRanges).map((r) => (
             <FilterLink key={r} href={qs({ age: r })} active={sp.age === r}>Ages {r}</FilterLink>
           ))}
-          <Link href="/angels/items" className="ml-auto font-semibold text-copper-700">Shop gifts by price →</Link>
+          <Link href="/angels/items" className="ml-auto font-semibold text-star-700">Shop gifts by price →</Link>
         </div>
 
         {cards.length === 0 ? (
@@ -92,12 +92,12 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
             {cards.map((a) => (
               <Link key={a.id} href={`/angels/${a.number}`} className="card group flex flex-col no-underline transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex items-center justify-between">
-                  <span className={`badge ${a.gender === "GIRL" ? "bg-copper-50 text-copper-700" : "bg-dusk-50 text-dusk-700"}`}>
+                  <span className={`badge ${a.gender === "GIRL" ? "bg-star-50 text-star-700" : "bg-dusk-50 text-dusk-700"}`}>
                     {genderLabel(a.gender)} · age {a.ageAtSeason}
                   </span>
                   <Star className="h-5 w-5 text-gold-500" />
                 </div>
-                <h2 className="mt-3 text-2xl font-bold">Angel #{a.number}</h2>
+                <h2 className="mt-3 text-2xl">Angel #{a.number}</h2>
                 {a.interests && <p className="mt-1 line-clamp-2 text-sm text-black/60">Loves {a.interests}</p>}
                 <div className="mt-auto pt-5">
                   {a.openCount === 0 ? (
@@ -109,7 +109,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
                         {a.openCount} of {a.items.length} gifts still needed
                         {a.openCents > 0 && <> · about {money(a.openCents)}</>}
                       </p>
-                      <p className="mt-3 text-sm font-semibold text-copper-700 group-hover:underline">
+                      <p className="mt-3 text-sm font-semibold text-star-700 group-hover:underline">
                         {a.untouched ? "Sponsor this angel →" : "Help finish this list →"}
                       </p>
                     </>

@@ -41,10 +41,10 @@ export default async function Apply({ searchParams }: { searchParams: Promise<{ 
           </>
         ) : (
           <div className="card text-center">
-            <h2 className="text-2xl font-bold">{t.apply.closedTitle}</h2>
+            <h2 className="text-2xl">{t.apply.closedTitle}</h2>
             <p className="mt-2 text-black/70">
               {season ? t.apply.closedEnded : t.apply.closedNoSeason} {t.apply.closedCheck}{" "}
-              <Link href={`/family?lang=${lang}`} className="font-semibold text-copper-700">{t.apply.checkStatus}</Link>.
+              <Link href={`/family?lang=${lang}`} className="font-semibold text-star-700">{t.apply.checkStatus}</Link>.
             </p>
           </div>
         )}

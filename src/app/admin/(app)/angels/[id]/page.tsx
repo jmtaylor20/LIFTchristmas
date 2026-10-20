@@ -53,7 +53,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
             Family: <Link href={`/admin/applications/${angel.applicationId}`}>{h.parentFirstName} {h.parentLastName}</Link> · {h.phone}
           </p>
 
-          <h2 className="mt-6 text-xl font-bold">Wish list</h2>
+          <h2 className="mt-6 text-xl">Wish list</h2>
           <div className="mt-2 overflow-x-auto">
             <table className="table">
               <thead>
@@ -98,7 +98,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
                       </form>
                       {i.status === "NEEDED" && (
                         <form action={adminDeleteItem.bind(null, i.id)}>
-                          <button className="mt-1 text-xs text-copper-700">Delete</button>
+                          <button className="mt-1 text-xs text-star-700">Delete</button>
                         </form>
                       )}
                     </td>
@@ -119,7 +119,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
 
         <div className="space-y-6">
           <div className="card">
-            <h2 className="text-lg font-bold">Sponsors</h2>
+            <h2 className="text-lg">Sponsors</h2>
             {angel.sponsorships.length === 0 && <p className="mt-2 text-sm text-black/55">No sponsors yet.</p>}
             <ul className="mt-2 space-y-3 text-sm">
               {angel.sponsorships.map((s) => (
@@ -145,7 +145,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
 
           {needed.length > 0 && (
             <form action={adminAssignSponsor.bind(null, angel.id)} className="card space-y-2">
-              <h2 className="text-lg font-bold">Add a sponsor by hand</h2>
+              <h2 className="text-lg">Add a sponsor by hand</h2>
               <p className="text-xs text-black/55">For phone calls or paper sign-up sheets.</p>
               <div className="grid grid-cols-2 gap-2">
                 <input name="firstName" placeholder="First name" className="input" />

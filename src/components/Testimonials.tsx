@@ -3,9 +3,9 @@ import { Star } from "./SiteChrome";
 
 export function Testimonials() {
   return (
-    <section className="container-page mt-20">
+    <section className="container-page mt-20 md:mt-24">
       <p className="eyebrow text-center">Stories of Christmas joy</p>
-      <h2 className="mt-2 text-center text-3xl font-bold">What our community is saying</h2>
+      <h2 className="mt-3 text-center text-[clamp(2.2rem,4vw,3.2rem)] leading-tight">What our neighbors are saying</h2>
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {site.testimonials.map((t, i) =>
           t.placeholder ? (
@@ -15,7 +15,7 @@ export function Testimonials() {
             </figure>
           ) : (
             <figure key={i} className="card">
-              <blockquote className="font-display text-lg leading-relaxed text-dusk-800">&ldquo;{t.quote}&rdquo;</blockquote>
+              <blockquote className="font-display text-lg leading-relaxed text-dusk-700">&ldquo;{t.quote}&rdquo;</blockquote>
               <figcaption className="mt-4 text-sm text-black/60">
                 — {t.name}
                 {t.role && <span className="text-black/40">, {t.role}</span>}

@@ -24,7 +24,7 @@ export default async function Donate() {
         <div className="card">
           {season ? (
             <>
-              <h2 className="text-2xl font-bold">Give a gift</h2>
+              <h2 className="text-2xl">Give a gift</h2>
               <p className="mt-1 text-sm text-black/65">
                 Give by {handle ? (
                   <>
@@ -49,12 +49,12 @@ export default async function Donate() {
         <div className="space-y-4">
           {season?.donationInstructions && (
             <div className="card bg-dusk-50">
-              <h2 className="text-lg font-bold">Give by check or in person</h2>
+              <h2 className="text-lg">Give by check or in person</h2>
               <p className="mt-2 whitespace-pre-line text-sm text-black/75">{season.donationInstructions}</p>
             </div>
           )}
           <div className="card text-sm text-black/65">
-            <h2 className="text-lg font-bold text-dusk-800">Your giving record</h2>
+            <h2 className="text-lg text-dusk-800">Your giving record</h2>
             <p className="mt-2">
               Once we see your gift arrive, we&rsquo;ll email you a receipt. Each January you&rsquo;ll also get a giving statement
               for the year. You can view both any time under <a href="/account">My Giving</a>.

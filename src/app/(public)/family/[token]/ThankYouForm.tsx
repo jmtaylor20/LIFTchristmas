@@ -54,7 +54,7 @@ export function ThankYouForm({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="space-y-3">
-      {state.error && <p className="rounded-lg bg-copper-50 px-3 py-2 text-sm text-copper-800">{t[state.error]}</p>}
+      {state.error && <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">{t[state.error]}</p>}
       {state.ok && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{t.sent}</p>}
       <label className="block">
         <span className="label">{t.to}</span>

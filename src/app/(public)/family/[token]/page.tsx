@@ -79,7 +79,7 @@ export default async function FamilyPage({
               season.pickupInstructions &&
               app.listSubmittedAt && (
                 <div className="card bg-dusk-50">
-                  <h2 className="text-xl font-bold">{t.pickup}</h2>
+                  <h2 className="text-xl">{t.pickup}</h2>
                   <p className="mt-1 whitespace-pre-line text-black/75">{season.pickupInstructions}</p>
                 </div>
               )
@@ -111,7 +111,7 @@ export default async function FamilyPage({
               app.angels.map((angel) => (
                 <div key={angel.id} className="card">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 className="text-2xl font-bold">{angel.child.firstName}</h2>
+                    <h2 className="text-2xl">{angel.child.firstName}</h2>
                     <p className="text-sm text-black/55">
                       {t.ageLine(angel.gender === "GIRL" ? f.girl : f.boy, angel.ageAtSeason)}
                       {angel.number != null && <> · Angel #{angel.number}</>}
@@ -133,7 +133,7 @@ export default async function FamilyPage({
                     </p>
                   )}
 
-                  <h3 className="mt-6 text-lg font-bold">{t.wishList}</h3>
+                  <h3 className="mt-6 text-lg">{t.wishList}</h3>
                   {angel.items.length === 0 && <p className="mt-1 text-sm text-black/55">{t.noItems}</p>}
                   <ul className="mt-2 divide-y divide-black/5">
                     {angel.items.map((item) => (
@@ -146,7 +146,7 @@ export default async function FamilyPage({
                         </div>
                         {editable && item.status === "NEEDED" && (
                           <form action={removeItem.bind(null, token, item.id)}>
-                            <button className="text-xs font-semibold text-copper-700">{f.remove}</button>
+                            <button className="text-xs font-semibold text-star-700">{f.remove}</button>
                           </form>
                         )}
                       </li>
@@ -167,7 +167,7 @@ export default async function FamilyPage({
 
             {app.listSubmittedAt && (
               <div className="card">
-                <h2 className="text-2xl font-bold">{dict[lang].thankYou.title}</h2>
+                <h2 className="text-2xl">{dict[lang].thankYou.title}</h2>
                 <p className="mt-1 text-sm text-black/65">{dict[lang].thankYou.intro}</p>
                 <div className="mt-4">
                   <ThankYouForm
@@ -178,7 +178,7 @@ export default async function FamilyPage({
                 </div>
                 {app.thankYouNotes.length > 0 && (
                   <>
-                    <h3 className="mt-6 text-lg font-bold">{dict[lang].thankYou.yours}</h3>
+                    <h3 className="mt-6 text-lg">{dict[lang].thankYou.yours}</h3>
                     <ul className="mt-2 divide-y divide-black/5 text-sm">
                       {app.thankYouNotes.map((n) => (
                         <li key={n.id} className="flex items-start justify-between gap-3 py-2">

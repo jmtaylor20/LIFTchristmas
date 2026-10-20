@@ -24,7 +24,7 @@ export function DonateForm({
 
   return (
     <form action={action} className="space-y-5">
-      {state.error && <p className="rounded-lg bg-copper-50 px-3 py-2 text-sm text-copper-800">{state.error}</p>}
+      {state.error && <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">{state.error}</p>}
       <div>
         <span className="label">How would you like to give?</span>
         <div className="flex flex-wrap gap-2">
