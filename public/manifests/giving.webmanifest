@@ -1,0 +1,35 @@
+{
+  "name": "LIFT Community Christmas",
+  "short_name": "LIFT Giving",
+  "start_url": "/account",
+  "description": "Sponsor an angel, give, and see your giving with LIFT Community Christmas.",
+  "theme_color": "#6b8fa5",
+  "id": "/account",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fcfaf5",
+  "icons": [
+    {
+      "src": "/icons/giving-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/giving-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/giving-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/giving-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

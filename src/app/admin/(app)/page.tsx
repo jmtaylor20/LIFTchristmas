@@ -7,6 +7,7 @@ import { AdminTitle, Stat } from "@/components/admin";
 import { Notice, ProgressBar } from "@/components/ui";
 import { familiesNeedingLists, REMINDER_DAYS_BEFORE, sponsorsWithOpenGifts } from "@/lib/reminders";
 import { remindFamilies, remindSponsors } from "../actions";
+import { InstallApp } from "@/components/InstallApp";
 
 export const metadata = { title: "Admin" };
 
@@ -49,6 +50,7 @@ export default async function Dashboard({
         <Link href="/admin/export/sponsors" className="btn-outline btn-sm">Export givers (CSV)</Link>
       </AdminTitle>
 
+      <div className="mb-4"><InstallApp app="LIFT Admin" /></div>
       {sp.reminded && (
         <div className="mb-4">
           <Notice tone="success">
@@ -71,7 +73,7 @@ export default async function Dashboard({
           )}
         </div>
       )}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Stat label="Applications to review" value={s.applications.pending} tone={s.applications.pending ? "red" : "default"} sub={`${s.applications.total} total · ${s.applications.approved} approved`} />
         <Stat label="Angels" value={s.angels.total} sub={`${s.angels.noList} still need a wish list`} />
         <Stat label="Money received" value={money(s.raisedCents)} tone="green" sub={`${s.donationCount} gifts · balance ${money(s.fundBalanceCents)}`} />

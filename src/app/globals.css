@@ -86,6 +86,58 @@
     @apply border-b border-black/5 px-3 py-2 align-top;
   }
 }
+/* On phones, tables marked rtable turn into stacked cards: the first column
+   becomes the card title, and every other cell shows its column name
+   (from data-label) beside its value. */
+@utility rtable {
+  @media (max-width: 767px) {
+    & thead { display: none; }
+    &, & tbody, & tr, & td { display: block; width: 100%; }
+    & tr {
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--color-dusk-100);
+      border-radius: 1rem;
+      background: white;
+      padding: 0.75rem 1rem;
+      box-shadow: 0 6px 18px rgb(41 79 101 / 0.05);
+    }
+    & td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      border: 0;
+      padding: 0.3rem 0;
+      text-align: right;
+    }
+    & td::before {
+      content: attr(data-label);
+      flex-shrink: 0;
+      padding-top: 0.1rem;
+      color: rgb(0 0 0 / 0.5);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+    & td:first-child {
+      display: block;
+      margin-bottom: 0.25rem;
+      border-bottom: 1px solid var(--color-dusk-100);
+      padding-bottom: 0.5rem;
+      font-size: 1rem;
+      text-align: left;
+    }
+    & td:first-child::before, & td:not([data-label])::before, & td[data-label=""]::before { content: none; }
+    & td:empty { display: none; }
+  }
+}
+/* The box around an rtable: a card on desktop, invisible on phones. */
+@utility rtable-wrap {
+  @apply card overflow-x-auto p-0 max-md:overflow-visible max-md:border-0 max-md:bg-transparent max-md:shadow-none;
+}
+
 @utility eyebrow {
   @apply text-xs font-bold tracking-[0.18em] text-dusk-600 uppercase;
 }

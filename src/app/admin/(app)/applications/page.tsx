@@ -54,14 +54,14 @@ export default async function Applications({ searchParams }: { searchParams: Pro
         ))}
         <form className="ml-auto">
           {status && <input type="hidden" name="status" value={status} />}
-          <input name="q" defaultValue={q} placeholder="Search name, phone, email" className="input w-64" />
+          <input name="q" defaultValue={q} placeholder="Search name, phone, email" className="input w-full sm:w-64" />
         </form>
       </div>
       {apps.length === 0 ? (
         <Empty>No applications here yet.</Empty>
       ) : (
-        <div className="card overflow-x-auto p-0">
-          <table className="table">
+        <div className="rtable-wrap">
+          <table className="table rtable">
             <thead>
               <tr>
                 <th>Parent / guardian</th>
@@ -79,23 +79,23 @@ export default async function Applications({ searchParams }: { searchParams: Pro
                 const atCap = prior >= season.approvalCapYears;
                 return (
                   <tr key={a.id}>
-                    <td>
+                    <td data-label="Parent / guardian">
                       <Link href={`/admin/applications/${a.id}`} className="font-semibold">
                         {a.household.parentFirstName} {a.household.parentLastName}
                       </Link>
                       <div className="text-xs text-black/50">{a.household.phone}</div>
                     </td>
-                    <td>{a.community}</td>
-                    <td>{a._count.angels}</td>
-                    <td>
+                    <td data-label="Community">{a.community}</td>
+                    <td data-label="Kids">{a._count.angels}</td>
+                    <td data-label="Years approved">
                       <span className={atCap ? "font-semibold text-star-700" : ""}>
                         {prior} prior
                         {atCap && " · at cap"}
                       </span>
                     </td>
-                    <td>{formatDateShort(a.createdAt)}</td>
-                    <td><AppBadge status={a.status} /></td>
-                    <td className="text-xs">{a.status === "APPROVED" ? (a.listSubmittedAt ? "✓ Submitted" : "Not yet") : ""}</td>
+                    <td data-label="Applied">{formatDateShort(a.createdAt)}</td>
+                    <td data-label="Status"><AppBadge status={a.status} /></td>
+                    <td data-label="Lists" className="text-xs">{a.status === "APPROVED" ? (a.listSubmittedAt ? "✓ Submitted" : "Not yet") : ""}</td>
                   </tr>
                 );
               })}

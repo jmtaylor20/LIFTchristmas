@@ -34,7 +34,7 @@ export default async function Donations({ searchParams }: { searchParams: Promis
       <AdminTitle title="Money & gifts" />
       {sp.saved && <div className="mb-4"><Notice tone="success">Saved.</Notice></div>}
       {sp.error && <div className="mb-4"><Notice tone="error">Please fill in the required fields.</Notice></div>}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Stat label="Money received" value={money(stats.raisedCents)} tone="green" sub={`${stats.donationCount} gifts${pending.length ? ` · ${pending.length} waiting to confirm` : ""}`} />
         <Stat label="Spent on gifts" value={money(stats.ministrySpentCents)} sub="Items marked Ministry buying" />
         <Stat label="Fund balance" value={money(stats.fundBalanceCents)} tone="gold" />
@@ -75,9 +75,9 @@ export default async function Donations({ searchParams }: { searchParams: Promis
       )}
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <div className="card overflow-x-auto">
+        <div className="card overflow-x-auto max-md:overflow-visible max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:shadow-none">
           <h2 className="text-xl">Donations received</h2>
-          <table className="table mt-2">
+          <table className="table rtable mt-2">
             <thead>
               <tr>
                 <th>Date</th>
@@ -91,22 +91,22 @@ export default async function Donations({ searchParams }: { searchParams: Promis
             <tbody>
               {donations.map((d) => (
                 <tr key={d.id} className={d.status !== "PAID" ? "text-black/40" : ""}>
-                  <td>{formatDateShort(d.receivedAt ?? d.createdAt)}</td>
-                  <td>
+                  <td data-label="Date">{formatDateShort(d.receivedAt ?? d.createdAt)}</td>
+                  <td data-label="Giver">
                     {d.sponsorId ? <a href={`/admin/sponsors/${d.sponsorId}`}>{d.donorName}</a> : d.donorName}
                     {d.note && <div className="text-xs text-black/50">{d.note}</div>}
                   </td>
-                  <td className="text-xs">
+                  <td data-label="Method" className="text-xs">
                     {methodLabel[d.method]}
                     {d.status === "NOT_RECEIVED" && " · never came"}
                   </td>
-                  <td className="text-right font-semibold">{money(d.amountCents, { cents: true })}</td>
-                  <td className="text-xs">
+                  <td data-label="Amount" className="text-right font-semibold">{money(d.amountCents, { cents: true })}</td>
+                  <td data-label="Receipt" className="text-xs">
                     {d.receiptSentAt ? `sent ${formatDateShort(d.receiptSentAt)}` : d.donorEmail && d.status === "PAID" ? (
                       <form action={resendReceipt.bind(null, d.id)}><button className="text-star-700 underline">send</button></form>
                     ) : "—"}
                   </td>
-                  <td>
+                  <td data-label="">
                     {d.status === "NOT_RECEIVED" && (
                       <form action={confirmDonation.bind(null, d.id)}><button className="text-xs text-dusk-700 underline">received after all</button></form>
                     )}
@@ -144,10 +144,10 @@ export default async function Donations({ searchParams }: { searchParams: Promis
       </div>
 
       <div id="in-kind" className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <div className="card overflow-x-auto">
+        <div className="card overflow-x-auto max-md:overflow-visible max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:shadow-none">
           <h2 className="text-xl">Amazon &amp; drop-off gifts</h2>
           <p className="text-sm text-black/55">General gifts not tied to an angel. Givers can report Amazon purchases on the Give page.</p>
-          <table className="table mt-2">
+          <table className="table rtable mt-2">
             <thead>
               <tr>
                 <th>Date</th>
@@ -160,20 +160,20 @@ export default async function Donations({ searchParams }: { searchParams: Promis
             <tbody>
               {inKind.map((g) => (
                 <tr key={g.id}>
-                  <td>{formatDateShort(g.createdAt)}</td>
-                  <td>{g.sponsorId ? <a href={`/admin/sponsors/${g.sponsorId}`}>{g.donorName}</a> : g.donorName}</td>
-                  <td>
+                  <td data-label="Date">{formatDateShort(g.createdAt)}</td>
+                  <td data-label="Giver">{g.sponsorId ? <a href={`/admin/sponsors/${g.sponsorId}`}>{g.donorName}</a> : g.donorName}</td>
+                  <td data-label="Gift">
                     {g.description}
                     <div className="text-xs text-black/50">{g.source === "AMAZON_WISHLIST" ? "Amazon" : "Drop-off"}{g.estValueCents != null && ` · ~${money(g.estValueCents)}`}</div>
                   </td>
-                  <td>
+                  <td data-label="Received">
                     <form action={markInKindReceived.bind(null, g.id)}>
                       <button className={`badge ${g.receivedAt ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>
                         {g.receivedAt ? `✓ ${formatDateShort(g.receivedAt)}` : "Mark received"}
                       </button>
                     </form>
                   </td>
-                  <td><form action={deleteInKind.bind(null, g.id)}><button className="text-xs text-black/40 hover:text-star-700">delete</button></form></td>
+                  <td data-label=""><form action={deleteInKind.bind(null, g.id)}><button className="text-xs text-black/40 hover:text-star-700">delete</button></form></td>
                 </tr>
               ))}
             </tbody>

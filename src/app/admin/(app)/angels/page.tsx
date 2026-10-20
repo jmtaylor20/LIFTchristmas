@@ -53,8 +53,8 @@ export default async function AdminAngels({ searchParams }: { searchParams: Prom
       {rows.length === 0 ? (
         <Empty>No angels here. Angels appear when applications are approved.</Empty>
       ) : (
-        <div className="card overflow-x-auto p-0">
-          <table className="table">
+        <div className="rtable-wrap">
+          <table className="table rtable">
             <thead>
               <tr>
                 <th>Angel</th>
@@ -68,12 +68,12 @@ export default async function AdminAngels({ searchParams }: { searchParams: Prom
             <tbody>
               {rows.map((a) => (
                 <tr key={a.id}>
-                  <td><Link href={`/admin/angels/${a.id}`} className="font-semibold">#{a.number}</Link></td>
-                  <td>
+                  <td data-label="Angel"><Link href={`/admin/angels/${a.id}`} className="font-semibold">#{a.number}</Link></td>
+                  <td data-label="Child">
                     {a.child.firstName} {a.child.lastName}
                     <div className="text-xs text-black/50">{genderLabel(a.gender)}, {a.ageAtSeason}</div>
                   </td>
-                  <td className="min-w-40">
+                  <td data-label="Gifts covered" className="min-w-40">
                     {a.items.length ? (
                       <>
                         <ProgressBar value={a.items.length - a.needed.length} max={a.items.length} />
@@ -83,8 +83,8 @@ export default async function AdminAngels({ searchParams }: { searchParams: Prom
                       <span className="text-xs text-black/45">No list yet</span>
                     )}
                   </td>
-                  <td>{a.needed.length ? money(a.neededCents) : "—"}</td>
-                  <td className="text-xs">
+                  <td data-label="Still needed">{a.needed.length ? money(a.neededCents) : "—"}</td>
+                  <td data-label="Sponsors" className="text-xs">
                     {a.sponsorships.map((s) => (
                       <div key={s.id}>
                         <Link href={`/admin/sponsors/${s.sponsorId}`}>{s.sponsor.firstName} {s.sponsor.lastName}</Link>
@@ -92,7 +92,7 @@ export default async function AdminAngels({ searchParams }: { searchParams: Prom
                       </div>
                     ))}
                   </td>
-                  <td className="text-xs">{a.hidden ? "Hidden" : a.application.listSubmittedAt ? "✓" : "Waiting on list"}</td>
+                  <td data-label="Public" className="text-xs">{a.hidden ? "Hidden" : a.application.listSubmittedAt ? "✓" : "Waiting on list"}</td>
                 </tr>
               ))}
             </tbody>

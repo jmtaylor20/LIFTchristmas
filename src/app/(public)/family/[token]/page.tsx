@@ -8,6 +8,7 @@ import { site } from "@/content/site";
 import { dict, longDate, toLang } from "@/content/i18n";
 import { addItem, removeItem, submitLists, updateAngelDetails } from "../actions";
 import { ThankYouForm } from "./ThankYouForm";
+import { InstallApp } from "@/components/InstallApp";
 
 export const metadata = { title: "My family's Christmas page", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -63,6 +64,7 @@ export default async function FamilyPage({
       </PageHero>
 
       <section className="container-page mt-10 max-w-4xl space-y-6">
+        <InstallApp app="LIFT Family" lang={lang} />
         {app.status === "PENDING" && <Notice>{t.pending(app.household.email ?? "")}</Notice>}
         {app.status === "WAITLIST" && <Notice tone="warn">{t.waitlist}</Notice>}
         {app.status === "DENIED" && (
@@ -206,6 +208,9 @@ export default async function FamilyPage({
             )}
           </>
         )}
+        <p className="pt-4 text-center text-xs text-black/45">
+          <a href={`/family?other=1&lang=${lang}`} className="text-black/45">{lang === "es" ? "¿No es su familia? Busque su página" : "Not your family? Find your page"}</a>
+        </p>
       </section>
     </div>
   );

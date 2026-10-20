@@ -5,6 +5,7 @@ import { formatDateShort, money } from "@/lib/format";
 import { Notice, PageHero } from "@/components/ui";
 import { createProfile, logout, requestLogin, saveTracking, updateProfile } from "./actions";
 import { ShipTo } from "@/components/ShipTo";
+import { InstallApp } from "@/components/InstallApp";
 
 export const metadata = { title: "My Giving", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -95,6 +96,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       </PageHero>
       <section className="container-page mt-10 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
+          <InstallApp app="LIFT Giving" />
           <div className="card">
             <h2 className="text-xl">My angels</h2>
             {sponsorships.length === 0 ? (
