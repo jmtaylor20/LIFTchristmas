@@ -8,6 +8,7 @@ import { formatDate, genderLabel, money } from "@/lib/format";
 import { Notice } from "@/components/ui";
 import { Star } from "@/components/SiteChrome";
 import { sponsorItems } from "../actions";
+import { RecognitionFields } from "@/components/RecognitionFields";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,7 @@ export default async function AngelPage({
                   <input name="email" type="email" required placeholder="Email" defaultValue={giver?.email} className="input" />
                   <input name="phone" type="tel" placeholder="Phone" defaultValue={giver?.phone ?? ""} className="input" />
                   <input name="organization" placeholder="Family, church, class, or business (optional)" defaultValue={giver?.organization ?? ""} className="input sm:col-span-2" />
+                  <RecognitionFields className="sm:col-span-2" defaults={giver ?? undefined} />
                 </div>
                 <fieldset className="space-y-2 border-t border-black/5 pt-5">
                   <legend className="text-lg">How will you get the gifts to us?</legend>

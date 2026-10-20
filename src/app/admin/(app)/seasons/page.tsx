@@ -2,13 +2,13 @@ import { db } from "@/lib/db";
 import { money, toDateInput } from "@/lib/format";
 import { AdminTitle } from "@/components/admin";
 import { Notice } from "@/components/ui";
-import { activateSeason, createSeason, updateSeason } from "../../actions";
+import { activateSeason, createSeason, deleteEmptySeason, updateSeason } from "../../actions";
 
 export const metadata = { title: "Seasons" };
 
-export default async function Seasons({ searchParams }: { searchParams: Promise<{ edit?: string; saved?: string; error?: string }> }) {
+export default async function Seasons({ searchParams }: { searchParams: Promise<{ edit?: string; saved?: string; error?: string; deleted?: string }> }) {
   const sp = await searchParams;
-  const seasons = await db.season.findMany({ orderBy: { year: "desc" }, include: { _count: { select: { applications: true, angels: true } } } });
+  const seasons = await db.season.findMany({ orderBy: { year: "desc" }, include: { _count: { select: { applications: true, angels: true, donations: true, sponsorships: true, inKindGifts: true, partners: true } } } });
   const editing = seasons.find((s) => s.id === sp.edit) ?? seasons.find((s) => s.isActive) ?? seasons[0];
 
   return (
@@ -16,6 +16,8 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
       <AdminTitle title="Seasons & deadlines" />
       {sp.saved && <div className="mb-4"><Notice tone="success">Saved.</Notice></div>}
       {sp.error === "exists" && <div className="mb-4"><Notice tone="error">That year already exists.</Notice></div>}
+      {sp.error === "notempty" && <div className="mb-4"><Notice tone="error">Only a season with no families, gifts, or partners can be deleted.</Notice></div>}
+      {sp.deleted && <div className="mb-4"><Notice tone="success">Season deleted.</Notice></div>}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_2fr]">
         <div className="space-y-4">
@@ -28,11 +30,18 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
                     {s.year} {s.isActive && <span className="badge ml-1 bg-emerald-100 text-emerald-900">Active</span>}
                   </a>
                   <span className="text-black/50">{s._count.applications} apps · {s._count.angels} angels</span>
-                  {!s.isActive && (
-                    <form action={activateSeason.bind(null, s.id)}>
-                      <button className="btn-outline btn-sm">Make active</button>
-                    </form>
-                  )}
+                  <span className="flex gap-1">
+                    {!s.isActive && (
+                      <form action={activateSeason.bind(null, s.id)}>
+                        <button className="btn-outline btn-sm">Make active</button>
+                      </form>
+                    )}
+                    {Object.values(s._count).every((n) => n === 0) && (
+                      <form action={deleteEmptySeason.bind(null, s.id)}>
+                        <button className="btn-outline btn-sm text-star-800" title="Only empty seasons can be deleted">Delete</button>
+                      </form>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

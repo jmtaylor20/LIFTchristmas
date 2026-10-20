@@ -55,6 +55,8 @@ export async function updateProfile(fd: FormData) {
       lastName: str(fd, "lastName") || giver.lastName,
       phone: str(fd, "phone") || null,
       organization: str(fd, "organization") || null,
+      anonymous: fd.get("anonymous") === "on",
+      displayName: str(fd, "displayName").slice(0, 80) || null,
     },
   });
   revalidatePath("/account");

@@ -127,6 +127,10 @@ export default async function Dashboard({
               <span>{openSponsors.length} sponsor{openSponsors.length === 1 ? " has" : "s have"} gifts not yet in</span>
               <button className="btn-outline btn-sm" disabled={openSponsors.length === 0}>Remind</button>
             </form>
+            <a href="/admin/season-thanks" className="flex items-center justify-between gap-2 text-dusk-700 no-underline">
+              <span>Christmas thank-you email to every giver</span>
+              <span className="btn-outline btn-sm">Preview</span>
+            </a>
           </div>
         </div>
       </div>

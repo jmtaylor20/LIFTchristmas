@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { formatDateShort, money } from "@/lib/format";
 import { AdminTitle, ItemBadge } from "@/components/admin";
-import { adminSendStatement, receiveSponsorship, saveSponsorNotes } from "../../../actions";
+import { adminSendStatement, receiveSponsorship, saveSponsorNotes, saveSponsorPublic } from "../../../actions";
+import { publicName } from "@/lib/recognition";
 
 export const metadata = { title: "Giver" };
 
@@ -99,6 +100,17 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
               })}
             </ul>
           </div>
+          <form action={saveSponsorPublic.bind(null, g.id)} className="card space-y-2">
+            <h2 className="text-lg">Public thank-you</h2>
+            <p className="text-xs text-black/55">
+              {g.anonymous ? "Anonymous: never shown publicly." : <>Shown on the home-page ticker as <strong>{publicName(g)}</strong> once a gift is received.</>}
+            </p>
+            <input name="displayName" defaultValue={g.displayName ?? ""} placeholder="Name to show (optional)" className="input" />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="anonymous" defaultChecked={g.anonymous} className="accent-dusk-700" /> Keep anonymous
+            </label>
+            <button className="btn-outline btn-sm">Save</button>
+          </form>
           <form action={saveSponsorNotes.bind(null, g.id)} className="card space-y-2">
             <h2 className="text-lg">Private notes</h2>
             <textarea name="adminNotes" defaultValue={g.adminNotes ?? ""} className="input min-h-24" />

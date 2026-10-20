@@ -10,6 +10,7 @@ export const adminNav = [
   { href: "/admin/angels", label: "Angels & Lists", short: "Angels", icon: "✦" },
   { href: "/admin/sponsors", label: "Givers", icon: "♡" },
   { href: "/admin/donations", label: "Money & Gifts", short: "Money", icon: "$" },
+  { href: "/admin/partners", label: "Business Partners", icon: "★" },
   { href: "/admin/thank-yous", label: "Thank-You Notes", icon: "✉" },
   { href: "/admin/families", label: "Family History", icon: "⌘" },
   { href: "/admin/statements", label: "Giving Statements", icon: "▤" },

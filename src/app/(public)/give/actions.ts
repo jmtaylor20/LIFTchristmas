@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { str } from "@/lib/format";
-import { upsertGiver } from "@/lib/givers";
+import { recognitionFields, upsertGiver } from "@/lib/givers";
 import { getActiveSeason } from "@/lib/season";
 import { esc, notifyAdmin } from "@/lib/email";
 
@@ -15,7 +15,7 @@ export async function logAmazonGift(fd: FormData) {
   const description = str(fd, "description").slice(0, 1000);
   if (!season || !firstName || !lastName || !email.includes("@") || !description) redirect("/give#amazon");
 
-  const giver = await upsertGiver({ firstName, lastName, email });
+  const giver = await upsertGiver({ firstName, lastName, email, ...recognitionFields(fd) });
   await db.inKindGift.create({
     data: {
       seasonId: season.id,

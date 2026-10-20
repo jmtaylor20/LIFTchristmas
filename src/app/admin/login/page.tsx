@@ -16,7 +16,12 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
           <Star className="h-6 w-6 text-gold-500" />
           <h1 className="text-xl">LIFT Ministry Admin</h1>
         </div>
-        {error && <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">Incorrect password. Passwords are case-sensitive.</p>}
+        {error === "locked" && (
+          <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">Too many tries. Please wait 15 minutes and try again.</p>
+        )}
+        {error && error !== "locked" && (
+          <p className="rounded-lg bg-star-50 px-3 py-2 text-sm text-star-800">Incorrect password. Passwords are case-sensitive.</p>
+        )}
         <PasswordField />
         <button className="btn-green w-full">Sign in</button>
       </form>

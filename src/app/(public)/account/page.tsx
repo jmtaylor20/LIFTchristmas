@@ -6,6 +6,7 @@ import { Notice, PageHero } from "@/components/ui";
 import { createProfile, logout, requestLogin, saveTracking, updateProfile } from "./actions";
 import { ShipTo } from "@/components/ShipTo";
 import { InstallApp } from "@/components/InstallApp";
+import { RecognitionFields } from "@/components/RecognitionFields";
 
 export const metadata = { title: "My Giving", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -219,6 +220,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
             <input value={giver.email} disabled className="input bg-black/5" />
             <input name="phone" defaultValue={giver.phone ?? ""} placeholder="Phone" className="input" />
             <input name="organization" defaultValue={giver.organization ?? ""} placeholder="Church / business" className="input" />
+            <RecognitionFields defaults={giver} />
             <div className="flex justify-between">
               <button className="btn-outline btn-sm">Save</button>
             </div>
