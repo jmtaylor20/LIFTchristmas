@@ -87,6 +87,16 @@ Environment variables are set in **Netlify → Project configuration → Environ
 
 **First steps in the admin** (`/admin`): open **Seasons & Deadlines**, create this year's season, and fill in the deadlines, Venmo username, Amazon list, shipping address, and drop-off/pickup details.
 
+## Test mode (try everything, then wipe it)
+
+1. In Netlify, set `SANDBOX_MODE` to `true` and redeploy (Deploys → Trigger deploy).
+2. While it's on:
+   - an orange banner marks the site as testing;
+   - **no emails are sent**: each one appears in **Admin → Test Mode & Outbox**, where its links can be clicked, so you can test family links, receipts, and giver sign-in;
+   - **Load sample data** adds a season with open deadlines, two approved families on the Angel Tree, and one waiting for approval.
+3. When testing is done, use **Delete all test data** (type `DELETE`). It permanently removes every season, family, giver, gift, note, partner, and test email.
+4. Set `SANDBOX_MODE` back to `false` and redeploy. The test page and delete button disappear entirely.
+
 ## Adding logos, photos, and testimonials
 
 - **Artwork:** the original angel and Community Christmas images are in `public/brand/`, copied unchanged from the LIFT Christmas Google Drive folder. Following the brand kit, the site never crops them, recolors them, or puts text over them.

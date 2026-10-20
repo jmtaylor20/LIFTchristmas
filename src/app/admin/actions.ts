@@ -14,6 +14,8 @@ import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
 import { site } from "@/content/site";
 import { deliverNote } from "@/lib/thankyou";
+import { isSandbox } from "@/lib/sandbox";
+import { deleteAllData, loadSampleData } from "@/lib/sampleData";
 import { sendSeasonThanks, thankForInKindGift, thankForReceivedGifts, thankPartnerIfLive } from "@/lib/thanks";
 import { sendListReminders, sendSponsorReminders } from "@/lib/reminders";
 import { dict, longDate, toLang } from "@/content/i18n";
@@ -549,4 +551,32 @@ export async function sendSeasonThanksNow() {
   if (!season) redirect("/admin");
   const r = await sendSeasonThanks(season.id);
   redirect(`/admin/season-thanks?sent=${r.sent}&remaining=${r.remaining}`);
+}
+
+// ---------------------------------------------------------------- test mode
+
+export async function loadSampleDataAction() {
+  await requireAdmin();
+  if (!isSandbox()) redirect("/admin");
+  const r = await loadSampleData(db);
+  (await cookies()).delete(ADMIN_SEASON_COOKIE);
+  revalidatePath("/", "layout");
+  redirect(`/admin/sandbox?loaded=${r.angels}`);
+}
+
+export async function deleteAllDataAction(fd: FormData) {
+  await requireAdmin();
+  if (!isSandbox()) redirect("/admin");
+  if (str(fd, "confirm") !== "DELETE") redirect("/admin/sandbox?error=confirm");
+  await deleteAllData(db);
+  (await cookies()).delete(ADMIN_SEASON_COOKIE);
+  revalidatePath("/", "layout");
+  redirect("/admin/sandbox?wiped=1");
+}
+
+export async function clearOutbox() {
+  await requireAdmin();
+  if (!isSandbox()) redirect("/admin");
+  await db.sandboxEmail.deleteMany();
+  revalidatePath("/admin/sandbox");
 }

@@ -19,6 +19,10 @@ export const adminNav = [
   { href: "/admin/seasons", label: "Seasons & Deadlines", icon: "◷" },
 ];
 
+const testModeItem = { href: "/admin/sandbox", label: "Test Mode & Outbox", icon: "🧪" };
+
+const navFor = (testMode?: boolean) => (testMode ? [...adminNav, testModeItem] : adminNav);
+
 // The five pages the owner uses most get a spot in the phone tab bar.
 const tabs = ["/admin", "/admin/applications", "/admin/angels", "/admin/donations", "/admin/pickup"];
 
@@ -27,11 +31,11 @@ function useActive() {
   return (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
 }
 
-export function SidebarNav() {
+export function SidebarNav({ testMode }: { testMode?: boolean }) {
   const active = useActive();
   return (
     <nav className="flex flex-col gap-0.5 px-3 pb-4">
-      {adminNav.map((n) => (
+      {navFor(testMode).map((n) => (
         <Link
           key={n.href}
           href={n.href}
@@ -45,13 +49,22 @@ export function SidebarNav() {
 }
 
 /** Phone header: brand, current page, and a menu with every page plus the season switcher. */
-export function MobileHeader({ seasonSwitcher, signOut }: { seasonSwitcher: React.ReactNode; signOut: React.ReactNode }) {
+export function MobileHeader({
+  seasonSwitcher,
+  signOut,
+  testMode,
+}: {
+  seasonSwitcher: React.ReactNode;
+  signOut: React.ReactNode;
+  testMode?: boolean;
+}) {
   const active = useActive();
   const path = usePathname();
   const [open, setOpen] = useState(false);
   // Also close when the page changes some other way (back button, tab bar).
   useEffect(() => setOpen(false), [path]);
-  const current = adminNav.filter((n) => active(n.href)).pop();
+  const items = navFor(testMode);
+  const current = items.filter((n) => active(n.href)).pop();
 
   return (
     <div className="no-print sticky top-0 z-40 lg:hidden">
@@ -74,7 +87,7 @@ export function MobileHeader({ seasonSwitcher, signOut }: { seasonSwitcher: Reac
         <div className="max-h-[calc(100dvh-56px)] overflow-y-auto bg-dusk-800 px-4 pt-3 pb-6 text-white shadow-xl">
           <div className="mb-3">{seasonSwitcher}</div>
           <nav className="grid grid-cols-2 gap-2">
-            {adminNav.map((n) => (
+            {items.map((n) => (
               <Link
                 key={n.href}
                 href={n.href}
