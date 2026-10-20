@@ -6,6 +6,7 @@ import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { formatDate, money } from "@/lib/format";
 import { db } from "@/lib/db";
 import { logAmazonGift } from "./actions";
+import { RecognitionFields } from "@/components/RecognitionFields";
 
 export const metadata = { title: "Give" };
 export const dynamic = "force-dynamic";
@@ -84,6 +85,7 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
                     <input name="lastName" required placeholder="Last name" className="input" />
                     <input name="email" type="email" required placeholder="Email" className="input sm:col-span-2" />
                     <textarea name="description" required placeholder="What did you order? (e.g. 2 pairs of size 10 sneakers)" className="input sm:col-span-2" />
+                    <RecognitionFields className="sm:col-span-2" />
                     <button className="btn-green sm:col-span-2 sm:justify-self-start">Record my gift</button>
                   </form>
                 </details>
@@ -92,7 +94,15 @@ export default async function Give({ searchParams }: { searchParams: Promise<{ l
           </Option>
         </div>
 
-        <Option n={4} title="Give money" body="Gifts of any size help us buy the items no one has chosen yet, plus wrapping supplies, so every angel is covered.">
+        <Option
+          n={4}
+          title="Partner as a business"
+          body="Businesses giving $100 or more are featured on our home page with their logo: Gold ($1,000+), Silver ($500+), or Bronze ($100+)."
+        >
+          <Link href="/partners" className="btn-primary">Become a Christmas partner</Link>
+        </Option>
+
+        <Option n={5} title="Give money" body="Gifts of any size help us buy the items no one has chosen yet, plus wrapping supplies, so every angel is covered.">
           <Link href="/donate" className="btn-primary">Donate</Link>
         </Option>
 

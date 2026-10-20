@@ -46,6 +46,7 @@ model Season {
   sponsorships Sponsorship[]
   donations    Donation[]
   inKindGifts  InKindGift[]
+  partners     CorporatePartner[]
 }
 
 model Household {
@@ -124,6 +125,8 @@ model Application {
   listSubmittedAt     DateTime?
   listReminderSentAt  DateTime?
   pickedUpAt          DateTime?
+  // Set when the owner approved a family past the approval cap using the override password.
+  capOverrideAt       DateTime?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
@@ -200,10 +203,15 @@ model Sponsor {
   emailNormalized String   @unique
   phone           String?
   organization    String?
+  // How the giver appears on the public thank-you ticker (e.g. "The Smith Family").
+  displayName     String?
+  // Anonymous givers never appear on the public site.
+  anonymous       Boolean  @default(false)
   adminNotes      String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  partners     CorporatePartner[]
   sponsorships Sponsorship[]
   donations    Donation[]
   inKindGifts  InKindGift[]
@@ -368,4 +376,64 @@ model ThankYouNote {
 
   @@index([applicationId])
   @@index([status])
+}
+
+enum PartnerTier {
+  GOLD
+  SILVER
+  BRONZE
+}
+
+enum PartnerStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+// A business that gives and wants logo recognition. Its tier comes from the
+// money the ministry has confirmed receiving from it this season
+// (Gold $1,000+, Silver $500+, Bronze $100+), unless the owner sets one.
+model CorporatePartner {
+  id           String        @id @default(cuid())
+  seasonId     String
+  season       Season        @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  sponsorId    String
+  sponsor      Sponsor       @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  businessName String
+  website      String?
+  logoData     Bytes?
+  logoType     String?
+  // Random key for the public logo URL.
+  logoKey      String?       @unique
+  pledgeCents  Int?
+  message      String?
+  status       PartnerStatus @default(PENDING)
+  tierOverride PartnerTier?
+  approvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([seasonId, sponsorId])
+  @@index([status])
+}
+
+// Failed admin sign-ins, used to slow down password guessing.
+model AdminLoginAttempt {
+  id        String   @id @default(cuid())
+  ip        String
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+}
+
+// Automatic thank-you emails already sent, so each one goes out only once.
+// kind: GIFTS_RECEIVED (refId = sponsorship), IN_KIND_RECEIVED (in-kind gift),
+// PARTNER_LIVE (partner), SEASON_THANKS (refId = "<seasonId>:<sponsorId>").
+model EmailLog {
+  id     String   @id @default(cuid())
+  kind   String
+  refId  String
+  sentAt DateTime @default(now())
+
+  @@unique([kind, refId])
 }

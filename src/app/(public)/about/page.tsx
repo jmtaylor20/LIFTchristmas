@@ -13,6 +13,23 @@ export default function About() {
       <PageHero eyebrow="About us" title={site.fullName}>
         <p>A Christ-centered giving ministry serving children and families in {site.region}.</p>
       </PageHero>
+      <section className="container-page mt-12">
+        <div className="card flex flex-col items-center gap-6 sm:flex-row">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={site.ministryLogo} alt={`${site.ministry}: ${site.ministryMotto}`} className="h-36 w-auto" />
+          <div>
+            <p className="eyebrow">Who we are</p>
+            <h2 className="mt-2 text-3xl">
+              {site.ministry}: <em className="text-dusk-600">{site.ministryMotto}</em>
+            </h2>
+            <p className="mt-2 text-black/70">
+              Community Christmas is an outreach of {site.ministry}. LIFT stands for <strong>Living In Faith Together</strong>, and
+              each Christmas we live that out by helping families in our community during the holiday season.
+            </p>
+            <p className="mt-3 font-display text-dusk-700 italic">{site.thanksLine}</p>
+          </div>
+        </div>
+      </section>
       <section className="container-page mt-12 grid gap-10 md:grid-cols-2">
         <div className="prose-lift">
           {site.mission.map((p, i) => (

@@ -70,6 +70,15 @@ export function SiteFooter() {
             <p className="mt-4 max-w-xs text-sm text-dusk-100">
               A Christ-centered angel tree ministry serving children and families in {site.region}.
             </p>
+            <div className="mt-5 flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={site.ministryLogo} alt={`${site.ministry}: ${site.ministryMotto}`} className="h-16 w-auto" />
+              <p className="text-xs leading-snug text-dusk-100">
+                A ministry of <strong className="text-white">{site.ministry}</strong>
+                <br />
+                {site.ministryMotto}
+              </p>
+            </div>
           </div>
           <blockquote className="font-display text-base text-white/90 italic">
             &ldquo;{site.giveVerse.text}&rdquo;
@@ -80,13 +89,18 @@ export function SiteFooter() {
             <p className="mt-2">
               <a className="text-white" href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
             </p>
-            {site.contactPhone && <p className="text-dusk-100">{site.contactPhone}</p>}
+            {site.contactPhone && (
+              <p>
+                <a className="text-dusk-100" href={`tel:${site.contactPhone.replace(/\D/g, "")}`}>{site.contactPhone}</a>
+              </p>
+            )}
             {site.facebookUrl && (
               <p><a className="text-white" href={site.facebookUrl}>Facebook</a></p>
             )}
             <ul className="mt-4 space-y-1 text-dusk-100">
               <li><Link href="/apply?lang=es" className="text-dusk-100" lang="es">Solicitud en español</Link></li>
               <li><Link href="/family" className="text-dusk-100">Families: find my page</Link></li>
+              <li><Link href="/partners" className="text-dusk-100">Business partners</Link></li>
             </ul>
           </div>
         </div>

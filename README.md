@@ -1,6 +1,8 @@
 # LIFT Community Christmas
 
-Website and ministry admin for **LIFT Community Christmas** (LIFT Ministries), serving children in Reeltown & Tallassee, Alabama.
+Website and ministry admin for **LIFT Ministries Community Christmas**, serving children in Reeltown & Tallassee, Alabama. LIFT stands for *Living In Faith Together*.
+
+Contact: liftministriesal@gmail.com · (334) 328-1513 · [Facebook](https://www.facebook.com/LIFTMinistries)
 
 Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 
@@ -24,9 +26,20 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 - **LIFT Family** (`/family`): for parents. On a device that has opened the family's private link, it goes straight back to their page.
 - **LIFT Admin** (`/admin`): for the ministry. On phones it has a bottom tab bar and a full menu, and its tables become cards.
 
+**Sponsor recognition**
+- **Business partners** (`/partners`): businesses give $100 or more and upload their logo. Once the owner approves the logo *and* marks the gift received, it appears on the home page partner wall by tier. Tiers follow the money received: **Gold** $1,000+, **Silver** $500+, **Bronze** $100+. The owner can also set a tier by hand.
+- **Thank-you ticker:** a rotating list of givers runs across the home page. Only givers whose gifts the owner has confirmed appear, so nobody can put a name there just by filling out a form. Givers choose a display name (for example, "The Smith Family") or stay anonymous on every giving form and in their profile.
+
+**Automatic thank-you emails** (each sent once):
+- When a sponsor's gifts are all received.
+- When an Amazon or drop-off gift is received.
+- When a business partner's logo goes live.
+- A Community Christmas thank-you to every giver of the season, sent automatically from December 27 with the season's real totals. The owner can preview it or send it early under Dashboard → Reminders.
+
 **Ministry admin** (`/admin`):
 - Dashboard: applications to review, angel coverage, money received, fund balance, the dollar value still needed, items waiting on you, and reminder buttons.
-- Applications: approve, waitlist, or deny, with an email to the family in their language. **Each family can be approved at most 5 years**; the cap is adjustable per season and enforced on the server.
+- Applications: approve, waitlist, or deny, with an email to the family in their language. **Each family can be approved at most 5 years**; the cap is adjustable per season and enforced on the server. To approve a family past the cap anyway, use **Override the cap** on their application. It needs the override password (`CAP_OVERRIDE_PASSWORD`, set in Netlify), and each override is recorded.
+- Sign-in: after 8 wrong passwords from one address, sign-in locks for 15 minutes.
 - Angels & Lists: each item's status (needed, committed, received, or "ministry buying" with the actual $ spent), how sponsors are delivering, tracking numbers, and adding sponsors by hand.
 - Givers, with how many years each has sponsored. Family History across all years.
 - Money & Gifts: confirm reported Venmo/check/cash gifts (this sends the receipt), record gifts directly, and track Amazon/drop-off gifts.
@@ -34,7 +47,8 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 - Giving Statements: preview, send, or resend year-end statements.
 - Gift Tags: printable Angel Tree tags and pickup-day bag labels.
 - Pickup Day: a phone-friendly check-off by last name, phone, or angel #.
-- Seasons & Deadlines: one season per year. It holds the deadlines, Venmo username, Amazon list, shipping address, drop-off and pickup details.
+- Business Partners: approve logos, edit names and websites, set tiers.
+- Seasons & Deadlines: one season per year. A season with nothing in it yet can be deleted. It holds the deadlines, Venmo username, Amazon list, shipping address, drop-off and pickup details.
 
 **Automatic emails** (via [Resend](https://resend.com)):
 - Application received, decisions, sponsor confirmations, receipts, and sign-in links.

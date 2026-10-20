@@ -3,14 +3,22 @@
 
 export const site = {
   name: "LIFT Community Christmas",
-  fullName: "LIFT Community Christmas Ministry",
+  fullName: "LIFT Ministries Community Christmas",
+  // LIFT stands for Living In Faith Together.
+  ministry: "LIFT Ministries",
+  ministryMotto: "Living In Faith Together",
+  ministryLogo: "/brand/lift-ministries-logo.png",
   communities: "Reeltown & Tallassee",
   region: "Reeltown & Tallassee, Alabama",
   tagline: "Sharing the love of Christ with children in our community, one Christmas gift at a time.",
   motto: "Neighbors lifting neighbors.",
-  contactEmail: "christmas@liftchristmas.org",
-  contactPhone: "",
-  facebookUrl: "",
+  contactEmail: "liftministriesal@gmail.com",
+  contactPhone: "(334) 328-1513",
+  facebookUrl: "https://www.facebook.com/LIFTMinistries",
+  // From the Community Christmas flyer.
+  helpLine:
+    "Lift Ministries Community Christmas is here to help families in our community during the holiday season. If you are in need of assistance this year, please complete the application below.",
+  thanksLine: "Thank you for allowing us to be a part of blessing families in our community this Christmas!",
 
   verse: {
     text: "For unto you is born this day in the city of David a Saviour, which is Christ the Lord.",
@@ -22,7 +30,7 @@ export const site = {
   },
 
   mission: [
-    "LIFT Community Christmas is a giving ministry rooted in the Christian faith. Each year, neighbors, churches, and families across Reeltown and Tallassee come together so that children in our community wake up on Christmas morning to gifts chosen just for them.",
+    "LIFT Community Christmas is a ministry of LIFT Ministries (Living In Faith Together), rooted in the Christian faith. Each year, neighbors, churches, businesses, and families across Reeltown and Tallassee come together to help families in our community during the holiday season, so children wake up on Christmas morning to gifts chosen just for them.",
     "We believe every child is made in God's image and deserves to know they are loved. Because God gave us the greatest gift in His Son, Jesus, we give joyfully to others.",
   ],
 

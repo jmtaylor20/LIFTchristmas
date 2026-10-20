@@ -7,12 +7,17 @@ import { Testimonials } from "@/components/Testimonials";
 import { applicationsAreOpen, getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { seasonStats } from "@/lib/stats";
 import { formatDate, money } from "@/lib/format";
+import { partnerWall, tickerNames } from "@/lib/recognition";
+import { PartnerWall } from "@/components/PartnerWall";
+import { ThankYouTicker } from "@/components/ThankYouTicker";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const season = await getActiveSeason();
-  const stats = season ? await seasonStats(season.id) : null;
+  const [stats, wall, names] = season
+    ? await Promise.all([seasonStats(season.id), partnerWall(season.id), tickerNames(season.id)])
+    : [null, [], []];
   const appsOpen = applicationsAreOpen(season);
   const giftsOpen = sponsoringIsOpen(season);
   const covered = stats ? stats.angels.fullyCovered : 0;
@@ -71,6 +76,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {season && <ThankYouTicker names={names} year={season.year} />}
 
       {stats && withLists > 0 && (
         <section className="container-page mt-10">
@@ -149,6 +156,41 @@ export default async function Home() {
               cta="Make a gift"
             />
           </div>
+        </div>
+      </section>
+
+      {/* Business partners */}
+      <section className="container-page py-20 md:py-24" aria-labelledby="partners-title">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Our Christmas partners</p>
+            <h2 id="partners-title" className="mt-4 text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.12]">
+              Local businesses lifting local families
+            </h2>
+          </div>
+          <Link href="/partners" className="btn-outline">Become a partner →</Link>
+        </div>
+        <div className="mt-8">
+          {wall.length > 0 ? (
+            <PartnerWall wall={wall} />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                ["Gold", "$1,000+"],
+                ["Silver", "$500+"],
+                ["Bronze", "$100+"],
+              ].map(([t, a]) => (
+                <Link
+                  key={t}
+                  href="/partners"
+                  className="flex h-32 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-dusk-200 bg-white text-center no-underline transition hover:border-dusk-500"
+                >
+                  <span className="font-display text-2xl text-dusk-700">{t} partner</span>
+                  <span className="text-sm text-black/55">{a} · Your logo here</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

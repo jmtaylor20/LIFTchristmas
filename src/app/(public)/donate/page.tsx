@@ -38,7 +38,7 @@ export default async function Donate() {
               <div className="mt-5">
                 <DonateForm
                   venmo={!!handle}
-                  defaults={giver ? { firstName: giver.firstName, lastName: giver.lastName, email: giver.email } : undefined}
+                  defaults={giver ? { firstName: giver.firstName, lastName: giver.lastName, email: giver.email, anonymous: giver.anonymous, displayName: giver.displayName } : undefined}
                 />
               </div>
             </>

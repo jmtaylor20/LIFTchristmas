@@ -3,19 +3,7 @@
 import { useActionState, useRef, useState, useTransition } from "react";
 import { dict, type Lang } from "@/content/i18n";
 import { submitThankYou, type ThankYouState } from "../actions";
-
-/** Shrinks a phone photo to at most 1600px so uploads stay small and fast. */
-async function shrink(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("resize failed"))), "image/jpeg", 0.82),
-  );
-}
+import { shrinkImage } from "@/lib/shrinkImage";
 
 export function ThankYouForm({
   token,
@@ -38,7 +26,8 @@ export function ThankYouForm({
     const photo = fd.get("photo");
     if (photo instanceof File && photo.size > 0) {
       try {
-        fd.set("photo", await shrink(photo), "card.jpg");
+        const { blob, name } = await shrinkImage(photo, 1600);
+        fd.set("photo", blob, name);
       } catch {
         // Fall back to the original file; the server checks its size and type.
       }

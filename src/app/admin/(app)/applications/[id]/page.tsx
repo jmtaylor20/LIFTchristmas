@@ -47,8 +47,12 @@ export default async function ApplicationDetail({
         {sp.error === "cap" && (
           <Notice tone="error">
             This family has already been approved {otherApproved.length} years, which meets the {app.season.approvalCapYears}-year cap. To
-            make an exception, raise the cap under Seasons &amp; Deadlines.
+            make an exception, use &ldquo;Override the cap&rdquo; below.
           </Notice>
+        )}
+        {sp.error === "override" && <Notice tone="error">That override password isn&rsquo;t right. The family was not approved.</Notice>}
+        {app.capOverrideAt && (
+          <Notice>Approved past the {app.season.approvalCapYears}-year cap by override on {formatDate(app.capOverrideAt)}.</Notice>
         )}
         {atCap && !sp.error && (
           <Notice tone="warn">
@@ -150,6 +154,31 @@ export default async function ApplicationDetail({
             <textarea name="adminNotes" defaultValue={app.adminNotes ?? ""} placeholder="Private notes (only admins see these)" className="input min-h-16" />
             <button className="btn-green w-full">Save decision</button>
           </form>
+
+          {atCap && app.status !== "APPROVED" && (
+            <form action={decideApplication.bind(null, app.id)} className="card space-y-3 border-star-100 bg-star-50/60">
+              <h2 className="text-xl">Override the cap</h2>
+              <p className="text-sm text-black/65">
+                This family has reached the {app.season.approvalCapYears}-year limit. To approve them anyway, enter the override
+                password. The override is recorded on this application.
+              </p>
+              <input type="hidden" name="status" value="APPROVED" />
+              <input
+                name="overridePassword"
+                type="password"
+                required
+                autoComplete="off"
+                autoCapitalize="characters"
+                placeholder="Override password"
+                className="input"
+              />
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="notify" defaultChecked className="h-4 w-4 accent-dusk-700" /> Email the family that they&rsquo;re approved
+              </label>
+              <textarea name="message" placeholder="Optional personal note to include in the email" className="input min-h-16" />
+              <button className="btn-primary w-full">Approve with override</button>
+            </form>
+          )}
 
           <div className="card space-y-2 text-sm">
             <h2 className="text-lg">Family&rsquo;s private link</h2>

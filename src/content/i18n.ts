@@ -14,10 +14,10 @@ const en = {
   christmas: (year: number | string) => `Christmas ${year}`,
 
   apply: {
-    title: "Apply for Christmas sponsorship",
+    title: "Holiday Assistance Application",
     intro: (communities: string) =>
-      `For families living in ${communities} who need help providing Christmas for their children this year. Please fill out one application per household.`,
-    closes: "Applications close",
+      `Lift Ministries Community Christmas is here to help families in our community (${communities}) during the holiday season. If you are in need of assistance this year, please complete the application below. One application per household.`,
+    closes: "All applications are due by",
     alreadyApplied: "Already applied? Use the private link we emailed you, or",
     getLinkAgain: "get your link again",
     closedTitle: "Applications are closed",
@@ -209,10 +209,10 @@ const es: Dict = {
   christmas: (year) => `Navidad ${year}`,
 
   apply: {
-    title: "Solicitud de patrocinio navideño",
+    title: "Solicitud de Ayuda Navideña",
     intro: (communities) =>
-      `Para familias que viven en ${communities} y necesitan ayuda para darles una Navidad a sus hijos este año. Por favor llene una sola solicitud por hogar.`,
-    closes: "Las solicitudes cierran el",
+      `Lift Ministries Community Christmas está aquí para ayudar a las familias de nuestra comunidad (${communities}) durante la temporada navideña. Si necesita ayuda este año, por favor complete la solicitud a continuación. Una solicitud por hogar.`,
+    closes: "Todas las solicitudes vencen el",
     alreadyApplied: "¿Ya presentó su solicitud? Use el enlace privado que le enviamos por correo, o",
     getLinkAgain: "reciba su enlace otra vez",
     closedTitle: "Las solicitudes están cerradas",

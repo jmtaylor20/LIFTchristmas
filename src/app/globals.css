@@ -156,3 +156,8 @@
   .no-print { display: none !important; }
   body { background: white; }
 }
+
+@keyframes lift-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

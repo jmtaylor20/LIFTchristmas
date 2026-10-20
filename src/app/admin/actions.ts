@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ApplicationStatus, ItemStatus } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -14,14 +14,33 @@ import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
 import { site } from "@/content/site";
 import { deliverNote } from "@/lib/thankyou";
+import { sendSeasonThanks, thankForInKindGift, thankForReceivedGifts, thankPartnerIfLive } from "@/lib/thanks";
 import { sendListReminders, sendSponsorReminders } from "@/lib/reminders";
 import { dict, longDate, toLang } from "@/content/i18n";
 
 // ------------------------------------------------------------------ session
 
+const MAX_FAILED_LOGINS = 8;
+const LOCKOUT_MINUTES = 15;
+
+async function clientIp() {
+  const h = await headers();
+  return h.get("x-nf-client-connection-ip") || h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
 export async function adminLogin(fd: FormData) {
   const expected = process.env.ADMIN_PASSWORD;
-  if (!expected || !safeEqual(str(fd, "password"), expected)) redirect("/admin/login?error=1");
+  const ip = await clientIp();
+  const since = new Date(Date.now() - LOCKOUT_MINUTES * 60 * 1000);
+  // Slow down password guessing: too many misses from one address locks it out for a while.
+  const recentFailures = await db.adminLoginAttempt.count({ where: { ip, createdAt: { gte: since } } });
+  if (recentFailures >= MAX_FAILED_LOGINS) redirect("/admin/login?error=locked");
+
+  if (!expected || !safeEqual(str(fd, "password"), expected)) {
+    await db.adminLoginAttempt.create({ data: { ip } });
+    redirect("/admin/login?error=1");
+  }
+  await db.adminLoginAttempt.deleteMany({ where: { OR: [{ ip }, { createdAt: { lt: since } }] } });
   await setAdminSession();
   redirect("/admin");
 }
@@ -112,17 +131,28 @@ export async function decideApplication(id: string, fd: FormData) {
   const app = await db.application.findUnique({ where: { id }, include: { household: true, season: true, angels: true } });
   if (!app) return;
 
-  if (status === "APPROVED") {
+  // Families at the approval cap can only be approved with the override password.
+  let capOverride = false;
+  if (status === "APPROVED" && app.status !== "APPROVED") {
     const years = await approvedYears(app.householdId, app.seasonId);
     if (years.length >= app.season.approvalCapYears) {
-      redirect(`/admin/applications/${id}?error=cap`);
+      const given = str(fd, "overridePassword");
+      const expected = process.env.CAP_OVERRIDE_PASSWORD;
+      if (!given) redirect(`/admin/applications/${id}?error=cap`);
+      if (!expected || !safeEqual(given, expected)) redirect(`/admin/applications/${id}?error=override`);
+      capOverride = true;
     }
   }
 
   await db.$transaction(async (tx) => {
     await tx.application.update({
       where: { id },
-      data: { status, decidedAt: status === "PENDING" ? null : new Date(), adminNotes: optStr(fd, "adminNotes") ?? app.adminNotes },
+      data: {
+        status,
+        decidedAt: status === "PENDING" ? null : new Date(),
+        adminNotes: optStr(fd, "adminNotes") ?? app.adminNotes,
+        ...(capOverride ? { capOverrideAt: new Date() } : {}),
+      },
     });
     if (status === "APPROVED") {
       // Give each child a public angel number.
@@ -245,6 +275,7 @@ async function refreshSponsorshipStatus(sponsorshipId: string | null) {
   if (!s || s.status === "CANCELLED") return;
   const delivered = s.items.length > 0 && s.items.every((i) => i.status === "RECEIVED");
   await db.sponsorship.update({ where: { id: s.id }, data: { status: delivered ? "DELIVERED" : "COMMITTED" } });
+  if (delivered) await thankForReceivedGifts(s.id);
 }
 
 /** Admin signs someone up for an angel (e.g. a phone call or a church sign-up sheet). */
@@ -303,6 +334,7 @@ export async function recordDonation(fd: FormData) {
     },
   });
   if (fd.get("sendReceipt") === "on") await sendDonationReceipt(d.id);
+  await thankPartnersOf(d.id);
   revalidatePath("/admin", "layout");
   redirect("/admin/donations?saved=1");
 }
@@ -312,6 +344,7 @@ export async function confirmDonation(id: string) {
   await requireAdmin();
   await db.donation.updateMany({ where: { id, status: { not: "PAID" } }, data: { status: "PAID", receivedAt: new Date() } });
   await sendDonationReceipt(id);
+  await thankPartnersOf(id);
   revalidatePath("/admin", "layout");
 }
 
@@ -343,7 +376,7 @@ export async function recordInKind(fd: FormData) {
   const description = str(fd, "description");
   if (!season || !firstName || !description) redirect("/admin/donations?error=1");
   const giver = email ? await upsertGiver({ firstName, lastName, email }) : null;
-  await db.inKindGift.create({
+  const gift = await db.inKindGift.create({
     data: {
       seasonId: season.id,
       sponsorId: giver?.id,
@@ -355,6 +388,7 @@ export async function recordInKind(fd: FormData) {
       receivedAt: fd.get("received") === "on" ? new Date() : null,
     },
   });
+  await thankForInKindGift(gift.id);
   revalidatePath("/admin", "layout");
   redirect("/admin/donations?saved=1#in-kind");
 }
@@ -363,6 +397,7 @@ export async function markInKindReceived(id: string) {
   await requireAdmin();
   const g = await db.inKindGift.findUnique({ where: { id } });
   if (g) await db.inKindGift.update({ where: { id }, data: { receivedAt: g.receivedAt ? null : new Date() } });
+  if (g && !g.receivedAt) await thankForInKindGift(id);
   revalidatePath("/admin/donations");
 }
 
@@ -442,4 +477,76 @@ export async function undoPickedUp(applicationId: string) {
   await requireAdmin();
   await db.application.update({ where: { id: applicationId }, data: { pickedUpAt: null } });
   revalidatePath("/admin/pickup");
+}
+
+// --------------------------------------------------------- business partners
+
+export async function approvePartner(id: string) {
+  await requireAdmin();
+  await db.corporatePartner.update({ where: { id }, data: { status: "APPROVED", approvedAt: new Date() } });
+  await thankPartnerIfLive(id);
+  revalidatePath("/", "layout");
+}
+
+export async function declinePartner(id: string) {
+  await requireAdmin();
+  await db.corporatePartner.update({ where: { id }, data: { status: "DECLINED", approvedAt: null } });
+  revalidatePath("/", "layout");
+}
+
+export async function updatePartner(id: string, fd: FormData) {
+  await requireAdmin();
+  const tier = str(fd, "tierOverride");
+  await db.corporatePartner.update({
+    where: { id },
+    data: {
+      businessName: str(fd, "businessName") || undefined,
+      website: optStr(fd, "website"),
+      tierOverride: tier === "GOLD" || tier === "SILVER" || tier === "BRONZE" ? tier : null,
+    },
+  });
+  await thankPartnerIfLive(id);
+  revalidatePath("/", "layout");
+}
+
+export async function saveSponsorPublic(id: string, fd: FormData) {
+  await requireAdmin();
+  await db.sponsor.update({
+    where: { id },
+    data: { anonymous: fd.get("anonymous") === "on", displayName: optStr(fd, "displayName") },
+  });
+  revalidatePath("/", "layout");
+}
+
+// --------------------------------------------------------------- seasons
+
+/** Deletes a season that has nothing in it yet (e.g. one created while testing). */
+export async function deleteEmptySeason(id: string) {
+  await requireAdmin();
+  const s = await db.season.findUnique({
+    where: { id },
+    include: { _count: { select: { applications: true, angels: true, sponsorships: true, donations: true, inKindGifts: true, partners: true } } },
+  });
+  if (!s) redirect("/admin/seasons");
+  if (Object.values(s._count).some((n) => n > 0)) redirect("/admin/seasons?error=notempty");
+  await db.season.delete({ where: { id } });
+  (await cookies()).delete(ADMIN_SEASON_COOKIE);
+  revalidatePath("/", "layout");
+  redirect("/admin/seasons?deleted=1");
+}
+
+/** When a business partner's gift is confirmed, their logo may have just gone live. */
+async function thankPartnersOf(donationId: string) {
+  const d = await db.donation.findUnique({ where: { id: donationId }, select: { sponsorId: true, seasonId: true } });
+  if (!d?.sponsorId) return;
+  const p = await db.corporatePartner.findUnique({ where: { seasonId_sponsorId: { seasonId: d.seasonId, sponsorId: d.sponsorId } } });
+  if (p) await thankPartnerIfLive(p.id);
+}
+
+export async function sendSeasonThanksNow() {
+  await requireAdmin();
+  const season = await getAdminSeason();
+  if (!season) redirect("/admin");
+  const r = await sendSeasonThanks(season.id);
+  redirect(`/admin/season-thanks?sent=${r.sent}&remaining=${r.remaining}`);
 }

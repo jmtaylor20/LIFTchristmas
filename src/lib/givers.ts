@@ -10,6 +10,9 @@ export type GiverInput = {
   email: string;
   phone?: string | null;
   organization?: string | null;
+  // Public-recognition choices. Left undefined, the giver's existing choices stay as they are.
+  anonymous?: boolean;
+  displayName?: string | null;
 };
 
 /** Every donor, sponsor and wish-list buyer gets one profile, keyed by email. */
@@ -24,12 +27,16 @@ export async function upsertGiver(input: GiverInput) {
       emailNormalized,
       phone: input.phone || null,
       organization: input.organization || null,
+      anonymous: input.anonymous ?? false,
+      displayName: input.displayName || null,
     },
     update: {
       firstName: input.firstName,
       lastName: input.lastName,
       ...(input.phone ? { phone: input.phone } : {}),
       ...(input.organization ? { organization: input.organization } : {}),
+      ...(input.anonymous !== undefined ? { anonymous: input.anonymous } : {}),
+      ...(input.displayName ? { displayName: input.displayName } : {}),
     },
   });
 }
@@ -234,4 +241,10 @@ export const BATCH_SIZE = 12;
 /** Keeps bulk sends under the email provider's ~2 messages/second limit. */
 export function pause(ms = 600) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+/** Reads the shared "how should we thank you?" fields from a giving form. */
+export function recognitionFields(fd: FormData) {
+  const displayName = String(fd.get("displayName") ?? "").trim().slice(0, 80);
+  return { anonymous: fd.get("anonymous") === "on", displayName: displayName || null };
 }

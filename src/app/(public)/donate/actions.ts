@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { money, parseMoneyToCents, str } from "@/lib/format";
 import { getActiveSeason } from "@/lib/season";
-import { upsertGiver } from "@/lib/givers";
+import { recognitionFields, upsertGiver } from "@/lib/givers";
 import { button, esc, notifyAdmin, siteUrl } from "@/lib/email";
 
 export type DonateState = { error?: string };
@@ -30,7 +30,7 @@ export async function reportGift(_prev: DonateState, fd: FormData): Promise<Dona
 
   const venmoName = str(fd, "venmoName").slice(0, 80);
   const note = str(fd, "note").slice(0, 300);
-  const giver = await upsertGiver({ firstName, lastName, email });
+  const giver = await upsertGiver({ firstName, lastName, email, ...recognitionFields(fd) });
   const donation = await db.donation.create({
     data: {
       seasonId: season.id,

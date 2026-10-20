@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { str } from "@/lib/format";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
-import { upsertGiver } from "@/lib/givers";
+import { recognitionFields, upsertGiver } from "@/lib/givers";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { formatDate, money } from "@/lib/format";
 import { site } from "@/content/site";
@@ -37,6 +37,7 @@ export async function sponsorItems(fd: FormData) {
     email,
     phone: str(fd, "phone") || null,
     organization: str(fd, "organization") || null,
+    ...recognitionFields(fd),
   });
 
   const isFull = chosen.length === angel.items.length;

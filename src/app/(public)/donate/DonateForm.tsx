@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { reportGift, type DonateState } from "./actions";
+import { RecognitionFields } from "@/components/RecognitionFields";
 
 const presets = [25, 50, 100, 150, 250];
 
@@ -15,7 +16,7 @@ export function DonateForm({
   defaults,
   venmo,
 }: {
-  defaults?: { firstName: string; lastName: string; email: string };
+  defaults?: { firstName: string; lastName: string; email: string; anonymous?: boolean; displayName?: string | null };
   venmo: boolean;
 }) {
   const [state, action, pending] = useActionState<DonateState, FormData>(reportGift, {});
@@ -71,6 +72,7 @@ export function DonateForm({
           <span />
         )}
         <input name="note" placeholder="In honor of… (optional)" className="input sm:col-span-2" />
+        <RecognitionFields className="sm:col-span-2" defaults={defaults} />
       </div>
       <button className="btn-primary w-full py-3 text-base" disabled={pending}>
         {pending ? "One moment…" : method === "VENMO" ? `Continue to Venmo: $${amount || "0"}` : `Give $${amount || "0"} by ${method === "CHECK" ? "check" : "cash"}`}

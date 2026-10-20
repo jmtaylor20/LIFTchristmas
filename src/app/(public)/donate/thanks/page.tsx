@@ -9,8 +9,8 @@ import { site } from "@/content/site";
 export const metadata = { title: "Thank you!" };
 export const dynamic = "force-dynamic";
 
-export default async function DonateThanks({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
-  const { d } = await searchParams;
+export default async function DonateThanks({ searchParams }: { searchParams: Promise<{ d?: string; partner?: string }> }) {
+  const { d, partner } = await searchParams;
   const donation = d ? await db.donation.findUnique({ where: { id: d }, include: { season: true } }) : null;
   if (!donation) notFound();
   const amount = money(donation.amountCents, { cents: true });
@@ -48,6 +48,14 @@ export default async function DonateThanks({ searchParams }: { searchParams: Pro
             ) : (
               <p className="text-black/75">Please contact us at {site.contactEmail} for where to send or drop off your gift.</p>
             )}
+          </div>
+        )}
+        {partner && (
+          <div className="card text-sm">
+            <p>
+              <strong>Thank you for partnering with us!</strong> We&rsquo;ll review your logo, and it will appear on our home page once
+              your gift arrives.
+            </p>
           </div>
         )}
         <div className="card bg-dusk-50 text-sm">
