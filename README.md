@@ -51,19 +51,22 @@ npm run dev                 # http://localhost:3000, admin at /admin
 
 Without `RESEND_API_KEY`, emails are printed to the server log.
 
-## Deploy: Supabase + Netlify
+## Hosting (live)
 
-The Netlify project **lift-christmas** (https://lift-christmas.netlify.app) already exists, with `SESSION_SECRET`, `CRON_SECRET`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL`, `ORG_LEGAL_NAME` and `ORG_TAX_EXEMPT` set. To finish:
+- **Site:** https://lift-christmas.netlify.app (Netlify project `lift-christmas`, team jmtaylor20)
+- **Database:** Supabase project `lift-christmas` (us-east-1)
+  - The tables live in a private `lift` schema, owned by a dedicated `lift_app` login, so Supabase's public API can't reach them.
+  - The site connects through the Supabase pooler at `aws-0-us-east-1.pooler.supabase.com`: `DATABASE_URL` on port 6543 for the app, `DIRECT_URL` on port 5432 for migrations.
+- **Health check:** `/api/health` reports whether the site can reach the database.
+- **Every deploy:** `netlify.toml` runs `prisma migrate deploy` first, so schema changes in `prisma/migrations` apply automatically.
 
-1. **Supabase:** create a project named `lift-christmas` (region: East US). Save the database password it asks you to choose.
-2. In Supabase, click **Connect** and copy two connection strings:
-   - **Transaction pooler** (port 6543). Add `?pgbouncer=true&connection_limit=1` to the end. This is `DATABASE_URL`.
-   - **Session pooler** (port 5432). This is `DIRECT_URL`.
-   Put your password in place of `[YOUR-PASSWORD]` in both.
-3. In **Netlify → lift-christmas → Project configuration → Environment variables**, add `DATABASE_URL` and `DIRECT_URL`. Also add `ADMIN_NOTIFY_EMAIL` (the owner's email) and, once Resend is set up, `RESEND_API_KEY` and `EMAIL_FROM`.
-4. In **Netlify → Project configuration → Build & deploy → Link repository**, choose GitHub → `jmtaylor20/LIFTchristmas`. Set the production branch to the branch with this code (`main` once it's merged). Netlify builds automatically: `netlify.toml` runs the database migrations first, creating all the tables, then builds the site.
-5. The scheduled jobs in `netlify/functions/` turn on automatically (daily reminders; giving statements in mid-January).
-6. Sign in at `/admin`, open **Seasons & Deadlines**, create this year's season, and fill in the deadlines, Venmo username, Amazon list, shipping address, and drop-off/pickup details.
+Environment variables are set in **Netlify → Project configuration → Environment variables**. Still to add:
+- `ADMIN_NOTIFY_EMAIL`: the owner's email, for alerts.
+- `RESEND_API_KEY` and `EMAIL_FROM`: once a Resend account is set up. Until then, emails are only written to the function logs.
+
+**Automatic deploys from GitHub:** in Netlify, open **Project configuration → Build & deploy → Continuous deployment → Link repository**. Choose GitHub → `jmtaylor20/LIFTchristmas` with production branch `main`. After that, every merge to `main` deploys on its own.
+
+**First steps in the admin** (`/admin`): open **Seasons & Deadlines**, create this year's season, and fill in the deadlines, Venmo username, Amazon list, shipping address, and drop-off/pickup details.
 
 ## Adding logos, photos, and testimonials
 

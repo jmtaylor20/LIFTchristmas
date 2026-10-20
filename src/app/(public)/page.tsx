@@ -27,7 +27,8 @@ export default async function Home() {
           <div className="relative z-10 pt-14 pb-10 md:py-20 md:pr-6">
             <p className="text-xs font-bold tracking-[0.18em] text-gold-300 uppercase">
               <span aria-hidden className="mr-2 text-sm">✦</span>
-              {site.communities} · Christmas {season?.year ?? ""}
+              {site.communities}
+              {season && <> · Christmas {season.year}</>}
             </p>
             <h1 id="hero-title" className="mt-5 text-[clamp(3rem,5.4vw,5.4rem)] leading-[1.06] tracking-[-0.03em] text-white">
               A little kindness can <em className="text-gold-300">lift</em> a Christmas.
