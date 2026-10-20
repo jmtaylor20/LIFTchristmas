@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
 
-// Sample families and angels for trying the site out. Used by `npm run db:seed`
+// Sample families, angels, and ministry needs for trying the site out. Used by `npm run db:seed`
 // locally and by Admin → Test Mode → "Load sample data".
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -99,6 +99,15 @@ export async function loadSampleData(db: PrismaClient) {
       angels++;
     }
   }
+  if ((await db.needItem.count({ where: { seasonId: season.id } })) === 0) {
+    await db.needItem.createMany({
+      data: [
+        { seasonId: season.id, name: "Wrapping paper rolls", priceCents: 1299, quantity: 10, url: "https://www.amazon.com/", sortOrder: 1 },
+        { seasonId: season.id, name: "Clear packing tape", priceCents: 899, quantity: 6, url: "https://www.amazon.com/", sortOrder: 2 },
+        { seasonId: season.id, name: "Large gift bags", details: "Assorted colors", priceCents: 2450, quantity: 4, sortOrder: 3 },
+      ],
+    });
+  }
   return { year: season.year, angels };
 }
 
@@ -115,6 +124,7 @@ export async function deleteAllData(db: PrismaClient) {
     db.loginToken.deleteMany(),
     db.donation.deleteMany(),
     db.inKindGift.deleteMany(),
+    db.needItem.deleteMany(),
     db.corporatePartner.deleteMany(),
     db.angel.deleteMany(),
     db.application.deleteMany(),
