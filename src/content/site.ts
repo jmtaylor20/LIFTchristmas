@@ -1,0 +1,55 @@
+// Editable site copy. Swap in real photos and testimonials here as they come in.
+// Photos go in /public/photos and are referenced like "/photos/wrapping-night.jpg".
+
+export const site = {
+  name: "LIFT Community Christmas",
+  fullName: "LIFT Community Christmas Ministry",
+  communities: "Reeltown & Tallassee",
+  region: "Reeltown & Tallassee, Alabama",
+  tagline: "Sharing the love of Christ with children in our community, one Christmas gift at a time.",
+  contactEmail: "christmas@liftchristmas.org",
+  contactPhone: "",
+  facebookUrl: "",
+
+  verse: {
+    text: "For unto you is born this day in the city of David a Saviour, which is Christ the Lord.",
+    ref: "Luke 2:11",
+  },
+  giveVerse: {
+    text: "Truly I tell you, whatever you did for one of the least of these brothers and sisters of mine, you did for me.",
+    ref: "Matthew 25:40",
+  },
+
+  mission: [
+    "LIFT Community Christmas is a giving ministry rooted in the Christian faith. Each year, neighbors, churches, and families across Reeltown and Tallassee come together so that children in our community wake up on Christmas morning to gifts chosen just for them.",
+    "We believe every child is made in God's image and deserves to know they are loved. Because God gave us the greatest gift in His Son, Jesus, we give joyfully to others.",
+  ],
+
+  // Leave src empty to show a placeholder until real photos are added.
+  photos: {
+    hero: { src: "", alt: "Children opening Christmas gifts" },
+    mission: { src: "", alt: "Volunteers wrapping gifts" },
+    give: { src: "", alt: "Gifts under the tree" },
+  },
+
+  // Set `placeholder: false` and fill in quote/name when testimonials arrive.
+  testimonials: [
+    { placeholder: true, quote: "", name: "", role: "Parent" },
+    { placeholder: true, quote: "", name: "", role: "Sponsor family" },
+    { placeholder: true, quote: "", name: "", role: "Volunteer" },
+  ],
+};
+
+// Logo files live in /public/brand. Until they're added, a star shows instead.
+export const brand = {
+  // The angel on a transparent or white background (used in the header and as the browser icon).
+  angel: "/brand/angel.png",
+  // The full "Community Christmas" artwork on the blue sky (used for social sharing).
+  full: "/brand/community-christmas.jpg",
+};
+
+export const org = {
+  legalName: process.env.ORG_LEGAL_NAME || site.fullName,
+  ein: process.env.ORG_EIN || "",
+  mailingAddress: process.env.ORG_MAILING_ADDRESS || "",
+};
