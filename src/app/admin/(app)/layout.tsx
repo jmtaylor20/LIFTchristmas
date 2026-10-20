@@ -3,6 +3,8 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAdminSeason } from "@/lib/season";
 import { MobileHeader, MobileTabBar, SidebarNav } from "@/components/AdminNav";
+import { SandboxBanner } from "@/components/SandboxBanner";
+import { isSandbox } from "@/lib/sandbox";
 import { adminLogout, switchSeason } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +38,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-[#f4f1ea] lg:grid lg:grid-cols-[240px_1fr]">
-      <MobileHeader seasonSwitcher={seasonSwitcher} signOut={signOut} />
+      <div className="lg:col-span-2"><SandboxBanner admin /></div>
+      <MobileHeader seasonSwitcher={seasonSwitcher} signOut={signOut} testMode={isSandbox()} />
       <aside className="no-print hidden bg-dusk-900 text-white/85 lg:block lg:min-h-screen">
         <div className="flex items-center gap-2 px-5 py-5">
           <span className="text-2xl text-gold-300">✦</span>
@@ -46,7 +49,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </div>
         {seasonSwitcher && <div className="px-5 pb-4">{seasonSwitcher}</div>}
-        <SidebarNav />
+        <SidebarNav testMode={isSandbox()} />
         <div className="space-y-2 px-5 pt-6 text-xs">
           <Link href="/" className="block text-white/60">View public site ↗</Link>
           {signOut}

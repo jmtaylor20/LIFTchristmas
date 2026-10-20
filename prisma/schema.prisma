@@ -437,3 +437,14 @@ model EmailLog {
 
   @@unique([kind, refId])
 }
+
+// Test mode only: emails are kept here (shown in Admin → Test Outbox) instead of being sent.
+model SandboxEmail {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  html      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

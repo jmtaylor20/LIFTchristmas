@@ -1,4 +1,6 @@
 import { site } from "@/content/site";
+import { db } from "./db";
+import { isSandbox } from "./sandbox";
 
 export function siteUrl(path = "") {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -13,6 +15,11 @@ type Email = { to: string; subject: string; html: string; text?: string; replyTo
  * loses a family's application or a sponsor's commitment.
  */
 export async function sendEmail(msg: Email): Promise<boolean> {
+  if (isSandbox()) {
+    // Test mode: keep the email for the Test Outbox instead of sending it.
+    await db.sandboxEmail.create({ data: { to: msg.to, subject: msg.subject, html: msg.html } });
+    return true;
+  }
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.log(`[email:not-configured] to=${msg.to} subject="${msg.subject}"\n${msg.text ?? stripHtml(msg.html)}`);
