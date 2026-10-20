@@ -1,0 +1,371 @@
+// LIFT Community Christmas Ministry
+//
+// People records (Household, Child, Sponsor) persist from year to year so the
+// ministry can see history and enforce the approval cap. Everything that
+// happens "this Christmas" hangs off a Season.
+
+generator client {
+  provider      = "prisma-client-js"
+  // rhel-openssl-3.0.x is the runtime for Netlify Functions.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Season {
+  id                   String    @id @default(cuid())
+  year                 Int       @unique
+  isActive             Boolean   @default(false)
+  applicationsOpen     Boolean   @default(true)
+  applicationDeadline  DateTime?
+  wishlistDeadline     DateTime?
+  giftDeadline         DateTime?
+  // Suggested spend per child, shown to sponsors as a guide.
+  perChildBudgetCents  Int       @default(15000)
+  maxItemsPerChild     Int       @default(8)
+  // Households may be approved at most this many seasons in total.
+  approvalCapYears     Int       @default(5)
+  amazonWishlistUrl    String?
+  // Venmo username (without the @) that donations go to.
+  venmoHandle          String?
+  dropOffInstructions  String?
+  // Where sponsors ship online orders (e.g. from Amazon).
+  shippingAddress      String?
+  donationInstructions String?
+  // Shown to approved families: when and where to pick up gifts.
+  pickupInstructions   String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  applications Application[]
+  angels       Angel[]
+  sponsorships Sponsorship[]
+  donations    Donation[]
+  inKindGifts  InKindGift[]
+}
+
+model Household {
+  id              String   @id @default(cuid())
+  parentFirstName String
+  parentLastName  String
+  email           String?
+  emailNormalized String?
+  phone           String
+  phoneDigits     String
+  address         String?
+  city            String?
+  zip             String?
+  adminNotes      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications Application[]
+  children     Child[]
+
+  @@index([emailNormalized])
+  @@index([phoneDigits])
+}
+
+model Child {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  birthDate   DateTime
+  gender      Gender
+  createdAt   DateTime  @default(now())
+
+  angels Angel[]
+
+  @@index([householdId])
+}
+
+enum Gender {
+  GIRL
+  BOY
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  WAITLIST
+  DENIED
+}
+
+model Application {
+  id                  String            @id @default(cuid())
+  seasonId            String
+  season              Season            @relation(fields: [seasonId], references: [id])
+  householdId         String
+  household           Household         @relation(fields: [householdId], references: [id])
+  status              ApplicationStatus @default(PENDING)
+  // Secret link the parent uses to check status and build wish lists.
+  accessToken         String            @unique
+  community           String
+  address             String
+  city                String
+  zip                 String
+  adultsInHome        Int
+  monthlyIncomeCents  Int?
+  assistancePrograms  String?
+  circumstances       String
+  churchHome          String?
+  referredBy          String?
+  agreedToTerms       Boolean           @default(false)
+  // "en" or "es"; family emails and pages use this language.
+  language            String            @default("en")
+  adminNotes          String?
+  decidedAt           DateTime?
+  listSubmittedAt     DateTime?
+  listReminderSentAt  DateTime?
+  pickedUpAt          DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  angels Angel[]
+
+  thankYouNotes ThankYouNote[]
+
+  @@unique([seasonId, householdId])
+  @@index([status])
+}
+
+model Angel {
+  id            String      @id @default(cuid())
+  seasonId      String
+  season        Season      @relation(fields: [seasonId], references: [id])
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  childId       String
+  child         Child       @relation(fields: [childId], references: [id])
+  // Public, anonymous tag number, e.g. "Angel #12". Assigned on approval.
+  number        Int?
+  ageAtSeason   Int
+  gender        Gender
+  shirtSize     String?
+  pantsSize     String?
+  shoeSize      String?
+  interests     String?
+  hidden        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  items         WishItem[]
+  sponsorships  Sponsorship[]
+  thankYouNotes ThankYouNote[]
+
+  @@unique([seasonId, number])
+  @@index([applicationId])
+}
+
+enum ItemStatus {
+  NEEDED
+  CLAIMED
+  RECEIVED
+  // Ministry will buy (or bought) it with donated funds.
+  MINISTRY
+}
+
+model WishItem {
+  id                String       @id @default(cuid())
+  angelId           String
+  angel             Angel        @relation(fields: [angelId], references: [id], onDelete: Cascade)
+  name              String
+  details           String?
+  url               String?
+  estPriceCents     Int?
+  sortOrder         Int          @default(0)
+  status            ItemStatus   @default(NEEDED)
+  sponsorshipId     String?
+  sponsorship       Sponsorship? @relation(fields: [sponsorshipId], references: [id], onDelete: SetNull)
+  ministryCostCents Int?
+  receivedAt        DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([angelId])
+  @@index([sponsorshipId])
+}
+
+model Sponsor {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String
+  emailNormalized String   @unique
+  phone           String?
+  organization    String?
+  adminNotes      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sponsorships Sponsorship[]
+  donations    Donation[]
+  inKindGifts  InKindGift[]
+  loginTokens  LoginToken[]
+  statements   GivingStatement[]
+}
+
+// One-time "magic link" sign-in for giver profiles. Only a hash is stored.
+model LoginToken {
+  id        String    @id @default(cuid())
+  sponsorId String
+  sponsor   Sponsor   @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// Year-end giving statement (tax receipt) sent to a giver for a calendar year.
+model GivingStatement {
+  id          String   @id @default(cuid())
+  sponsorId   String
+  sponsor     Sponsor  @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  taxYear     Int
+  totalCents  Int
+  emailedTo   String
+  sentAt      DateTime @default(now())
+  sendCount   Int      @default(1)
+
+  @@unique([sponsorId, taxYear])
+}
+
+enum SponsorshipType {
+  FULL
+  PARTIAL
+}
+
+enum GiftDelivery {
+  DROP_OFF
+  // Ordered online and shipped to the ministry, labeled with the angel number.
+  SHIP
+}
+
+enum SponsorshipStatus {
+  COMMITTED
+  DELIVERED
+  CANCELLED
+}
+
+model Sponsorship {
+  id        String            @id @default(cuid())
+  seasonId  String
+  season    Season            @relation(fields: [seasonId], references: [id])
+  sponsorId String
+  sponsor   Sponsor           @relation(fields: [sponsorId], references: [id])
+  angelId   String
+  angel     Angel             @relation(fields: [angelId], references: [id], onDelete: Cascade)
+  type      SponsorshipType
+  status         SponsorshipStatus @default(COMMITTED)
+  delivery       GiftDelivery      @default(DROP_OFF)
+  // Order or tracking numbers the sponsor shares for shipped gifts.
+  trackingInfo   String?
+  note           String?
+  reminderSentAt DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  items WishItem[]
+
+  @@index([seasonId])
+  @@index([sponsorId])
+}
+
+enum DonationMethod {
+  VENMO
+  CASH
+  CHECK
+  OTHER
+}
+
+enum DonationStatus {
+  // Reported by the giver, not yet confirmed by the ministry.
+  PENDING
+  // Confirmed received; counts toward totals and giving records.
+  PAID
+  NOT_RECEIVED
+}
+
+model Donation {
+  id              String         @id @default(cuid())
+  seasonId        String
+  season          Season         @relation(fields: [seasonId], references: [id])
+  sponsorId       String?
+  sponsor         Sponsor?       @relation(fields: [sponsorId], references: [id])
+  donorName       String
+  donorEmail      String?
+  amountCents     Int
+  method          DonationMethod
+  status          DonationStatus @default(PENDING)
+  // When the ministry confirmed the money arrived; giving records use this date.
+  receivedAt      DateTime?
+  receiptSentAt   DateTime?
+  note            String?
+  createdAt       DateTime       @default(now())
+
+  @@index([seasonId, status])
+}
+
+enum InKindSource {
+  AMAZON_WISHLIST
+  DROP_OFF
+}
+
+// Gifts that aren't tied to a specific angel, e.g. items bought from the
+// ministry's Amazon wish list.
+model InKindGift {
+  id            String       @id @default(cuid())
+  seasonId      String
+  season        Season       @relation(fields: [seasonId], references: [id])
+  sponsorId     String?
+  sponsor       Sponsor?     @relation(fields: [sponsorId], references: [id])
+  donorName     String
+  donorEmail    String?
+  source        InKindSource
+  description   String
+  estValueCents Int?
+  receivedAt    DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([seasonId])
+}
+
+enum NoteStatus {
+  // Waiting for the ministry to review.
+  PENDING
+  SENT
+  // Ministry decided not to pass it on.
+  HELD
+}
+
+// A thank-you from a family to the people who sponsored their children.
+// The ministry reviews each note before it reaches sponsors, so neither side
+// sees the other's personal details.
+model ThankYouNote {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  // Empty means "from the whole family" (goes to every sponsor of their children).
+  angelId       String?
+  angel         Angel?      @relation(fields: [angelId], references: [id], onDelete: Cascade)
+  message       String
+  // Optional photo of a handmade card, resized in the browser before upload.
+  imageData     Bytes?
+  imageType     String?
+  // Random key that lets emailed image links work without signing in.
+  imageKey      String?     @unique
+  status        NoteStatus  @default(PENDING)
+  sentAt        DateTime?
+  sentCount     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([applicationId])
+  @@index([status])
+}

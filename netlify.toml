@@ -1,0 +1,15 @@
+[build]
+  # Apply any new database migrations (via DIRECT_URL), then build.
+  command = "npx prisma migrate deploy && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  # Lets the Prisma engine ship with the server functions.
+  included_files = ["node_modules/.prisma/client/*.node", "node_modules/.prisma/client/schema.prisma"]
+
+# Netlify's Next.js runtime (server pages, API routes, images).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
