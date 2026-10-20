@@ -19,8 +19,11 @@ async function main() {
       wishlistDeadline: new Date(`${year}-11-25T23:59:59-06:00`),
       giftDeadline: new Date(`${year}-12-12T23:59:59-06:00`),
       amazonWishlistUrl: "https://www.amazon.com/hz/wishlist/ls/EXAMPLE",
+      venmoHandle: "LIFT-Ministries-Demo",
       dropOffInstructions: "Drop off unwrapped gifts at the church fellowship hall, Sundays after service or weekdays 9–noon.",
-      donationInstructions: "Make checks payable to LIFT Community Christmas and mail to P.O. Box 000, Tallassee, AL 36078.",
+      shippingAddress: "P.O. Box 000\nTallassee, AL 36078",
+      donationInstructions: "Make checks payable to LIFT Ministries and mail to P.O. Box 000, Tallassee, AL 36078, or bring cash or a check to the fellowship hall.",
+      pickupInstructions: "Gift pickup is Saturday, December 19, 9am–noon at the fellowship hall. Please bring a photo ID.",
     },
   });
 

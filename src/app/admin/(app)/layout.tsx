@@ -13,9 +13,11 @@ const nav = [
   { href: "/admin/angels", label: "Angels & Lists" },
   { href: "/admin/sponsors", label: "Givers" },
   { href: "/admin/donations", label: "Money & Gifts" },
+  { href: "/admin/thank-yous", label: "Thank-You Notes" },
   { href: "/admin/families", label: "Family History" },
-  { href: "/admin/statements", label: "Tax Statements" },
+  { href: "/admin/statements", label: "Giving Statements" },
   { href: "/admin/tags", label: "Gift Tags" },
+  { href: "/admin/pickup", label: "Pickup Day" },
   { href: "/admin/seasons", label: "Seasons & Deadlines" },
 ];
 

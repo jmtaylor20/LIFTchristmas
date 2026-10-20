@@ -144,6 +144,11 @@ export default async function Home() {
               {season?.applicationDeadline && (
                 <p className="mt-3 text-sm text-white/75">Applications close {formatDate(season.applicationDeadline)}.</p>
               )}
+              {appsOpen && (
+                <p className="mt-2 text-sm" lang="es">
+                  <Link href="/apply?lang=es" className="font-semibold text-gold-300">¿Necesita ayuda? Solicite en español →</Link>
+                </p>
+              )}
             </div>
             <div className="md:text-right">
               {appsOpen ? (

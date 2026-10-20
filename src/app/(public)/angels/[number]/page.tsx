@@ -123,6 +123,22 @@ export default async function AngelPage({
                   <input name="phone" type="tel" placeholder="Phone" defaultValue={giver?.phone ?? ""} className="input" />
                   <input name="organization" placeholder="Family, church, class, or business (optional)" defaultValue={giver?.organization ?? ""} className="input sm:col-span-2" />
                 </div>
+                <fieldset className="space-y-2 border-t border-black/5 pt-5">
+                  <legend className="text-lg font-bold">How will you get the gifts to us?</legend>
+                  <label className="flex items-start gap-2 text-sm">
+                    <input type="radio" name="delivery" value="DROP_OFF" defaultChecked className="mt-1 accent-dusk-700" />
+                    <span>I&rsquo;ll shop and drop the gifts off</span>
+                  </label>
+                  {season.shippingAddress && (
+                    <label className="flex items-start gap-2 text-sm">
+                      <input type="radio" name="delivery" value="SHIP" className="mt-1 accent-dusk-700" />
+                      <span>
+                        I&rsquo;ll order online (Amazon, Walmart, Target…) and ship to the ministry.
+                        <span className="block text-xs text-black/55">We&rsquo;ll give you a ship-to label with Angel #{angel.number} on it.</span>
+                      </span>
+                    </label>
+                  )}
+                </fieldset>
                 <button className="btn-primary w-full py-3 text-base">Sponsor these gifts</button>
                 {season.giftDeadline && (
                   <p className="text-center text-xs text-black/55">Unwrapped gifts are due by {formatDate(season.giftDeadline)}.</p>

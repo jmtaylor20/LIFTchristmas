@@ -20,7 +20,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
   });
   if (!g) notFound();
   const years = [...new Set(g.sponsorships.filter((s) => s.status !== "CANCELLED").map((s) => s.season.year))].sort();
-  const taxYears = [...new Set([...g.donations.map((d) => d.createdAt.getFullYear()), ...g.sponsorships.map((s) => s.season.year)])].sort((a, b) => b - a);
+  const taxYears = [...new Set([...g.donations.filter((d) => d.receivedAt).map((d) => d.receivedAt!.getFullYear()), ...g.sponsorships.map((s) => s.season.year)])].sort((a, b) => b - a);
 
   return (
     <>
@@ -37,8 +37,9 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
                 <div key={s.id} className={`rounded-xl border border-black/5 p-3 ${s.status === "CANCELLED" ? "opacity-50" : ""}`}>
                   <div className="flex justify-between text-sm">
                     <Link href={`/admin/angels/${s.angelId}`} className="font-semibold">Angel #{s.angel.number} ({s.season.year})</Link>
-                    <span className="text-black/50">{s.type === "FULL" ? "Whole list" : "Some items"} · {s.status.toLowerCase()}</span>
+                    <span className="text-black/50">{s.type === "FULL" ? "Whole list" : "Some items"} · {s.delivery === "SHIP" ? "shipping" : "drop-off"} · {s.status.toLowerCase()}</span>
                   </div>
+                  {s.trackingInfo && <p className="text-xs text-black/60">Tracking: {s.trackingInfo}</p>}
                   <ul className="mt-2 space-y-1 text-sm">
                     {s.items.map((i) => (
                       <li key={i.id} className="flex justify-between gap-2">{i.name}<ItemBadge status={i.status} /></li>
@@ -60,7 +61,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
               <tbody>
                 {g.donations.map((d) => (
                   <tr key={d.id}>
-                    <td>{formatDateShort(d.createdAt)}</td>
+                    <td>{formatDateShort(d.receivedAt ?? d.createdAt)}</td>
                     <td>{d.method.toLowerCase()} {d.status !== "PAID" && <span className="text-xs text-copper-700">({d.status.toLowerCase()})</span>}</td>
                     <td className="text-right">{money(d.amountCents, { cents: true })}</td>
                   </tr>
@@ -84,7 +85,7 @@ export default async function SponsorDetail({ params }: { params: Promise<{ id: 
             <p className="mt-2 text-xs text-black/50">Giver since {formatDateShort(g.createdAt)}</p>
           </div>
           <div className="card">
-            <h2 className="text-lg font-bold">Tax statements</h2>
+            <h2 className="text-lg font-bold">Giving statements</h2>
             <ul className="mt-2 space-y-2 text-sm">
               {taxYears.map((y) => {
                 const sent = g.statements.find((s) => s.taxYear === y);

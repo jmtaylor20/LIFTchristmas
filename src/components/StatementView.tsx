@@ -1,6 +1,6 @@
 import type { Statement } from "@/lib/givers";
 import { formatDate, money } from "@/lib/format";
-import { org, site } from "@/content/site";
+import { org, receiptDisclaimer, site } from "@/content/site";
 import { Star } from "./SiteChrome";
 
 export function StatementView({ s }: { s: Statement }) {
@@ -41,7 +41,7 @@ export function StatementView({ s }: { s: Statement }) {
           <tbody>
             {s.donations.map((d) => (
               <tr key={d.id}>
-                <td>{formatDate(d.createdAt, { month: "short" })}</td>
+                <td>{formatDate(d.receivedAt, { month: "short" })}</td>
                 <td className="capitalize">{d.method.toLowerCase()}</td>
                 <td className="text-right">{money(d.amountCents, { cents: true })}</td>
               </tr>
@@ -75,7 +75,7 @@ export function StatementView({ s }: { s: Statement }) {
       )}
 
       <footer className="mt-10 border-t border-black/10 pt-4 text-xs text-black/60">
-        <p>No goods or services were provided in exchange for these contributions. Please keep this statement for your tax records.</p>
+        <p>{receiptDisclaimer(true)}</p>
         <p className="mt-3 italic">
           &ldquo;{site.giveVerse.text}&rdquo; — {site.giveVerse.ref}
         </p>

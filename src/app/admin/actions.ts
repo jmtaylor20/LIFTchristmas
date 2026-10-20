@@ -13,6 +13,9 @@ import { optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
 import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
 import { site } from "@/content/site";
+import { deliverNote } from "@/lib/thankyou";
+import { sendListReminders, sendSponsorReminders } from "@/lib/reminders";
+import { dict, longDate, toLang } from "@/content/i18n";
 
 // ------------------------------------------------------------------ session
 
@@ -46,8 +49,11 @@ function seasonFields(fd: FormData) {
     maxItemsPerChild: Math.max(1, Math.min(25, Number(str(fd, "maxItemsPerChild")) || 8)),
     approvalCapYears: Math.max(1, Math.min(50, Number(str(fd, "approvalCapYears")) || 5)),
     amazonWishlistUrl: optStr(fd, "amazonWishlistUrl"),
+    venmoHandle: optStr(fd, "venmoHandle")?.replace(/^@/, "") ?? null,
     dropOffInstructions: optStr(fd, "dropOffInstructions"),
+    shippingAddress: optStr(fd, "shippingAddress"),
     donationInstructions: optStr(fd, "donationInstructions"),
+    pickupInstructions: optStr(fd, "pickupInstructions"),
   };
 }
 
@@ -67,8 +73,11 @@ export async function createSeason(fd: FormData) {
       maxItemsPerChild: prev?.maxItemsPerChild,
       approvalCapYears: prev?.approvalCapYears,
       amazonWishlistUrl: prev?.amazonWishlistUrl,
+      venmoHandle: prev?.venmoHandle,
       dropOffInstructions: prev?.dropOffInstructions,
+      shippingAddress: prev?.shippingAddress,
       donationInstructions: prev?.donationInstructions,
+      pickupInstructions: prev?.pickupInstructions,
     },
   });
   redirect(`/admin/seasons?edit=${s.id}`);
@@ -126,25 +135,23 @@ export async function decideApplication(id: string, fd: FormData) {
   });
 
   if (notify && app.household.email && status !== "PENDING") {
+    const lang = toLang(app.language);
+    const t = dict[lang].email;
+    const first = esc(app.household.parentFirstName);
     const link = siteUrl(`/family/${app.accessToken}`);
     const extra = message ? `<p>${esc(message).replace(/\n/g, "<br/>")}</p>` : "";
-    const bodies: Record<string, string> = {
-      APPROVED: `<p>Hi ${esc(app.household.parentFirstName)},</p>
-<p><strong>Good news: your family has been approved for Christmas sponsorship!</strong></p>
-<p>Next, please make a wish list for each of your children using your family's page below${app.season.wishlistDeadline ? ` by <strong>${app.season.wishlistDeadline.toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "America/Chicago" })}</strong>` : ""}.</p>
-${extra}${button(link, "Make our wish lists")}
-<p>Merry Christmas,<br/>${esc(site.name)}</p>`,
-      WAITLIST: `<p>Hi ${esc(app.household.parentFirstName)},</p>
-<p>Thank you for applying. Your family has been placed on our waiting list. We'll contact you if a spot opens.</p>${extra}
-${button(link, "Check my status")}`,
-      DENIED: `<p>Hi ${esc(app.household.parentFirstName)},</p>
-<p>Thank you for applying. We're sorry, but we are unable to sponsor your family this year.</p>${extra}
-<p>We'll be praying for you and your family this Christmas season.</p>`,
-    };
+    const due = app.season.wishlistDeadline ? longDate(app.season.wishlistDeadline, lang) : null;
+    const pickup = app.season.pickupInstructions ? esc(app.season.pickupInstructions).replace(/\n/g, "<br/>") : "";
+    const html =
+      status === "APPROVED"
+        ? t.approved(first, due, extra, button(link, t.approvedButton), pickup, esc(site.name))
+        : status === "WAITLIST"
+          ? t.waitlist(first, extra, button(link, t.statusButton))
+          : t.denied(first, extra);
     await sendEmail({
       to: app.household.email,
-      subject: status === "APPROVED" ? `You're approved! Next step: wish lists` : `Your Christmas sponsorship application`,
-      html: layout(bodies[status]),
+      subject: status === "APPROVED" ? t.approvedSubject : t.decisionSubject,
+      html: layout(html),
     });
   }
   revalidatePath("/admin", "layout");
@@ -276,10 +283,11 @@ export async function recordDonation(fd: FormData) {
   const firstName = str(fd, "firstName");
   const lastName = str(fd, "lastName");
   const email = str(fd, "email");
-  const method = str(fd, "method") as "CASH" | "CHECK" | "OTHER";
-  if (!season || !amountCents || !firstName || !["CASH", "CHECK", "OTHER"].includes(method)) redirect("/admin/donations?error=1");
+  const method = str(fd, "method") as "VENMO" | "CASH" | "CHECK" | "OTHER";
+  if (!season || !amountCents || !firstName || !["VENMO", "CASH", "CHECK", "OTHER"].includes(method)) redirect("/admin/donations?error=1");
   const giver = email ? await upsertGiver({ firstName, lastName, email }) : null;
   const dateStr = str(fd, "date");
+  const receivedAt = dateStr ? new Date(`${dateStr}T12:00:00-06:00`) : new Date();
   const d = await db.donation.create({
     data: {
       seasonId: season.id,
@@ -290,12 +298,27 @@ export async function recordDonation(fd: FormData) {
       method,
       status: "PAID",
       note: optStr(fd, "note"),
-      ...(dateStr ? { createdAt: new Date(`${dateStr}T12:00:00-06:00`) } : {}),
+      createdAt: receivedAt,
+      receivedAt,
     },
   });
   if (fd.get("sendReceipt") === "on") await sendDonationReceipt(d.id);
   revalidatePath("/admin", "layout");
   redirect("/admin/donations?saved=1");
+}
+
+/** A reported Venmo gift showed up: count it and email the receipt. */
+export async function confirmDonation(id: string) {
+  await requireAdmin();
+  await db.donation.updateMany({ where: { id, status: { not: "PAID" } }, data: { status: "PAID", receivedAt: new Date() } });
+  await sendDonationReceipt(id);
+  revalidatePath("/admin", "layout");
+}
+
+export async function markDonationNotReceived(id: string) {
+  await requireAdmin();
+  await db.donation.update({ where: { id }, data: { status: "NOT_RECEIVED", receivedAt: null } });
+  revalidatePath("/admin", "layout");
 }
 
 export async function deleteDonation(id: string) {
@@ -349,7 +372,7 @@ export async function deleteInKind(id: string) {
   revalidatePath("/admin/donations");
 }
 
-// ---------------------------------------------------------- tax statements
+// ------------------------------------------------------ giving statements
 
 export async function adminSendStatement(sponsorId: string, year: number) {
   await requireAdmin();
@@ -360,11 +383,63 @@ export async function adminSendStatement(sponsorId: string, year: number) {
 export async function adminSendAllStatements(year: number, fd: FormData) {
   await requireAdmin();
   const r = await sendAllStatements(year, { onlyIfUnsent: fd.get("onlyUnsent") === "on" });
-  redirect(`/admin/statements?year=${year}&sent=${r.sent}&skipped=${r.skipped}&failed=${r.failed}`);
+  redirect(`/admin/statements?year=${year}&sent=${r.sent}&skipped=${r.skipped}&failed=${r.failed}&remaining=${r.remaining}`);
 }
 
 export async function saveSponsorNotes(id: string, fd: FormData) {
   await requireAdmin();
   await db.sponsor.update({ where: { id }, data: { adminNotes: optStr(fd, "adminNotes") } });
   revalidatePath(`/admin/sponsors/${id}`);
+}
+
+// ----------------------------------------------------------- thank-you notes
+
+export async function sendThankYou(noteId: string, fd: FormData) {
+  await requireAdmin();
+  const message = str(fd, "message").slice(0, 2000);
+  if (message) await db.thankYouNote.update({ where: { id: noteId }, data: { message } });
+  const sent = await deliverNote(noteId);
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/thank-yous?sent=${sent}`);
+}
+
+export async function holdThankYou(noteId: string) {
+  await requireAdmin();
+  await db.thankYouNote.update({ where: { id: noteId }, data: { status: "HELD" } });
+  revalidatePath("/admin", "layout");
+}
+
+export async function reopenThankYou(noteId: string) {
+  await requireAdmin();
+  await db.thankYouNote.update({ where: { id: noteId }, data: { status: "PENDING" } });
+  revalidatePath("/admin", "layout");
+}
+
+// ---------------------------------------------------------------- reminders
+
+export async function remindFamilies() {
+  await requireAdmin();
+  const r = await sendListReminders({ force: true });
+  redirect(`/admin?reminded=families&sent=${r.sent}&remaining=${r.remaining}`);
+}
+
+export async function remindSponsors() {
+  await requireAdmin();
+  const r = await sendSponsorReminders({ force: true });
+  redirect(`/admin?reminded=sponsors&sent=${r.sent}&remaining=${r.remaining}`);
+}
+
+// --------------------------------------------------------------- pickup day
+
+export async function markPickedUp(applicationId: string, fd: FormData) {
+  await requireAdmin();
+  await db.application.update({ where: { id: applicationId }, data: { pickedUpAt: new Date() } });
+  revalidatePath("/admin/pickup");
+  redirect(`/admin/pickup${str(fd, "q") ? `?q=${encodeURIComponent(str(fd, "q"))}` : ""}`);
+}
+
+export async function undoPickedUp(applicationId: string) {
+  await requireAdmin();
+  await db.application.update({ where: { id: applicationId }, data: { pickedUpAt: null } });
+  revalidatePath("/admin/pickup");
 }

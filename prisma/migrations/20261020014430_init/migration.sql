@@ -11,16 +11,22 @@ CREATE TYPE "ItemStatus" AS ENUM ('NEEDED', 'CLAIMED', 'RECEIVED', 'MINISTRY');
 CREATE TYPE "SponsorshipType" AS ENUM ('FULL', 'PARTIAL');
 
 -- CreateEnum
+CREATE TYPE "GiftDelivery" AS ENUM ('DROP_OFF', 'SHIP');
+
+-- CreateEnum
 CREATE TYPE "SponsorshipStatus" AS ENUM ('COMMITTED', 'DELIVERED', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "DonationMethod" AS ENUM ('ONLINE', 'CASH', 'CHECK', 'OTHER');
+CREATE TYPE "DonationMethod" AS ENUM ('VENMO', 'CASH', 'CHECK', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "DonationStatus" AS ENUM ('PENDING', 'PAID', 'FAILED');
+CREATE TYPE "DonationStatus" AS ENUM ('PENDING', 'PAID', 'NOT_RECEIVED');
 
 -- CreateEnum
 CREATE TYPE "InKindSource" AS ENUM ('AMAZON_WISHLIST', 'DROP_OFF');
+
+-- CreateEnum
+CREATE TYPE "NoteStatus" AS ENUM ('PENDING', 'SENT', 'HELD');
 
 -- CreateTable
 CREATE TABLE "Season" (
@@ -35,8 +41,11 @@ CREATE TABLE "Season" (
     "maxItemsPerChild" INTEGER NOT NULL DEFAULT 8,
     "approvalCapYears" INTEGER NOT NULL DEFAULT 5,
     "amazonWishlistUrl" TEXT,
+    "venmoHandle" TEXT,
     "dropOffInstructions" TEXT,
+    "shippingAddress" TEXT,
     "donationInstructions" TEXT,
+    "pickupInstructions" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -93,9 +102,12 @@ CREATE TABLE "Application" (
     "churchHome" TEXT,
     "referredBy" TEXT,
     "agreedToTerms" BOOLEAN NOT NULL DEFAULT false,
+    "language" TEXT NOT NULL DEFAULT 'en',
     "adminNotes" TEXT,
     "decidedAt" TIMESTAMP(3),
     "listSubmittedAt" TIMESTAMP(3),
+    "listReminderSentAt" TIMESTAMP(3),
+    "pickedUpAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -108,7 +120,7 @@ CREATE TABLE "Angel" (
     "seasonId" TEXT NOT NULL,
     "applicationId" TEXT NOT NULL,
     "childId" TEXT NOT NULL,
-    "number" INTEGER NOT NULL,
+    "number" INTEGER,
     "ageAtSeason" INTEGER NOT NULL,
     "gender" "Gender" NOT NULL,
     "shirtSize" TEXT,
@@ -158,6 +170,31 @@ CREATE TABLE "Sponsor" (
 );
 
 -- CreateTable
+CREATE TABLE "LoginToken" (
+    "id" TEXT NOT NULL,
+    "sponsorId" TEXT NOT NULL,
+    "tokenHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "usedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "LoginToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GivingStatement" (
+    "id" TEXT NOT NULL,
+    "sponsorId" TEXT NOT NULL,
+    "taxYear" INTEGER NOT NULL,
+    "totalCents" INTEGER NOT NULL,
+    "emailedTo" TEXT NOT NULL,
+    "sentAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "sendCount" INTEGER NOT NULL DEFAULT 1,
+
+    CONSTRAINT "GivingStatement_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Sponsorship" (
     "id" TEXT NOT NULL,
     "seasonId" TEXT NOT NULL,
@@ -165,7 +202,10 @@ CREATE TABLE "Sponsorship" (
     "angelId" TEXT NOT NULL,
     "type" "SponsorshipType" NOT NULL,
     "status" "SponsorshipStatus" NOT NULL DEFAULT 'COMMITTED',
+    "delivery" "GiftDelivery" NOT NULL DEFAULT 'DROP_OFF',
+    "trackingInfo" TEXT,
     "note" TEXT,
+    "reminderSentAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -182,7 +222,8 @@ CREATE TABLE "Donation" (
     "amountCents" INTEGER NOT NULL,
     "method" "DonationMethod" NOT NULL,
     "status" "DonationStatus" NOT NULL DEFAULT 'PENDING',
-    "stripeSessionId" TEXT,
+    "receivedAt" TIMESTAMP(3),
+    "receiptSentAt" TIMESTAMP(3),
     "note" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -203,6 +244,24 @@ CREATE TABLE "InKindGift" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "InKindGift_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ThankYouNote" (
+    "id" TEXT NOT NULL,
+    "applicationId" TEXT NOT NULL,
+    "angelId" TEXT,
+    "message" TEXT NOT NULL,
+    "imageData" BYTEA,
+    "imageType" TEXT,
+    "imageKey" TEXT,
+    "status" "NoteStatus" NOT NULL DEFAULT 'PENDING',
+    "sentAt" TIMESTAMP(3),
+    "sentCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ThankYouNote_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -242,19 +301,31 @@ CREATE INDEX "WishItem_sponsorshipId_idx" ON "WishItem"("sponsorshipId");
 CREATE UNIQUE INDEX "Sponsor_emailNormalized_key" ON "Sponsor"("emailNormalized");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "LoginToken_tokenHash_key" ON "LoginToken"("tokenHash");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GivingStatement_sponsorId_taxYear_key" ON "GivingStatement"("sponsorId", "taxYear");
+
+-- CreateIndex
 CREATE INDEX "Sponsorship_seasonId_idx" ON "Sponsorship"("seasonId");
 
 -- CreateIndex
 CREATE INDEX "Sponsorship_sponsorId_idx" ON "Sponsorship"("sponsorId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Donation_stripeSessionId_key" ON "Donation"("stripeSessionId");
-
--- CreateIndex
 CREATE INDEX "Donation_seasonId_status_idx" ON "Donation"("seasonId", "status");
 
 -- CreateIndex
 CREATE INDEX "InKindGift_seasonId_idx" ON "InKindGift"("seasonId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ThankYouNote_imageKey_key" ON "ThankYouNote"("imageKey");
+
+-- CreateIndex
+CREATE INDEX "ThankYouNote_applicationId_idx" ON "ThankYouNote"("applicationId");
+
+-- CreateIndex
+CREATE INDEX "ThankYouNote_status_idx" ON "ThankYouNote"("status");
 
 -- AddForeignKey
 ALTER TABLE "Child" ADD CONSTRAINT "Child_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Household"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -281,6 +352,12 @@ ALTER TABLE "WishItem" ADD CONSTRAINT "WishItem_angelId_fkey" FOREIGN KEY ("ange
 ALTER TABLE "WishItem" ADD CONSTRAINT "WishItem_sponsorshipId_fkey" FOREIGN KEY ("sponsorshipId") REFERENCES "Sponsorship"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "LoginToken" ADD CONSTRAINT "LoginToken_sponsorId_fkey" FOREIGN KEY ("sponsorId") REFERENCES "Sponsor"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GivingStatement" ADD CONSTRAINT "GivingStatement_sponsorId_fkey" FOREIGN KEY ("sponsorId") REFERENCES "Sponsor"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Sponsorship" ADD CONSTRAINT "Sponsorship_seasonId_fkey" FOREIGN KEY ("seasonId") REFERENCES "Season"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -300,3 +377,9 @@ ALTER TABLE "InKindGift" ADD CONSTRAINT "InKindGift_seasonId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "InKindGift" ADD CONSTRAINT "InKindGift_sponsorId_fkey" FOREIGN KEY ("sponsorId") REFERENCES "Sponsor"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ThankYouNote" ADD CONSTRAINT "ThankYouNote_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "Application"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ThankYouNote" ADD CONSTRAINT "ThankYouNote_angelId_fkey" FOREIGN KEY ("angelId") REFERENCES "Angel"("id") ON DELETE CASCADE ON UPDATE CASCADE;

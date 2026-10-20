@@ -1,29 +1,29 @@
 import Link from "next/link";
 import { PageHero } from "@/components/ui";
+import { dict, toLang } from "@/content/i18n";
 
 export const metadata = { title: "Application received" };
 
-export default async function Thanks({ searchParams }: { searchParams: Promise<{ t?: string }> }) {
-  const { t } = await searchParams;
+export default async function Thanks({ searchParams }: { searchParams: Promise<{ t?: string; lang?: string }> }) {
+  const { t: token, lang: l } = await searchParams;
+  const lang = toLang(l);
+  const t = dict[lang].thanks;
   return (
-    <>
-      <PageHero eyebrow="Thank you" title="We received your application">
-        <p>Our team will prayerfully review it and email you when a decision has been made.</p>
+    <div lang={lang}>
+      <PageHero eyebrow={t.eyebrow} title={t.title}>
+        <p>{t.intro}</p>
       </PageHero>
       <section className="container-page mt-10 max-w-2xl">
         <div className="card space-y-4">
-          <p>
-            We emailed you a private link to your family&rsquo;s Christmas page. Once you&rsquo;re approved, you&rsquo;ll use that
-            page to make a wish list for each child.
-          </p>
-          {t && (
+          <p>{t.body}</p>
+          {token && (
             <>
-              <p className="text-sm text-black/60">You can also bookmark it now:</p>
-              <Link href={`/family/${t}`} className="btn-green">Go to my family&rsquo;s page</Link>
+              <p className="text-sm text-black/60">{t.bookmark}</p>
+              <Link href={`/family/${token}`} className="btn-green">{t.go}</Link>
             </>
           )}
         </div>
       </section>
-    </>
+    </div>
   );
 }

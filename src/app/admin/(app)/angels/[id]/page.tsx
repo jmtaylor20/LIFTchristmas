@@ -128,6 +128,10 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
                   <div className="text-xs text-black/55">
                     {s.sponsor.email} {s.sponsor.phone && `· ${s.sponsor.phone}`} · {formatDateShort(s.createdAt)} · {s.type === "FULL" ? "whole list" : `${s.items.length} items`} · {s.status.toLowerCase()}
                   </div>
+                  <div className="mt-1 text-xs">
+                    {s.delivery === "SHIP" ? "📦 Shipping to the ministry" : "🚗 Dropping off"}
+                    {s.trackingInfo && <span className="text-black/60"> · Tracking: {s.trackingInfo}</span>}
+                  </div>
                   {s.status === "COMMITTED" && (
                     <div className="mt-2 flex gap-2">
                       <form action={receiveSponsorship.bind(null, s.id)}><button className="btn-green btn-sm">Mark all received</button></form>

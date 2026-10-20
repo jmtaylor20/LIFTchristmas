@@ -8,12 +8,15 @@ import { applicationsAreOpen, getActiveSeason } from "@/lib/season";
 import { randomToken } from "@/lib/tokens";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { site } from "@/content/site";
+import { dict, toLang } from "@/content/i18n";
 
 export type ApplyState = { error?: string };
 
 export async function submitApplication(_prev: ApplyState, fd: FormData): Promise<ApplyState> {
+  const lang = toLang(str(fd, "lang"));
+  const t = dict[lang];
   const season = await getActiveSeason();
-  if (!season || !applicationsAreOpen(season)) return { error: "Applications are closed for this season." };
+  if (!season || !applicationsAreOpen(season)) return { error: t.errors.closed };
 
   const parent = {
     parentFirstName: str(fd, "parentFirstName"),
@@ -25,12 +28,12 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
     zip: str(fd, "zip"),
     community: str(fd, "community"),
   };
-  if (Object.values(parent).some((v) => !v)) return { error: "Please fill in all of the parent/guardian fields." };
-  if (phoneDigits(parent.phone).length !== 10) return { error: "Please enter a 10-digit phone number." };
-  if (!/^\S+@\S+\.\S+$/.test(parent.email)) return { error: "Please enter a valid email address." };
+  if (Object.values(parent).some((v) => !v)) return { error: t.errors.parent };
+  if (phoneDigits(parent.phone).length !== 10) return { error: t.errors.phone };
+  if (!/^\S+@\S+\.\S+$/.test(parent.email)) return { error: t.errors.email };
   const circumstances = str(fd, "circumstances").slice(0, 2000);
-  if (!circumstances) return { error: "Please tell us a little about your family's need." };
-  if (fd.get("agree") !== "on") return { error: "Please check the confirmation box." };
+  if (!circumstances) return { error: t.errors.need };
+  if (fd.get("agree") !== "on") return { error: t.errors.agree };
   const adultsInHome = Math.max(1, Math.min(20, Number(str(fd, "adultsInHome")) || 1));
 
   // Children arrive as parallel arrays, one entry per child block.
@@ -49,13 +52,13 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
       interests: at("childInterests").slice(0, 300) || null,
     };
   });
-  if (children.length === 0) return { error: "Please add at least one child." };
+  if (children.length === 0) return { error: t.errors.noChildren };
   for (const c of children) {
     if (!c.firstName || !c.lastName || Number.isNaN(c.birthDate.getTime()) || (c.gender !== "GIRL" && c.gender !== "BOY")) {
-      return { error: "Please complete the name, birth date, and boy/girl for every child." };
+      return { error: t.errors.child };
     }
     const age = ageOn(c.birthDate, christmas);
-    if (age < 0 || age > 17) return { error: `${c.firstName} must be 17 or younger on Christmas Day.` };
+    if (age < 0 || age > 17) return { error: t.errors.age(c.firstName) };
   }
 
   const accessToken = randomToken();
@@ -112,6 +115,7 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
         churchHome: str(fd, "churchHome") || null,
         referredBy: str(fd, "referredBy") || null,
         agreedToTerms: true,
+        language: lang,
       },
     });
 
@@ -144,27 +148,19 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
   });
 
   if (result.duplicate) {
-    return {
-      error:
-        "We already have an application for your household this season. Use the private link in your email to check on it, or use “Get my link again” at the top of this page.",
-    };
+    return { error: t.errors.duplicate };
   }
 
   const link = siteUrl(`/family/${accessToken}`);
   await sendEmail({
     to: parent.email,
-    subject: `We received your application — ${site.name}`,
-    html: layout(`<p>Hi ${esc(parent.parentFirstName)},</p>
-<p>Thank you for applying for Christmas sponsorship. Our team will review your application and email you when a decision is made.</p>
-<p>Save this private link. You'll use it to check your status and, once approved, to make your children's wish lists:</p>
-${button(link, "My family's Christmas page")}
-<p style="font-size:13px;color:#666">Please don't share this link. It's how we know it's you.</p>
-<p>Praying for you and your family,<br/>${esc(site.name)}</p>`),
+    subject: t.email.receivedSubject(site.name),
+    html: layout(t.email.received(esc(parent.parentFirstName), button(link, t.email.pageButton), esc(site.name))),
   });
   await notifyAdmin(
     "New sponsorship application",
-    `<p>${esc(parent.parentFirstName)} ${esc(parent.parentLastName)} (${esc(parent.community)}) applied with ${children.length} child${children.length === 1 ? "" : "ren"}.</p>${button(siteUrl(`/admin/applications/${result.appId}`), "Review application")}`,
+    `<p>${esc(parent.parentFirstName)} ${esc(parent.parentLastName)} (${esc(parent.community)}) applied with ${children.length} child${children.length === 1 ? "" : "ren"}${lang === "es" ? " (in Spanish)" : ""}.</p>${button(siteUrl(`/admin/applications/${result.appId}`), "Review application")}`,
   );
 
-  redirect(`/apply/thanks?t=${encodeURIComponent(accessToken)}`);
+  redirect(`/apply/thanks?t=${encodeURIComponent(accessToken)}&lang=${lang}`);
 }

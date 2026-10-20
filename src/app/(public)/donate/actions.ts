@@ -2,26 +2,34 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { parseMoneyToCents, str } from "@/lib/format";
+import { money, parseMoneyToCents, str } from "@/lib/format";
 import { getActiveSeason } from "@/lib/season";
-import { stripe, stripeEnabled } from "@/lib/stripe";
 import { upsertGiver } from "@/lib/givers";
-import { siteUrl } from "@/lib/email";
-import { site } from "@/content/site";
+import { button, esc, notifyAdmin, siteUrl } from "@/lib/email";
 
 export type DonateState = { error?: string };
 
-export async function startDonation(_prev: DonateState, fd: FormData): Promise<DonateState> {
+const methodWords = { VENMO: "Venmo", CHECK: "check", CASH: "cash" } as const;
+
+/**
+ * Records a gift the giver says they're sending by Venmo, check, or cash. It
+ * stays "pending" until the ministry confirms it arrived, which sends the receipt.
+ */
+export async function reportGift(_prev: DonateState, fd: FormData): Promise<DonateState> {
   const season = await getActiveSeason();
-  if (!season || !stripeEnabled()) return { error: "Online giving isn't available right now." };
+  if (!season) return { error: "Giving isn't open right now." };
+  const method = str(fd, "method") as keyof typeof methodWords;
+  if (!(method in methodWords) || (method === "VENMO" && !season.venmoHandle)) return { error: "Please choose how you'd like to give." };
   const amountCents = parseMoneyToCents(fd.get("amount"));
-  if (!amountCents || amountCents < 500) return { error: "Please enter an amount of at least $5." };
-  if (amountCents > 5_000_000) return { error: "For gifts over $50,000 please contact us directly." };
+  if (!amountCents || amountCents < 100) return { error: "Please enter an amount of at least $1." };
+  if (amountCents > 5_000_000) return { error: "For large gifts please contact us directly." };
   const firstName = str(fd, "firstName");
   const lastName = str(fd, "lastName");
   const email = str(fd, "email");
   if (!firstName || !lastName || !/^\S+@\S+\.\S+$/.test(email)) return { error: "Please enter your name and email." };
 
+  const venmoName = str(fd, "venmoName").slice(0, 80);
+  const note = str(fd, "note").slice(0, 300);
   const giver = await upsertGiver({ firstName, lastName, email });
   const donation = await db.donation.create({
     data: {
@@ -30,30 +38,14 @@ export async function startDonation(_prev: DonateState, fd: FormData): Promise<D
       donorName: `${firstName} ${lastName}`,
       donorEmail: email,
       amountCents,
-      method: "ONLINE",
+      method,
       status: "PENDING",
-      note: str(fd, "note").slice(0, 300) || null,
+      note: [venmoName && `Venmo: ${venmoName}`, note].filter(Boolean).join(" · ") || null,
     },
   });
-
-  const session = await stripe().checkout.sessions.create({
-    mode: "payment",
-    customer_email: email,
-    submit_type: "donate",
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: amountCents,
-          product_data: { name: `Gift to ${site.fullName}`, description: `Christmas ${season.year}` },
-        },
-      },
-    ],
-    metadata: { donationId: donation.id },
-    success_url: siteUrl(`/donate/thanks?session_id={CHECKOUT_SESSION_ID}`),
-    cancel_url: siteUrl("/donate?canceled=1"),
-  });
-  await db.donation.update({ where: { id: donation.id }, data: { stripeSessionId: session.id } });
-  redirect(session.url!);
+  await notifyAdmin(
+    `${methodWords[method]} gift reported: ${money(amountCents)}`,
+    `<p>${esc(firstName)} ${esc(lastName)} (${esc(email)}) says they're giving <strong>${money(amountCents, { cents: true })}</strong> by ${methodWords[method]}${venmoName ? ` from <strong>${esc(venmoName)}</strong>` : ""}.</p><p>Once it arrives, mark it received to send their receipt.</p>${button(siteUrl("/admin/donations"), "Open Money & Gifts")}`,
+  );
+  redirect(`/donate/thanks?d=${donation.id}`);
 }

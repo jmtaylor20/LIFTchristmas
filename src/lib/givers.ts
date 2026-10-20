@@ -2,7 +2,7 @@ import { db } from "./db";
 import { button, esc, layout, sendEmail, siteUrl } from "./email";
 import { formatDate, money, normalizeEmail } from "./format";
 import { randomToken, sha256 } from "./tokens";
-import { org, site } from "@/content/site";
+import { org, receiptDisclaimer, site } from "@/content/site";
 
 export type GiverInput = {
   firstName: string;
@@ -44,7 +44,7 @@ export async function sendLoginLink(sponsorId: string, email: string, firstName:
     to: email,
     subject: `Your ${site.name} sign-in link`,
     html: layout(`<p>Hi ${esc(firstName)},</p>
-<p>Use the button below to open your giver profile. You'll see your sponsored angels, your gifts, and your giving records for taxes.</p>
+<p>Use the button below to open your giver profile. You'll see your sponsored angels, your gifts, and your giving records.</p>
 ${button(link, "Open my giver profile")}
 <p style="font-size:13px;color:#666">This link works once and expires in 1 hour. If you didn't ask for it, you can ignore this email.</p>`),
   });
@@ -62,7 +62,7 @@ export async function sendDonationReceipt(donationId: string) {
 <p>Thank you for your generous gift! Every dollar helps a child in ${esc(site.communities)} experience the joy of Christmas and the love of Christ.</p>
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <tr><td style="padding:6px 0;color:#666">Amount</td><td style="text-align:right;font-weight:bold">${money(d.amountCents, { cents: true })}</td></tr>
-  <tr><td style="padding:6px 0;color:#666">Date</td><td style="text-align:right">${formatDate(d.createdAt)}</td></tr>
+  <tr><td style="padding:6px 0;color:#666">Date received</td><td style="text-align:right">${formatDate(d.receivedAt ?? d.createdAt)}</td></tr>
   <tr><td style="padding:6px 0;color:#666">Method</td><td style="text-align:right">${methodLabel(d.method)}</td></tr>
 </table>
 ${receiptFooter()}
@@ -73,19 +73,19 @@ ${button(siteUrl("/account"), "View my giver profile")}`),
 }
 
 function methodLabel(m: string) {
-  return { ONLINE: "Online (card)", CASH: "Cash", CHECK: "Check", OTHER: "Other" }[m] ?? m;
+  return { VENMO: "Venmo", CASH: "Cash", CHECK: "Check", OTHER: "Other" }[m] ?? m;
 }
 
-function receiptFooter() {
+function receiptFooter(plural = false) {
   return `<p style="font-size:13px;color:#555;border-top:1px solid #eee;padding-top:12px">
 ${esc(org.legalName)}${org.ein ? ` &middot; EIN ${esc(org.ein)}` : ""}${org.mailingAddress ? `<br/>${esc(org.mailingAddress)}` : ""}<br/>
-No goods or services were provided in exchange for this contribution. Please keep this receipt for your tax records.</p>`;
+${esc(receiptDisclaimer(plural))}</p>`;
 }
 
-// ---------------------------------------------------------- tax statements
+// ------------------------------------------------------ giving statements
 
 function yearRange(year: number) {
-  // Calendar tax year in US Central time.
+  // Calendar year in US Central time.
   return { gte: new Date(`${year}-01-01T00:00:00-06:00`), lt: new Date(`${year + 1}-01-01T00:00:00-06:00`) };
 }
 
@@ -96,8 +96,8 @@ export async function buildStatement(sponsorId: string, year: number) {
 
   const [donations, items, inKind] = await Promise.all([
     db.donation.findMany({
-      where: { sponsorId, status: "PAID", createdAt: range },
-      orderBy: { createdAt: "asc" },
+      where: { sponsorId, status: "PAID", receivedAt: range },
+      orderBy: { receivedAt: "asc" },
     }),
     db.wishItem.findMany({
       where: { status: "RECEIVED", receivedAt: range, sponsorship: { sponsorId } },
@@ -138,7 +138,7 @@ export function statementHtml(s: Statement) {
   const rows = s.donations
     .map(
       (d) =>
-        `<tr><td style="padding:6px 0">${formatDate(d.createdAt, { month: "short" })}</td><td>${methodLabel(d.method)}</td><td style="text-align:right">${money(d.amountCents, { cents: true })}</td></tr>`,
+        `<tr><td style="padding:6px 0">${formatDate(d.receivedAt, { month: "short" })}</td><td>${methodLabel(d.method)}</td><td style="text-align:right">${money(d.amountCents, { cents: true })}</td></tr>`,
     )
     .join("");
   const noncash = s.noncash
@@ -147,7 +147,7 @@ export function statementHtml(s: Statement) {
   const name = [s.sponsor.firstName, s.sponsor.lastName].join(" ");
 
   return `<p>Dear ${esc(s.sponsor.firstName)},</p>
-<p>Thank you for blessing the children of ${esc(site.communities)} this year. Below is your ${s.year} giving statement for your tax records.</p>
+<p>Thank you for blessing the children of ${esc(site.communities)} this year. Below is your ${s.year} giving statement${org.taxExempt ? " for your tax records" : ""}.</p>
 <h3 style="margin:20px 0 4px;color:#42617f">${s.year} Giving Statement</h3>
 <p style="margin:0;color:#555">${esc(name)}${s.sponsor.organization ? ` &middot; ${esc(s.sponsor.organization)}` : ""}<br/>${esc(s.sponsor.email)}</p>
 <h4 style="margin:20px 0 4px">Monetary contributions</h4>
@@ -163,7 +163,7 @@ ${
     ? `<ul style="padding-left:18px;font-size:14px">${noncash}</ul><p style="font-size:13px;color:#555">The ministry does not assign a value to non-cash gifts. Please keep your purchase receipts to determine their value.</p>`
     : `<p style="color:#666">None recorded.</p>`
 }
-${receiptFooter().replace("this contribution", "these contributions")}`;
+${receiptFooter(true)}`;
 }
 
 /**
@@ -197,7 +197,7 @@ export async function giversForYear(year: number) {
   const rows = await db.sponsor.findMany({
     where: {
       OR: [
-        { donations: { some: { status: "PAID", createdAt: range } } },
+        { donations: { some: { status: "PAID", receivedAt: range } } },
         { inKindGifts: { some: { receivedAt: range } } },
         { sponsorships: { some: { items: { some: { status: "RECEIVED", receivedAt: range } } } } },
       ],
@@ -208,11 +208,30 @@ export async function giversForYear(year: number) {
   return rows;
 }
 
-export async function sendAllStatements(year: number, opts: { onlyIfUnsent?: boolean } = {}) {
+/**
+ * Sends statements in small batches so a run fits within the host's request
+ * time limit and the email provider's rate limit. Call again (or let the
+ * scheduled job run again) until `remaining` is 0.
+ */
+export async function sendAllStatements(year: number, opts: { onlyIfUnsent?: boolean; limit?: number } = {}) {
+  const limit = opts.limit ?? BATCH_SIZE;
   const givers = await giversForYear(year);
-  const result = { sent: 0, skipped: 0, empty: 0, failed: 0 };
-  for (const g of givers) {
-    result[await sendStatement(g.id, year, opts)]++;
+  const todo = opts.onlyIfUnsent ? givers.filter((g) => g.statements.length === 0) : givers;
+  const result = { sent: 0, skipped: givers.length - todo.length, empty: 0, failed: 0, remaining: 0 };
+  for (const [i, g] of todo.entries()) {
+    if (i >= limit) {
+      result.remaining = todo.length - i;
+      break;
+    }
+    result[await sendStatement(g.id, year)]++;
+    await pause();
   }
   return result;
+}
+
+export const BATCH_SIZE = 12;
+
+/** Keeps bulk sends under the email provider's ~2 messages/second limit. */
+export function pause(ms = 600) {
+  return new Promise((r) => setTimeout(r, ms));
 }

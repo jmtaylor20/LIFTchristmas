@@ -62,9 +62,14 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
               <Input label="Max wish-list items per child" name="maxItemsPerChild" type="number" defaultValue={editing.maxItemsPerChild} />
               <Input label="Approval cap (years per family)" name="approvalCapYears" type="number" defaultValue={editing.approvalCapYears} />
             </div>
-            <Input label="Amazon wish list link" name="amazonWishlistUrl" defaultValue={editing.amazonWishlistUrl ?? ""} placeholder="https://www.amazon.com/hz/wishlist/ls/…" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input label="Venmo username for donations" name="venmoHandle" defaultValue={editing.venmoHandle ?? ""} placeholder="@LIFT-Ministries" />
+              <Input label="Amazon wish list link" name="amazonWishlistUrl" defaultValue={editing.amazonWishlistUrl ?? ""} placeholder="https://www.amazon.com/hz/wishlist/ls/…" />
+            </div>
             <Area label="Gift drop-off instructions (shown to sponsors)" name="dropOffInstructions" defaultValue={editing.dropOffInstructions} placeholder="Drop off unwrapped gifts at … between …" />
+            <Area label="Shipping address for online orders (leave blank to turn off shipping)" name="shippingAddress" defaultValue={editing.shippingAddress} placeholder={"123 Main St\nTallassee, AL 36078"} />
             <Area label="Check / in-person giving instructions (shown on Donate page)" name="donationInstructions" defaultValue={editing.donationInstructions} placeholder="Make checks payable to … and mail to …" />
+            <Area label="Gift pickup details (shown to approved families, in their approval email)" name="pickupInstructions" defaultValue={editing.pickupInstructions} placeholder="Pickup is Saturday, Dec. 19, 9am–noon at … Please bring your ID." />
             <button className="btn-green">Save settings</button>
           </form>
         )}

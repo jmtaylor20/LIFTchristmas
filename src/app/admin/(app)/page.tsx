@@ -4,14 +4,27 @@ import { getAdminSeason } from "@/lib/season";
 import { seasonStats } from "@/lib/stats";
 import { formatDate, formatDateShort, money } from "@/lib/format";
 import { AdminTitle, Stat } from "@/components/admin";
-import { ProgressBar } from "@/components/ui";
+import { Notice, ProgressBar } from "@/components/ui";
+import { familiesNeedingLists, REMINDER_DAYS_BEFORE, sponsorsWithOpenGifts } from "@/lib/reminders";
+import { remindFamilies, remindSponsors } from "../actions";
 
 export const metadata = { title: "Admin" };
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ reminded?: string; sent?: string; remaining?: string }>;
+}) {
+  const sp = await searchParams;
   const season = await getAdminSeason();
   if (!season) return null;
   const s = await seasonStats(season.id);
+  const [noLists, openSponsors, pendingMoney, pendingNotes] = await Promise.all([
+    familiesNeedingLists(season.id),
+    sponsorsWithOpenGifts(season.id),
+    db.donation.count({ where: { seasonId: season.id, status: "PENDING" } }),
+    db.thankYouNote.count({ where: { status: "PENDING", application: { seasonId: season.id } } }),
+  ]);
   const [recentSponsorships, recentDonations, pendingApps] = await Promise.all([
     db.sponsorship.findMany({
       where: { seasonId: season.id },
@@ -36,10 +49,32 @@ export default async function Dashboard() {
         <Link href="/admin/export/sponsors" className="btn-outline btn-sm">Export givers (CSV)</Link>
       </AdminTitle>
 
+      {sp.reminded && (
+        <div className="mb-4">
+          <Notice tone="success">
+            Sent {sp.sent} reminder{sp.sent === "1" ? "" : "s"} to {sp.reminded}.
+            {Number(sp.remaining) > 0 && <strong> {sp.remaining} more to go. Press the button again to send the next batch.</strong>}
+          </Notice>
+        </div>
+      )}
+      {(pendingMoney > 0 || pendingNotes > 0) && (
+        <div className="mb-4 flex flex-wrap gap-3">
+          {pendingMoney > 0 && (
+            <Link href="/admin/donations" className="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 no-underline ring-1 ring-amber-200">
+              💵 {pendingMoney} gift{pendingMoney === 1 ? "" : "s"} waiting for you to confirm →
+            </Link>
+          )}
+          {pendingNotes > 0 && (
+            <Link href="/admin/thank-yous" className="rounded-xl bg-copper-50 px-4 py-2 text-sm text-copper-800 no-underline ring-1 ring-copper-100">
+              💌 {pendingNotes} thank-you note{pendingNotes === 1 ? "" : "s"} to review →
+            </Link>
+          )}
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Applications to review" value={s.applications.pending} tone={s.applications.pending ? "red" : "default"} sub={`${s.applications.total} total · ${s.applications.approved} approved`} />
         <Stat label="Angels" value={s.angels.total} sub={`${s.angels.noList} still need a wish list`} />
-        <Stat label="Money raised" value={money(s.raisedCents)} tone="green" sub={`${s.donationCount} gifts · balance ${money(s.fundBalanceCents)}`} />
+        <Stat label="Money received" value={money(s.raisedCents)} tone="green" sub={`${s.donationCount} gifts · balance ${money(s.fundBalanceCents)}`} />
         <Stat label="Still needed" value={money(s.neededCents)} tone="red" sub={`${s.items.NEEDED} items without a sponsor`} />
       </div>
 
@@ -76,6 +111,21 @@ export default async function Dashboard() {
             ))}
           </ul>
           <Link href="/admin/seasons" className="mt-4 inline-block text-sm font-semibold text-copper-700">Edit deadlines →</Link>
+
+          <h3 className="mt-6 text-lg font-bold">Reminders</h3>
+          <p className="text-xs text-black/55">
+            Sent automatically {REMINDER_DAYS_BEFORE} days before each deadline. You can also send them now.
+          </p>
+          <div className="mt-3 space-y-2 text-sm">
+            <form action={remindFamilies} className="flex items-center justify-between gap-2">
+              <span>{noLists.length} famil{noLists.length === 1 ? "y hasn’t" : "ies haven’t"} submitted lists</span>
+              <button className="btn-outline btn-sm" disabled={noLists.length === 0}>Remind</button>
+            </form>
+            <form action={remindSponsors} className="flex items-center justify-between gap-2">
+              <span>{openSponsors.length} sponsor{openSponsors.length === 1 ? " has" : "s have"} gifts not yet in</span>
+              <button className="btn-outline btn-sm" disabled={openSponsors.length === 0}>Remind</button>
+            </form>
+          </div>
         </div>
       </div>
 

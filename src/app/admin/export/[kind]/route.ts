@@ -46,9 +46,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ kind: s
       include: { sponsor: true, angel: true, items: true },
       orderBy: { createdAt: "asc" },
     });
-    rows = [["Sponsor", "Email", "Phone", "Organization", "Angel #", "Type", "Status", "Items", "Signed up"]];
+    rows = [["Sponsor", "Email", "Phone", "Organization", "Angel #", "Type", "Status", "Delivery", "Tracking", "Items", "Signed up"]];
     for (const s of ss) {
-      rows.push([`${s.sponsor.firstName} ${s.sponsor.lastName}`, s.sponsor.email, s.sponsor.phone, s.sponsor.organization, s.angel.number, s.type, s.status, s.items.map((i) => i.name).join("; "), s.createdAt.toISOString().slice(0, 10)]);
+      rows.push([`${s.sponsor.firstName} ${s.sponsor.lastName}`, s.sponsor.email, s.sponsor.phone, s.sponsor.organization, s.angel.number, s.type, s.status, s.delivery, s.trackingInfo, s.items.map((i) => i.name).join("; "), s.createdAt.toISOString().slice(0, 10)]);
     }
     const ds = await db.donation.findMany({ where: { seasonId: season.id, status: "PAID" } });
     rows.push([], ["Donor", "Email", "Amount", "Method", "Date", "Note"]);

@@ -5,7 +5,9 @@
 // happens "this Christmas" hangs off a Season.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // rhel-openssl-3.0.x is the runtime for Netlify Functions.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -28,8 +30,14 @@ model Season {
   // Households may be approved at most this many seasons in total.
   approvalCapYears     Int       @default(5)
   amazonWishlistUrl    String?
+  // Venmo username (without the @) that donations go to.
+  venmoHandle          String?
   dropOffInstructions  String?
+  // Where sponsors ship online orders (e.g. from Amazon).
+  shippingAddress      String?
   donationInstructions String?
+  // Shown to approved families: when and where to pick up gifts.
+  pickupInstructions   String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -109,13 +117,19 @@ model Application {
   churchHome          String?
   referredBy          String?
   agreedToTerms       Boolean           @default(false)
+  // "en" or "es"; family emails and pages use this language.
+  language            String            @default("en")
   adminNotes          String?
   decidedAt           DateTime?
   listSubmittedAt     DateTime?
+  listReminderSentAt  DateTime?
+  pickedUpAt          DateTime?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
   angels Angel[]
+
+  thankYouNotes ThankYouNote[]
 
   @@unique([seasonId, householdId])
   @@index([status])
@@ -141,8 +155,9 @@ model Angel {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  items        WishItem[]
-  sponsorships Sponsorship[]
+  items         WishItem[]
+  sponsorships  Sponsorship[]
+  thankYouNotes ThankYouNote[]
 
   @@unique([seasonId, number])
   @@index([applicationId])
@@ -226,6 +241,12 @@ enum SponsorshipType {
   PARTIAL
 }
 
+enum GiftDelivery {
+  DROP_OFF
+  // Ordered online and shipped to the ministry, labeled with the angel number.
+  SHIP
+}
+
 enum SponsorshipStatus {
   COMMITTED
   DELIVERED
@@ -241,8 +262,12 @@ model Sponsorship {
   angelId   String
   angel     Angel             @relation(fields: [angelId], references: [id], onDelete: Cascade)
   type      SponsorshipType
-  status    SponsorshipStatus @default(COMMITTED)
-  note      String?
+  status         SponsorshipStatus @default(COMMITTED)
+  delivery       GiftDelivery      @default(DROP_OFF)
+  // Order or tracking numbers the sponsor shares for shipped gifts.
+  trackingInfo   String?
+  note           String?
+  reminderSentAt DateTime?
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
@@ -253,16 +278,18 @@ model Sponsorship {
 }
 
 enum DonationMethod {
-  ONLINE
+  VENMO
   CASH
   CHECK
   OTHER
 }
 
 enum DonationStatus {
+  // Reported by the giver, not yet confirmed by the ministry.
   PENDING
+  // Confirmed received; counts toward totals and giving records.
   PAID
-  FAILED
+  NOT_RECEIVED
 }
 
 model Donation {
@@ -276,7 +303,8 @@ model Donation {
   amountCents     Int
   method          DonationMethod
   status          DonationStatus @default(PENDING)
-  stripeSessionId String?        @unique
+  // When the ministry confirmed the money arrived; giving records use this date.
+  receivedAt      DateTime?
   receiptSentAt   DateTime?
   note            String?
   createdAt       DateTime       @default(now())
@@ -306,4 +334,38 @@ model InKindGift {
   createdAt     DateTime     @default(now())
 
   @@index([seasonId])
+}
+
+enum NoteStatus {
+  // Waiting for the ministry to review.
+  PENDING
+  SENT
+  // Ministry decided not to pass it on.
+  HELD
+}
+
+// A thank-you from a family to the people who sponsored their children.
+// The ministry reviews each note before it reaches sponsors, so neither side
+// sees the other's personal details.
+model ThankYouNote {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  // Empty means "from the whole family" (goes to every sponsor of their children).
+  angelId       String?
+  angel         Angel?      @relation(fields: [angelId], references: [id], onDelete: Cascade)
+  message       String
+  // Optional photo of a handmade card, resized in the browser before upload.
+  imageData     Bytes?
+  imageType     String?
+  // Random key that lets emailed image links work without signing in.
+  imageKey      String?     @unique
+  status        NoteStatus  @default(PENDING)
+  sentAt        DateTime?
+  sentCount     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([applicationId])
+  @@index([status])
 }

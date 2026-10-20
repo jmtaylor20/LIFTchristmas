@@ -9,6 +9,7 @@ import { upsertGiver } from "@/lib/givers";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { formatDate, money } from "@/lib/format";
 import { site } from "@/content/site";
+import { shipToHtml } from "@/lib/shipping";
 
 export async function sponsorItems(fd: FormData) {
   const season = await getActiveSeason();
@@ -39,9 +40,10 @@ export async function sponsorItems(fd: FormData) {
   });
 
   const isFull = chosen.length === angel.items.length;
+  const delivery = fd.get("delivery") === "SHIP" && season.shippingAddress ? "SHIP" : "DROP_OFF";
   const sponsorship = await db.$transaction(async (tx) => {
     const s = await tx.sponsorship.create({
-      data: { seasonId: season.id, sponsorId: giver.id, angelId: angel.id, type: isFull ? "FULL" : "PARTIAL" },
+      data: { seasonId: season.id, sponsorId: giver.id, angelId: angel.id, type: isFull ? "FULL" : "PARTIAL", delivery },
     });
     // Only claim items still open, so two people can't take the same gift.
     const res = await tx.wishItem.updateMany({
@@ -67,14 +69,19 @@ export async function sponsorItems(fd: FormData) {
 <p>Thank you for sponsoring <strong>Angel #${angel.number}</strong> (${angel.gender === "GIRL" ? "girl" : "boy"}, age ${angel.ageAtSeason})! Here's what you've committed to give:</p>
 <ul>${list}</ul>
 <p>Sizes: shirt ${esc(angel.shirtSize) || "—"}, pants ${esc(angel.pantsSize) || "—"}, shoes ${esc(angel.shoeSize) || "—"}.</p>
-<p><strong>Please bring gifts unwrapped${season.giftDeadline ? ` by ${formatDate(season.giftDeadline)}` : ""}</strong>, labeled &ldquo;Angel #${angel.number}&rdquo;.</p>
-${season.dropOffInstructions ? `<p>${esc(season.dropOffInstructions).replace(/\n/g, "<br/>")}</p>` : ""}
+${
+    delivery === "SHIP"
+      ? `<p><strong>Please have your order arrive${season.giftDeadline ? ` by ${formatDate(season.giftDeadline)}` : " soon"}</strong>, shipped to:</p>${shipToHtml(angel.number, season.shippingAddress!)}
+<p>Once you've ordered, you can add your order or tracking number in your giver profile so we can watch for it.</p>`
+      : `<p><strong>Please bring gifts unwrapped${season.giftDeadline ? ` by ${formatDate(season.giftDeadline)}` : ""}</strong>, labeled &ldquo;Angel #${angel.number}&rdquo;.</p>
+${season.dropOffInstructions ? `<p>${esc(season.dropOffInstructions).replace(/\n/g, "<br/>")}</p>` : ""}`
+  }
 ${button(siteUrl("/account"), "View my giver profile")}
 <p>&ldquo;${esc(site.giveVerse.text)}&rdquo; &mdash; ${esc(site.giveVerse.ref)}</p>`),
   });
   await notifyAdmin(
     `Angel #${angel.number} ${isFull ? "fully" : "partly"} sponsored`,
-    `<p>${esc(firstName)} ${esc(lastName)} (${esc(email)}) committed to ${items.length} gift(s) for Angel #${angel.number}.</p><ul>${list}</ul>`,
+    `<p>${esc(firstName)} ${esc(lastName)} (${esc(email)}) committed to ${items.length} gift(s) for Angel #${angel.number}${delivery === "SHIP" ? " and will ship them" : ""}.</p><ul>${list}</ul>`,
   );
   redirect(`/angels/thanks?s=${sponsorship.id}`);
 }

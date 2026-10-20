@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { formatDate, money } from "@/lib/format";
 import { PageHero } from "@/components/ui";
 import { site } from "@/content/site";
+import { ShipTo } from "@/components/ShipTo";
 
 export const metadata = { title: "Thank you!" };
 export const dynamic = "force-dynamic";
@@ -37,11 +38,26 @@ export default async function SponsorThanks({ searchParams }: { searchParams: Pr
         </div>
         <div className="card bg-dusk-50">
           <h2 className="text-xl font-bold">What&rsquo;s next</h2>
-          <p className="mt-2">
-            Please bring gifts <strong>unwrapped</strong> and labeled &ldquo;Angel #{sp.angel.number}&rdquo;
-            {sp.season.giftDeadline && <> by <strong>{formatDate(sp.season.giftDeadline)}</strong></>}.
-          </p>
-          {sp.season.dropOffInstructions && <p className="mt-2 whitespace-pre-line">{sp.season.dropOffInstructions}</p>}
+          {sp.delivery === "SHIP" && sp.season.shippingAddress ? (
+            <>
+              <p className="mt-2">
+                Order online and ship to the address below
+                {sp.season.giftDeadline && <> so it arrives by <strong>{formatDate(sp.season.giftDeadline)}</strong></>}:
+              </p>
+              <div className="mt-3"><ShipTo angelNumber={sp.angel.number} address={sp.season.shippingAddress} /></div>
+              <p className="mt-3 text-sm">
+                After you order, add your order or tracking number in <a href="/account">My Giving</a> so we can watch for it.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-2">
+                Please bring gifts <strong>unwrapped</strong> and labeled &ldquo;Angel #{sp.angel.number}&rdquo;
+                {sp.season.giftDeadline && <> by <strong>{formatDate(sp.season.giftDeadline)}</strong></>}.
+              </p>
+              {sp.season.dropOffInstructions && <p className="mt-2 whitespace-pre-line">{sp.season.dropOffInstructions}</p>}
+            </>
+          )}
           <p className="mt-2 text-sm text-black/60">We sent these details to {sp.sponsor.email}.</p>
         </div>
         <div className="flex flex-wrap gap-3">

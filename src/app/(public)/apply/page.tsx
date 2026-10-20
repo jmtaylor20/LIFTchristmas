@@ -1,51 +1,54 @@
 import Link from "next/link";
 import { PageHero, Notice } from "@/components/ui";
+import { LangToggle } from "@/components/LangToggle";
 import { applicationsAreOpen, getActiveSeason } from "@/lib/season";
-import { formatDate } from "@/lib/format";
+import { dict, longDate, toLang } from "@/content/i18n";
 import { site } from "@/content/site";
 import { ApplicationForm } from "./ApplicationForm";
 
 export const metadata = { title: "Apply for Christmas Sponsorship" };
 export const dynamic = "force-dynamic";
 
-export default async function Apply() {
+export default async function Apply({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
+  const lang = toLang((await searchParams).lang);
+  const t = dict[lang];
   const season = await getActiveSeason();
   const open = applicationsAreOpen(season);
 
   return (
-    <>
-      <PageHero eyebrow={`Christmas ${season?.year ?? ""}`} title="Apply for Christmas sponsorship">
-        <p>
-          For families living in {site.communities} who need help providing Christmas for their children this year.
-          Please fill out one application per household.
-        </p>
+    <div lang={lang}>
+      <PageHero eyebrow={t.christmas(season?.year ?? "")} title={t.apply.title}>
+        <p>{t.apply.intro(site.communities)}</p>
         {season?.applicationDeadline && open && (
           <p className="mt-2 text-base">
-            Applications close <strong>{formatDate(season.applicationDeadline)}</strong>.
+            {t.apply.closes} <strong>{longDate(season.applicationDeadline, lang)}</strong>.
           </p>
         )}
+        <div className="mt-4">
+          <LangToggle lang={lang} path="/apply" />
+        </div>
       </PageHero>
       <section className="container-page mt-10 max-w-3xl">
         {open ? (
           <>
             <Notice>
-              Already applied? Use the private link we emailed you, or{" "}
-              <Link href="/family" className="font-semibold">get your link again</Link>.
+              {t.apply.alreadyApplied}{" "}
+              <Link href={`/family?lang=${lang}`} className="font-semibold">{t.apply.getLinkAgain}</Link>.
             </Notice>
             <div className="mt-6">
-              <ApplicationForm />
+              <ApplicationForm lang={lang} />
             </div>
           </>
         ) : (
           <div className="card text-center">
-            <h2 className="text-2xl font-bold">Applications are closed</h2>
+            <h2 className="text-2xl font-bold">{t.apply.closedTitle}</h2>
             <p className="mt-2 text-black/70">
-              {season ? "The application period for this season has ended." : "Applications haven't opened yet."} If you
-              have already applied, you can <Link href="/family" className="font-semibold text-copper-700">check your status here</Link>.
+              {season ? t.apply.closedEnded : t.apply.closedNoSeason} {t.apply.closedCheck}{" "}
+              <Link href={`/family?lang=${lang}`} className="font-semibold text-copper-700">{t.apply.checkStatus}</Link>.
             </p>
           </div>
         )}
       </section>
-    </>
+    </div>
   );
 }

@@ -7,6 +7,8 @@ import { normalizeEmail, parseMoneyToCents, phoneDigits, str } from "@/lib/forma
 import { getActiveSeason, wishlistsAreOpen } from "@/lib/season";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { site } from "@/content/site";
+import { randomToken } from "@/lib/tokens";
+import { dict, toLang } from "@/content/i18n";
 
 export async function resendFamilyLink(fd: FormData) {
   const lookup = str(fd, "lookup");
@@ -22,15 +24,16 @@ export async function resendFamilyLink(fd: FormData) {
       include: { household: true },
     });
     if (app?.household.email) {
+      const t = dict[toLang(app.language)].email;
       await sendEmail({
         to: app.household.email,
-        subject: `Your family's Christmas page — ${site.name}`,
-        html: layout(`<p>Hi ${esc(app.household.parentFirstName)},</p><p>Here is your private link:</p>${button(siteUrl(`/family/${app.accessToken}`), "My family's Christmas page")}`),
+        subject: t.linkSubject(site.name),
+        html: layout(t.link(esc(app.household.parentFirstName), button(siteUrl(`/family/${app.accessToken}`), t.pageButton))),
       });
     }
   }
   // Same response either way so the form can't be used to look people up.
-  redirect("/family?sent=1");
+  redirect(`/family?sent=1&lang=${toLang(str(fd, "lang"))}`);
 }
 
 /** Loads the application for a parent token and checks the list is still editable. */
@@ -109,4 +112,37 @@ export async function submitLists(token: string) {
     `<p>${esc(household?.parentFirstName)} ${esc(household?.parentLastName)} submitted wish lists for ${angels.length} angel${angels.length === 1 ? "" : "s"}. They are now on the Angel Tree.</p>${button(siteUrl(`/admin/applications/${app.id}`), "View")}`,
   );
   revalidatePath(`/family/${token}`);
+}
+
+export type ThankYouState = { ok?: boolean; error?: "errEmpty" | "errPhoto" | "errClosed" };
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+export async function submitThankYou(token: string, _prev: ThankYouState, fd: FormData): Promise<ThankYouState> {
+  const app = await db.application.findUnique({
+    where: { accessToken: token },
+    include: { household: true, angels: { select: { id: true, number: true } } },
+  });
+  if (!app || app.status !== "APPROVED" || !app.listSubmittedAt) return { error: "errClosed" };
+  const message = str(fd, "message").slice(0, 2000);
+  if (!message) return { error: "errEmpty" };
+  const angelId = str(fd, "angelId");
+  if (angelId && !app.angels.some((a) => a.id === angelId)) return { error: "errClosed" };
+
+  const photo = fd.get("photo");
+  let image: { imageData: Uint8Array<ArrayBuffer>; imageType: string; imageKey: string } | null = null;
+  if (photo instanceof File && photo.size > 0) {
+    if (photo.size > 4 * 1024 * 1024 || !IMAGE_TYPES.includes(photo.type)) return { error: "errPhoto" };
+    image = { imageData: new Uint8Array(await photo.arrayBuffer()), imageType: photo.type, imageKey: randomToken(18) };
+  }
+
+  await db.thankYouNote.create({
+    data: { applicationId: app.id, angelId: angelId || null, message, ...(image ?? {}) },
+  });
+  await notifyAdmin(
+    "New thank-you note to review",
+    `<p>The ${esc(app.household.parentLastName)} family wrote a thank-you note${image ? " with a photo" : ""}.</p>${button(siteUrl("/admin/thank-yous"), "Review and send")}`,
+  );
+  revalidatePath(`/family/${token}`);
+  return { ok: true };
 }

@@ -2,17 +2,18 @@
 
 import { useActionState, useState } from "react";
 import { Field, Select, TextArea } from "@/components/ui";
+import { dict, type Lang } from "@/content/i18n";
 import { submitApplication, type ApplyState } from "./actions";
 
-const assistance = ["SNAP / food stamps", "WIC", "Medicaid / ALL Kids", "Housing assistance", "SSI / disability", "Unemployment"];
-
-export function ApplicationForm() {
+export function ApplicationForm({ lang }: { lang: Lang }) {
+  const t = dict[lang].form;
   const [state, action, pending] = useActionState<ApplyState, FormData>(submitApplication, {});
   const [kids, setKids] = useState([0]);
   const [next, setNext] = useState(1);
 
   return (
     <form action={action} className="space-y-6">
+      <input type="hidden" name="lang" value={lang} />
       {state.error && (
         <div className="rounded-xl border border-copper-100 bg-copper-50 px-4 py-3 text-sm text-copper-800" role="alert">
           {state.error}
@@ -20,89 +21,82 @@ export function ApplicationForm() {
       )}
 
       <fieldset className="card space-y-4">
-        <legend className="font-display text-xl font-bold text-dusk-800">Parent or guardian</legend>
+        <legend className="font-display text-xl font-bold text-dusk-800">{t.parent}</legend>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="First name" name="parentFirstName" required autoComplete="given-name" />
-          <Field label="Last name" name="parentLastName" required autoComplete="family-name" />
-          <Field label="Phone" name="phone" type="tel" required autoComplete="tel" />
-          <Field label="Email" name="email" type="email" required autoComplete="email" hint="We'll send your private link and updates here." />
-          <Field label="Street address" name="address" required autoComplete="street-address" className="sm:col-span-2" />
-          <Field label="City" name="city" required autoComplete="address-level2" />
-          <Field label="ZIP" name="zip" required autoComplete="postal-code" inputMode="numeric" />
+          <Field label={t.firstName} name="parentFirstName" required autoComplete="given-name" />
+          <Field label={t.lastName} name="parentLastName" required autoComplete="family-name" />
+          <Field label={t.phone} name="phone" type="tel" required autoComplete="tel" />
+          <Field label={t.email} name="email" type="email" required autoComplete="email" hint={t.emailHint} />
+          <Field label={t.address} name="address" required autoComplete="street-address" className="sm:col-span-2" />
+          <Field label={t.city} name="city" required autoComplete="address-level2" />
+          <Field label={t.zip} name="zip" required autoComplete="postal-code" inputMode="numeric" />
           <Select
-            label="Community"
+            label={t.community}
             name="community"
             required
             options={[
-              { value: "", label: "Choose…" },
+              { value: "", label: t.choose },
               { value: "Reeltown", label: "Reeltown" },
               { value: "Tallassee", label: "Tallassee" },
-              { value: "Other", label: "Other nearby area" },
+              { value: "Other", label: t.otherArea },
             ]}
           />
-          <Field label="Adults living in the home" name="adultsInHome" type="number" min={1} max={20} defaultValue={1} required />
+          <Field label={t.adults} name="adultsInHome" type="number" min={1} max={20} defaultValue={1} required />
         </div>
       </fieldset>
 
       <fieldset className="card space-y-4">
-        <legend className="font-display text-xl font-bold text-dusk-800">Household situation</legend>
-        <Field label="Approximate monthly household income" name="monthlyIncome" inputMode="decimal" placeholder="$" hint="Optional, but it helps us review." />
+        <legend className="font-display text-xl font-bold text-dusk-800">{t.household}</legend>
+        <Field label={t.income} name="monthlyIncome" inputMode="decimal" placeholder="$" hint={t.incomeHint} />
         <div>
-          <span className="label">Does your household receive any of these?</span>
+          <span className="label">{t.assistanceQ}</span>
           <div className="grid gap-2 sm:grid-cols-2">
-            {assistance.map((a) => (
+            {t.assistance.map((a, i) => (
               <label key={a} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="assistance" value={a} className="h-4 w-4 accent-dusk-700" /> {a}
+                {/* Stored in English so the admin always sees the same labels. */}
+                <input type="checkbox" name="assistance" value={dict.en.form.assistance[i]} className="h-4 w-4 accent-dusk-700" /> {a}
               </label>
             ))}
           </div>
         </div>
-        <TextArea
-          label="Tell us about your family's need this Christmas"
-          name="circumstances"
-          required
-          maxLength={2000}
-          hint="Job loss, illness, a new baby, a hard year. Anything you'd like us to know. Everything you share is kept private."
-        />
+        <TextArea label={t.need} name="circumstances" required maxLength={2000} hint={t.needHint} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Church home" name="churchHome" hint="Optional" />
-          <Field label="How did you hear about us?" name="referredBy" hint="Optional" />
+          <Field label={t.church} name="churchHome" hint={t.optional} />
+          <Field label={t.heard} name="referredBy" hint={t.optional} />
         </div>
       </fieldset>
 
       <fieldset className="card space-y-5">
-        <legend className="font-display text-xl font-bold text-dusk-800">Children</legend>
-        <p className="text-sm text-black/60">
-          List each child (17 and under) living in your home. You&rsquo;ll make each child&rsquo;s wish list after you&rsquo;re approved.
-        </p>
+        <legend className="font-display text-xl font-bold text-dusk-800">{t.children}</legend>
+        <p className="text-sm text-black/60">{t.childrenIntro}</p>
         {kids.map((k, idx) => (
           <div key={k} className="rounded-xl border border-black/10 bg-cream/50 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-bold">Child {idx + 1}</h3>
+              <h3 className="text-base font-bold">{t.child(idx + 1)}</h3>
               {kids.length > 1 && (
                 <button type="button" className="text-xs font-semibold text-copper-700" onClick={() => setKids(kids.filter((x) => x !== k))}>
-                  Remove
+                  {t.remove}
                 </button>
               )}
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="First name" name="childFirstName" required />
-              <Field label="Last name" name="childLastName" required />
-              <Field label="Birth date" name="childBirthDate" type="date" required />
+              <Field label={t.firstName} name="childFirstName" required />
+              <Field label={t.lastName} name="childLastName" required />
+              <Field label={t.birthDate} name="childBirthDate" type="date" required />
               <Select
-                label="Boy or girl"
+                label={t.boyOrGirl}
                 name="childGender"
                 required
                 options={[
-                  { value: "", label: "Choose…" },
-                  { value: "GIRL", label: "Girl" },
-                  { value: "BOY", label: "Boy" },
+                  { value: "", label: t.choose },
+                  { value: "GIRL", label: t.girl },
+                  { value: "BOY", label: t.boy },
                 ]}
               />
-              <Field label="Shirt size" name="childShirt" placeholder="e.g. Youth M" />
-              <Field label="Pants size" name="childPants" placeholder="e.g. 10 slim" />
-              <Field label="Shoe size" name="childShoe" placeholder="e.g. 3Y" />
-              <Field label="Interests / favorite things" name="childInterests" placeholder="Dinosaurs, art, football…" />
+              <Field label={t.shirt} name="childShirt" placeholder="Youth M" />
+              <Field label={t.pants} name="childPants" placeholder="10 slim" />
+              <Field label={t.shoe} name="childShoe" placeholder="3Y" />
+              <Field label={t.interests} name="childInterests" placeholder={t.interestsPh} />
             </div>
           </div>
         ))}
@@ -115,7 +109,7 @@ export function ApplicationForm() {
               setNext(next + 1);
             }}
           >
-            + Add another child
+            {t.addChild}
           </button>
         )}
       </fieldset>
@@ -123,13 +117,10 @@ export function ApplicationForm() {
       <div className="card space-y-3">
         <label className="flex items-start gap-3 text-sm">
           <input type="checkbox" name="agree" required className="mt-1 h-4 w-4 accent-dusk-700" />
-          <span>
-            I confirm the information above is true, this is the only application for my household this year, and I
-            understand gifts must be picked up at the time and place the ministry provides.
-          </span>
+          <span>{t.agree}</span>
         </label>
         <button className="btn-primary px-8 py-3 text-base" disabled={pending}>
-          {pending ? "Submitting…" : "Submit application"}
+          {pending ? t.submitting : t.submit}
         </button>
       </div>
     </form>

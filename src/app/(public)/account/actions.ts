@@ -66,3 +66,13 @@ export async function emailMyStatement(year: number) {
   await sendStatement(giver.id, year);
   redirect(`/account/statements/${year}?emailed=1`);
 }
+
+export async function saveTracking(sponsorshipId: string, fd: FormData) {
+  const giver = await currentGiver();
+  if (!giver) redirect("/account");
+  await db.sponsorship.updateMany({
+    where: { id: sponsorshipId, sponsorId: giver.id },
+    data: { trackingInfo: str(fd, "trackingInfo").slice(0, 500) || null },
+  });
+  revalidatePath("/account");
+}

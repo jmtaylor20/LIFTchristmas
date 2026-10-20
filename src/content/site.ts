@@ -49,7 +49,18 @@ export const brand = {
 };
 
 export const org = {
-  legalName: process.env.ORG_LEGAL_NAME || site.fullName,
+  legalName: process.env.ORG_LEGAL_NAME || "LIFT Ministries",
   ein: process.env.ORG_EIN || "",
   mailingAddress: process.env.ORG_MAILING_ADDRESS || "",
+  // Set ORG_TAX_EXEMPT=true only once the IRS has recognized LIFT Ministries
+  // as a 501(c)(3). It switches receipts to tax-deductible wording.
+  taxExempt: process.env.ORG_TAX_EXEMPT === "true",
 };
+
+/** The fine print printed on every receipt and giving statement. */
+export function receiptDisclaimer(plural = false) {
+  const these = plural ? "these contributions" : "this contribution";
+  return org.taxExempt
+    ? `${org.legalName} is a 501(c)(3) tax-exempt organization. No goods or services were provided in exchange for ${these}. Please keep this for your tax records.`
+    : `${org.legalName} is not currently recognized by the IRS as a 501(c)(3) tax-exempt organization, so ${these} cannot be claimed as a tax deduction. This record is for your personal records. Thank you for your generosity!`;
+}

@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { currentGiver } from "@/lib/auth";
 import { formatDateShort, money } from "@/lib/format";
 import { Notice, PageHero } from "@/components/ui";
-import { createProfile, logout, requestLogin, updateProfile } from "./actions";
+import { createProfile, logout, requestLogin, saveTracking, updateProfile } from "./actions";
+import { ShipTo } from "@/components/ShipTo";
 
 export const metadata = { title: "My Giving", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
     return (
       <>
         <PageHero eyebrow="My giving" title="Your giver profile">
-          <p>See the angels you&rsquo;ve sponsored, your gifts and donations, and download your giving statements for taxes.</p>
+          <p>See the angels you&rsquo;ve sponsored, your gifts and donations, and download your yearly giving statements.</p>
         </PageHero>
         <section className="container-page mt-10 max-w-4xl space-y-6">
           {sent && <Notice tone="success">Check your email! If we have a profile for that address, a sign-in link is on its way.</Notice>}
@@ -53,7 +54,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
     );
   }
 
-  const [sponsorships, donations, inKind, statements] = await Promise.all([
+  const [sponsorships, donations, inKind, statements, notes] = await Promise.all([
     db.sponsorship.findMany({
       where: { sponsorId: giver.id, status: { not: "CANCELLED" } },
       include: { angel: true, items: true, season: true },
@@ -62,11 +63,22 @@ export default async function Account({ searchParams }: { searchParams: Promise<
     db.donation.findMany({ where: { sponsorId: giver.id, status: "PAID" }, orderBy: { createdAt: "desc" } }),
     db.inKindGift.findMany({ where: { sponsorId: giver.id }, orderBy: { createdAt: "desc" } }),
     db.givingStatement.findMany({ where: { sponsorId: giver.id }, orderBy: { taxYear: "desc" } }),
+    db.thankYouNote.findMany({
+      where: {
+        status: "SENT",
+        OR: [
+          { angel: { sponsorships: { some: { sponsorId: giver.id, status: { not: "CANCELLED" } } } } },
+          { angelId: null, application: { angels: { some: { sponsorships: { some: { sponsorId: giver.id, status: { not: "CANCELLED" } } } } } } },
+        ],
+      },
+      select: { id: true, message: true, imageKey: true, sentAt: true, angel: { select: { number: true } } },
+      orderBy: { sentAt: "desc" },
+    }),
   ]);
 
   const years = new Set<number>();
   sponsorships.forEach((s) => years.add(s.season.year));
-  donations.forEach((d) => years.add(d.createdAt.getFullYear()));
+  donations.forEach((d) => years.add((d.receivedAt ?? d.createdAt).getFullYear()));
   inKind.forEach((g) => years.add(g.createdAt.getFullYear()));
   statements.forEach((s) => years.add(s.taxYear));
   const taxYears = [...years].sort((a, b) => b - a);
@@ -113,11 +125,41 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                         </li>
                       ))}
                     </ul>
+                    {s.delivery === "SHIP" && s.status === "COMMITTED" && s.season.shippingAddress && (
+                      <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
+                        <p className="text-xs font-semibold text-black/60 uppercase">Ship to</p>
+                        <ShipTo angelNumber={s.angel.number} address={s.season.shippingAddress} />
+                        <form action={saveTracking.bind(null, s.id)} className="flex gap-2">
+                          <input name="trackingInfo" defaultValue={s.trackingInfo ?? ""} placeholder="Order or tracking number(s)" className="input" />
+                          <button className="btn-outline btn-sm">Save</button>
+                        </form>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
+
+          {notes.length > 0 && (
+            <div className="card bg-copper-50/60">
+              <h2 className="text-xl font-bold">💌 Thank-you notes</h2>
+              <div className="mt-3 space-y-4">
+                {notes.map((n) => (
+                  <figure key={n.id} className="rounded-xl bg-white p-4">
+                    <blockquote className="font-display text-lg whitespace-pre-line text-dusk-800">&ldquo;{n.message}&rdquo;</blockquote>
+                    {n.imageKey && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/card/${n.imageKey}`} alt="Thank-you card" className="mt-3 max-h-72 rounded-lg" />
+                    )}
+                    <figcaption className="mt-2 text-xs text-black/55">
+                      {n.angel ? `Angel #${n.angel.number}'s family` : "Your angel's family"} · {formatDateShort(n.sentAt)}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="card">
             <h2 className="text-xl font-bold">Donations &amp; gifts</h2>
@@ -130,7 +172,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                 <tbody>
                   {donations.map((d) => (
                     <tr key={d.id}>
-                      <td>{formatDateShort(d.createdAt)}</td>
+                      <td>{formatDateShort(d.receivedAt ?? d.createdAt)}</td>
                       <td>Donation ({d.method.toLowerCase()})</td>
                       <td className="text-right font-semibold">{money(d.amountCents, { cents: true })}</td>
                     </tr>
@@ -151,7 +193,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
         <div className="space-y-6">
           <div className="card">
             <h2 className="text-xl font-bold">Giving statements</h2>
-            <p className="mt-1 text-sm text-black/60">For your tax records. Statements are emailed every January.</p>
+            <p className="mt-1 text-sm text-black/60">A record of your giving. Statements are emailed every January.</p>
             {taxYears.length === 0 ? (
               <p className="mt-3 text-sm text-black/50">Your first statement will appear here after you give.</p>
             ) : (
