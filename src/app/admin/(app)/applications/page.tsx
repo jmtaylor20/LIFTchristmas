@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ApplicationStatus } from "@prisma/client";
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { formatDateShort } from "@/lib/format";
 import { AdminTitle, AppBadge, Empty } from "@/components/admin";
 
@@ -11,7 +11,7 @@ const statuses: ApplicationStatus[] = ["PENDING", "APPROVED", "WAITLIST", "DENIE
 
 export default async function Applications({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
   const sp = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const status = statuses.includes(sp.status as ApplicationStatus) ? (sp.status as ApplicationStatus) : undefined;
   const q = sp.q?.trim();
 

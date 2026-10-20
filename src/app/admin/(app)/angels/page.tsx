@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { genderLabel, money } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
 import { ProgressBar } from "@/components/ui";
@@ -9,7 +9,7 @@ export const metadata = { title: "Angels" };
 
 export default async function AdminAngels({ searchParams }: { searchParams: Promise<{ coverage?: string }> }) {
   const { coverage } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const angels = await db.angel.findMany({
     where: { seasonId: season.id, application: { status: "APPROVED" } },
     include: {

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { AdminTitle } from "@/components/admin";
 import { ProgressBar } from "@/components/ui";
 import { markPickedUp, undoPickedUp } from "../../actions";
@@ -10,7 +10,7 @@ export const metadata = { title: "Pickup day" };
 // are ready, tap once to check them out.
 export default async function Pickup({ searchParams }: { searchParams: Promise<{ q?: string; show?: string }> }) {
   const { q = "", show } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const query = q.trim();
   const all_ = await db.application.findMany({
     where: { seasonId: season.id, status: "APPROVED", ...(show === "waiting" ? { pickedUpAt: null } : {}) },

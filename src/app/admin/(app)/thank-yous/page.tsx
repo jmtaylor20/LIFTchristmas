@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { noteRecipients } from "@/lib/thankyou";
 import { formatDateShort } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
@@ -11,7 +11,7 @@ export const metadata = { title: "Thank-you notes" };
 
 export default async function ThankYous({ searchParams }: { searchParams: Promise<{ sent?: string }> }) {
   const { sent } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const notes = await db.thankYouNote.findMany({
     where: { application: { seasonId: season.id } },
     select: {

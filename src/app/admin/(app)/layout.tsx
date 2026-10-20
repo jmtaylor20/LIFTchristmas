@@ -56,16 +56,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </aside>
       <div className="min-w-0 px-4 pt-5 pb-28 sm:px-8 sm:pt-8 lg:pb-10">
-        {!season ? (
-          <div className="card max-w-xl">
-            <h1 className="text-2xl">Welcome!</h1>
-            <p className="mt-2">Start by creating this year&rsquo;s season and setting your deadlines.</p>
-            <Link href="/admin/seasons" className="btn-green mt-4">Set up a season</Link>
-            {children}
+        {!season && (
+          <div className="card mb-6 max-w-2xl border-star-100 bg-star-50/60">
+            <h1 className="text-2xl">Welcome! Let&rsquo;s set up your Christmas season</h1>
+            <p className="mt-2 text-black/70">
+              Everything (applications, the Angel Tree, giving) belongs to a season. Create this year&rsquo;s season under Seasons
+              &amp; Deadlines and set your dates.
+              {isSandbox() && " In test mode you can also load sample data from Test Mode & Outbox."}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/admin/seasons" className="btn-green">Set up a season</Link>
+              {isSandbox() && <Link href="/admin/sandbox" className="btn-outline">Load sample data</Link>}
+            </div>
           </div>
-        ) : (
-          children
         )}
+        {children}
       </div>
       <MobileTabBar />
     </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getAdminSeason } from "@/lib/season";
+import { requireAdminSeason } from "@/lib/season";
 import { money } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
 
@@ -8,7 +8,7 @@ export const metadata = { title: "Givers" };
 
 export default async function Sponsors({ searchParams }: { searchParams: Promise<{ q?: string; scope?: string }> }) {
   const { q, scope } = await searchParams;
-  const season = (await getAdminSeason())!;
+  const season = await requireAdminSeason();
   const thisSeason = scope !== "all";
   const givers = await db.sponsor.findMany({
     where: {

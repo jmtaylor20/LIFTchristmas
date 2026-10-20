@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { db } from "./db";
 
 export async function getActiveSeason() {
@@ -18,6 +19,13 @@ export async function getAdminSeason() {
     if (s) return s;
   }
   return getActiveSeason();
+}
+
+/** For admin pages that only make sense inside a season: with no season yet, go set one up. */
+export async function requireAdminSeason() {
+  const season = await getAdminSeason();
+  if (!season) redirect("/admin/seasons?setup=1");
+  return season;
 }
 
 type DeadlineSeason = {
