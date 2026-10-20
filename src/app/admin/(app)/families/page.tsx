@@ -26,12 +26,12 @@ export default async function Families({ searchParams }: { searchParams: Promise
         Every family that has ever applied. Families are matched year to year by phone number or email. The current cap is{" "}
         <strong>{season.approvalCapYears} approved years</strong>.
       </p>
-      <form className="mb-4"><input name="q" defaultValue={q} placeholder="Search name, phone, email" className="input w-72" /></form>
+      <form className="mb-4"><input name="q" defaultValue={q} placeholder="Search name, phone, email" className="input w-full sm:w-72" /></form>
       {households.length === 0 ? (
         <Empty>No families yet.</Empty>
       ) : (
-        <div className="card overflow-x-auto p-0">
-          <table className="table">
+        <div className="rtable-wrap">
+          <table className="table rtable">
             <thead>
               <tr>
                 <th>Family</th>
@@ -47,14 +47,14 @@ export default async function Families({ searchParams }: { searchParams: Promise
                 const remaining = Math.max(0, season.approvalCapYears - approved.length);
                 return (
                   <tr key={h.id}>
-                    <td>
+                    <td data-label="Family">
                       <Link href={`/admin/families/${h.id}`} className="font-semibold">{h.parentLastName}, {h.parentFirstName}</Link>
                       <div className="text-xs text-black/50">{h.phone}</div>
                     </td>
-                    <td>{h._count.children}</td>
-                    <td className="text-xs">{h.applications.map((a) => a.season.year).join(", ")}</td>
-                    <td>{approved.length} <span className="text-xs text-black/45">{approved.length > 0 && `(${approved.join(", ")})`}</span></td>
-                    <td className={remaining === 0 ? "font-semibold text-star-700" : ""}>{remaining === 0 ? "At cap" : remaining}</td>
+                    <td data-label="Children">{h._count.children}</td>
+                    <td data-label="Years applied" className="text-xs">{h.applications.map((a) => a.season.year).join(", ")}</td>
+                    <td data-label="Years approved">{approved.length} <span className="text-xs text-black/45">{approved.length > 0 && `(${approved.join(", ")})`}</span></td>
+                    <td data-label="Remaining" className={remaining === 0 ? "font-semibold text-star-700" : ""}>{remaining === 0 ? "At cap" : remaining}</td>
                   </tr>
                 );
               })}

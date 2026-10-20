@@ -55,7 +55,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
 
           <h2 className="mt-6 text-xl">Wish list</h2>
           <div className="mt-2 overflow-x-auto">
-            <table className="table">
+            <table className="table rtable">
               <thead>
                 <tr>
                   <th>Item</th>
@@ -68,24 +68,24 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
               <tbody>
                 {angel.items.map((i) => (
                   <tr key={i.id}>
-                    <td>
+                    <td data-label="Item">
                       <span className="font-medium">{i.name}</span>
                       {i.details && <div className="text-xs text-black/50">{i.details}</div>}
                       {i.url && <a href={i.url} target="_blank" rel="noopener noreferrer" className="text-xs">link ↗</a>}
                     </td>
-                    <td>{i.estPriceCents != null ? money(i.estPriceCents) : "—"}</td>
-                    <td>
+                    <td data-label="Est.">{i.estPriceCents != null ? money(i.estPriceCents) : "—"}</td>
+                    <td data-label="Status">
                       <ItemBadge status={i.status} />
                       {i.status === "MINISTRY" && i.ministryCostCents != null && <div className="text-xs text-black/50">spent {money(i.ministryCostCents, { cents: true })}</div>}
                     </td>
-                    <td className="text-xs">
+                    <td data-label="Sponsor" className="text-xs">
                       {i.sponsorship && (
                         <Link href={`/admin/sponsors/${i.sponsorship.sponsorId}`}>
                           {i.sponsorship.sponsor.firstName} {i.sponsorship.sponsor.lastName}
                         </Link>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Update">
                       <form action={setItemStatus.bind(null, i.id)} className="flex flex-wrap items-center gap-1">
                         <select name="status" defaultValue={i.status} className="input w-auto py-1 text-xs">
                           <option value="NEEDED">Needed</option>

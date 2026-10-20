@@ -19,6 +19,11 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 - `/donate`: **Venmo, check, or cash**. The giver says what they're sending; the gift shows up for the owner as "waiting to confirm" until she marks it received.
 - `/account`: giver profile, signed into by emailed link (no password). Shows their angels, gifts, donations, thank-you notes from families, and yearly giving statements.
 
+**Three home-screen apps.** On a phone, each part of the site can be added to the home screen as its own app, with its own name and icon. A prompt explains how.
+- **LIFT Giving** (`/account`): for givers.
+- **LIFT Family** (`/family`): for parents. On a device that has opened the family's private link, it goes straight back to their page.
+- **LIFT Admin** (`/admin`): for the ministry. On phones it has a bottom tab bar and a full menu, and its tables become cards.
+
 **Ministry admin** (`/admin`):
 - Dashboard: applications to review, angel coverage, money received, fund balance, the dollar value still needed, items waiting on you, and reminder buttons.
 - Applications: approve, waitlist, or deny, with an email to the family in their language. **Each family can be approved at most 5 years**; the cap is adjustable per season and enforced on the server.

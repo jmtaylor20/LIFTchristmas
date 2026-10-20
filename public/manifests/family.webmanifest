@@ -1,0 +1,35 @@
+{
+  "name": "LIFT Christmas for Families",
+  "short_name": "LIFT Family",
+  "start_url": "/family",
+  "description": "Your family's LIFT Community Christmas page: status, wish lists, and pickup.",
+  "theme_color": "#6b8fa5",
+  "id": "/family",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fcfaf5",
+  "icons": [
+    {
+      "src": "/icons/family-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/family-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/family-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/family-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

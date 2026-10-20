@@ -34,14 +34,14 @@ export default async function Sponsors({ searchParams }: { searchParams: Promise
         <Link href="/admin/sponsors?scope=all" className={`rounded-full px-3 py-1 no-underline ${!thisSeason ? "bg-dusk-700 text-white" : "bg-white ring-1 ring-black/10"}`}>All years</Link>
         <form className="ml-auto">
           {!thisSeason && <input type="hidden" name="scope" value="all" />}
-          <input name="q" defaultValue={q} placeholder="Search" className="input w-64" />
+          <input name="q" defaultValue={q} placeholder="Search" className="input w-full sm:w-64" />
         </form>
       </div>
       {givers.length === 0 ? (
         <Empty>No givers yet.</Empty>
       ) : (
-        <div className="card overflow-x-auto p-0">
-          <table className="table">
+        <div className="rtable-wrap">
+          <table className="table rtable">
             <thead>
               <tr>
                 <th>Name</th>
@@ -59,16 +59,16 @@ export default async function Sponsors({ searchParams }: { searchParams: Promise
                 const years = [...new Set(g.sponsorships.map((s) => s.season.year))].sort();
                 return (
                   <tr key={g.id}>
-                    <td>
+                    <td data-label="Name">
                       <Link href={`/admin/sponsors/${g.id}`} className="font-semibold">{g.firstName} {g.lastName}</Link>
                       {g.organization && <div className="text-xs text-black/50">{g.organization}</div>}
                     </td>
-                    <td className="text-xs">{g.email}<br />{g.phone}</td>
-                    <td>{new Set(cur.map((s) => s.angelId)).size || "—"}</td>
-                    <td>{cur.reduce((n, s) => n + s._count.items, 0) || "—"}</td>
-                    <td>{money(g.donations.filter((d) => d.seasonId === season.id).reduce((n, d) => n + d.amountCents, 0))}</td>
-                    <td title={years.join(", ")}>{years.length} {years.length > 0 && <span className="text-xs text-black/45">({years.join(", ")})</span>}</td>
-                    <td>{money(g.donations.reduce((n, d) => n + d.amountCents, 0))}</td>
+                    <td data-label="Contact" className="text-xs">{g.email}<br />{g.phone}</td>
+                    <td data-label="Angels">{new Set(cur.map((s) => s.angelId)).size || "—"}</td>
+                    <td data-label="Items">{cur.reduce((n, s) => n + s._count.items, 0) || "—"}</td>
+                    <td data-label="Donated">{money(g.donations.filter((d) => d.seasonId === season.id).reduce((n, d) => n + d.amountCents, 0))}</td>
+                    <td data-label="Years sponsoring" title={years.join(", ")}>{years.length} {years.length > 0 && <span className="text-xs text-black/45">({years.join(", ")})</span>}</td>
+                    <td data-label="Lifetime donated">{money(g.donations.reduce((n, d) => n + d.amountCents, 0))}</td>
                   </tr>
                 );
               })}
