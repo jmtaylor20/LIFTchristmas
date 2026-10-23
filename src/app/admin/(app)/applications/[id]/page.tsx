@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { formatDate, genderLabel, money } from "@/lib/format";
+import { ageText, formatDate, genderLabel, money } from "@/lib/format";
 import { siteUrl } from "@/lib/email";
 import { AdminTitle, AppBadge, ItemBadge } from "@/components/admin";
 import { Notice } from "@/components/ui";
-import { decideApplication, lockLists, unlockLists } from "../../../actions";
+import { decideApplication, lockLists, setChildGender, unlockLists } from "../../../actions";
 
 export const metadata = { title: "Application" };
 
@@ -28,7 +28,8 @@ export default async function ApplicationDetail({
           children: { include: { angels: { include: { season: true } } } },
         },
       },
-      angels: { include: { child: true, items: true }, orderBy: { ageAtSeason: "desc" } },
+      angels: { include: { child: true, items: { orderBy: { sortOrder: "asc" } } }, orderBy: { ageAtSeason: "desc" } },
+      documents: { select: { id: true, kind: true, contentType: true, url: true }, orderBy: { kind: "asc" } },
     },
   });
   if (!app) notFound();
@@ -36,6 +37,8 @@ export default async function ApplicationDetail({
   const otherApproved = h.applications.filter((a) => a.status === "APPROVED" && a.id !== app.id);
   const atCap = otherApproved.length >= app.season.approvalCapYears;
   const portal = siteUrl(`/family/${app.accessToken}`);
+  const unknownGender = app.angels.filter((a) => !a.gender).length;
+  const yn = (v: boolean | null) => (v == null ? null : v ? "Yes" : "No");
 
   return (
     <>
@@ -54,6 +57,16 @@ export default async function ApplicationDetail({
         {app.capOverrideAt && (
           <Notice>Approved past the {app.season.approvalCapYears}-year cap by override on {formatDate(app.capOverrideAt)}.</Notice>
         )}
+        {unknownGender > 0 && (
+          <Notice tone="warn">
+            Set <strong>boy or girl</strong> for {unknownGender} child{unknownGender === 1 ? "" : "ren"} below. Sponsors see it on the Angel Tree.
+          </Notice>
+        )}
+        {app.priorHelp && app.priorHelpYears && (
+          <Notice>
+            <strong>Helped before (as the family told us):</strong> {app.priorHelpYears}. Check this against the {app.season.approvalCapYears}-year cap.
+          </Notice>
+        )}
         {atCap && !sp.error && (
           <Notice tone="warn">
             <strong>Approval cap reached:</strong> approved in {otherApproved.map((a) => a.season.year).join(", ")} ({otherApproved.length} of {app.season.approvalCapYears} years).
@@ -68,20 +81,46 @@ export default async function ApplicationDetail({
               <h2 className="text-xl">Application · Christmas {app.season.year}</h2>
               <AppBadge status={app.status} />
             </div>
+            {app.source === "import" && <p className="mt-1 text-xs text-black/50">Imported from the Google Form</p>}
             <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <D k="Phone" v={h.phone} />
-              <D k="Email" v={h.email} />
-              <D k="Address" v={`${app.address}, ${app.city} ${app.zip}`} />
+              <D k="Email" v={h.email ?? "None given"} />
+              <D k="Address" v={[app.address, app.city !== "" && !app.address.toLowerCase().includes(app.city.toLowerCase()) ? app.city : null, app.zip && !app.address.includes(app.zip) ? app.zip : null].filter(Boolean).join(", ")} />
               <D k="Community" v={app.community} />
-              <D k="Adults in home" v={String(app.adultsInHome)} />
-              <D k="Monthly income" v={app.monthlyIncomeCents != null ? money(app.monthlyIncomeCents) : "Not given"} />
-              <D k="Assistance" v={app.assistancePrograms || "None listed"} />
-              <D k="Church home" v={app.churchHome} />
-              <D k="Referred by" v={app.referredBy} />
+              <D k="Job / employer" v={app.employer} />
+              <D k="At this job" v={app.jobLength} />
+              <D k="Helped by Community Christmas before" v={[yn(app.priorHelp), app.priorHelpYears].filter(Boolean).join(" · ") || null} />
+              <D k="Help from another agency" v={[yn(app.otherAgencyHelp), app.assistancePrograms].filter(Boolean).join(" · ") || null} />
+              {app.adultsInHome != null && <D k="Adults in home" v={String(app.adultsInHome)} />}
+              {app.monthlyIncomeCents != null && <D k="Monthly income" v={money(app.monthlyIncomeCents)} />}
+              {app.churchHome && <D k="Church home" v={app.churchHome} />}
+              {app.referredBy && <D k="Referred by" v={app.referredBy} />}
               <D k="Applied" v={formatDate(app.createdAt)} />
+              <D k="Signed" v={app.signatureName ? `${app.signatureName}${app.signedAt ? `, ${formatDate(app.signedAt)}` : ""}` : null} />
             </dl>
-            <h3 className="mt-5 text-sm font-semibold text-black/60 uppercase">Their story</h3>
-            <p className="mt-1 whitespace-pre-line text-sm">{app.circumstances}</p>
+            <h3 className="mt-5 text-sm font-semibold text-black/60 uppercase">Documents</h3>
+            {app.documents.length === 0 ? (
+              <p className="mt-1 text-sm text-black/55">None attached.</p>
+            ) : (
+              <ul className="mt-1 flex flex-wrap gap-2 text-sm">
+                {app.documents.map((d) => (
+                  <li key={d.id}>
+                    <a href={d.url ?? `/admin/document/${d.id}`} target="_blank" rel="noreferrer" className="btn-outline btn-sm">
+                      {d.kind === "PHOTO_ID" ? "Photo ID" : "Income proof"} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {app.documents.some((d) => d.url) && (
+              <p className="mt-1 text-xs text-black/50">These open in Google Drive. Sign in with an account the form&rsquo;s owner has shared them with.</p>
+            )}
+            {app.circumstances && (
+              <>
+                <h3 className="mt-5 text-sm font-semibold text-black/60 uppercase">Their story</h3>
+                <p className="mt-1 whitespace-pre-line text-sm">{app.circumstances}</p>
+              </>
+            )}
           </div>
 
           <div className="card">
@@ -93,17 +132,26 @@ export default async function ApplicationDetail({
                   <div key={a.id} className="rounded-xl border border-black/5 p-4">
                     <div className="flex flex-wrap justify-between gap-2">
                       <p className="font-semibold">
-                        {a.child.firstName} {a.child.lastName} · {genderLabel(a.gender)}, {a.ageAtSeason}
-                        {a.number != null && <Link href={`/admin/angels/${a.id}`} className="ml-2 text-sm">Angel #{a.number} →</Link>}
+                        {a.child.firstName} {a.child.lastName} · {genderLabel(a.gender)}, {ageText(a.ageAtSeason)}
+                        <Link href={`/admin/angels/${a.id}`} className="ml-2 text-sm">{a.number != null ? `Angel #${a.number}` : "Edit list"} →</Link>
                       </p>
                       <span className="text-xs text-black/50">
-                        Born {formatDate(a.child.birthDate, { timeZone: "UTC" })}
+                        {a.child.birthDate && <>Born {formatDate(a.child.birthDate, { timeZone: "UTC" })}</>}
                         {pastYears && pastYears.length > 0 && <> · also served {pastYears.join(", ")}</>}
                       </span>
                     </div>
                     <p className="text-xs text-black/55">
-                      Shirt {a.shirtSize || "—"} · Pants {a.pantsSize || "—"} · Shoes {a.shoeSize || "—"} {a.interests && <>· {a.interests}</>}
+                      Clothing {a.shirtSize || "—"}{a.pantsSize && <> · Pants {a.pantsSize}</>} · Shoes {a.shoeSize || "—"}
+                      {a.child.race && <> · {a.child.race}</>} {a.interests && <>· {a.interests}</>}
                     </p>
+                    <form key={a.gender ?? "unset"} action={setChildGender.bind(null, a.id)} className="mt-2 flex items-center gap-2 text-sm">
+                      <select name="gender" defaultValue={a.gender ?? ""} className={`input w-auto py-1 ${a.gender ? "" : "border-star-300 bg-star-50"}`}>
+                        <option value="" disabled>Boy or girl?</option>
+                        <option value="GIRL">Girl</option>
+                        <option value="BOY">Boy</option>
+                      </select>
+                      <button className="btn-outline btn-sm">Save</button>
+                    </form>
                     {a.items.length > 0 && (
                       <ul className="mt-2 space-y-1 text-sm">
                         {a.items.map((i) => (
@@ -150,6 +198,11 @@ export default async function ApplicationDetail({
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="notify" defaultChecked className="h-4 w-4 accent-dusk-700" /> Email the family about this decision
             </label>
+            {!h.email && (
+              <p className="text-xs text-star-800">
+                No email on file. Call or text {h.phone} with the decision. You can text them their private link (below) so they can see their status.
+              </p>
+            )}
             <textarea name="message" placeholder="Optional personal note to include in the email" className="input min-h-16" />
             <textarea name="adminNotes" defaultValue={app.adminNotes ?? ""} placeholder="Private notes (only admins see these)" className="input min-h-16" />
             <button className="btn-green w-full">Save decision</button>

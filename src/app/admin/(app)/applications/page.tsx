@@ -43,6 +43,7 @@ export default async function Applications({ searchParams }: { searchParams: Pro
   return (
     <>
       <AdminTitle title="Applications">
+        <Link href="/admin/applications/import" className="btn-outline btn-sm">Import from Google Form</Link>
         <Link href="/admin/export/applications" className="btn-outline btn-sm">Export CSV</Link>
       </AdminTitle>
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">

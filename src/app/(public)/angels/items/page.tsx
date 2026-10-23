@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
-import { genderLabel, money } from "@/lib/format";
+import { ageText, genderLabel, money } from "@/lib/format";
 import { PageHero } from "@/components/ui";
 
 export const metadata = { title: "Gifts by price" };
@@ -57,7 +57,7 @@ export default async function ItemsByPrice({ searchParams }: { searchParams: Pro
                   <div>
                     <p className="font-medium">{i.name}</p>
                     <p className="text-xs text-black/55">
-                      Angel #{i.angel.number} · {genderLabel(i.angel.gender)}, age {i.angel.ageAtSeason}
+                      Angel #{i.angel.number} · {genderLabel(i.angel.gender)}, {ageText(i.angel.ageAtSeason)}
                       {i.details && <> · {i.details}</>}
                     </p>
                   </div>

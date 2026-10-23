@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
-import { formatDate, genderLabel, money } from "@/lib/format";
+import { ageText, formatDate, genderLabel, money } from "@/lib/format";
 import { PageHero, ProgressBar } from "@/components/ui";
 import { Star } from "@/components/SiteChrome";
 
@@ -93,7 +93,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
               <Link key={a.id} href={`/angels/${a.number}`} className="card group flex flex-col no-underline transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex items-center justify-between">
                   <span className={`badge ${a.gender === "GIRL" ? "bg-star-50 text-star-700" : "bg-dusk-50 text-dusk-700"}`}>
-                    {genderLabel(a.gender)} · age {a.ageAtSeason}
+                    {genderLabel(a.gender)} · {ageText(a.ageAtSeason)}
                   </span>
                   <Star className="h-5 w-5 text-gold-500" />
                 </div>

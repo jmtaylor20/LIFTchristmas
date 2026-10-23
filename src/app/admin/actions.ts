@@ -9,6 +9,7 @@ import { clearAdminSession, requireAdmin, setAdminSession } from "@/lib/auth";
 import { safeEqual } from "@/lib/tokens";
 import { ADMIN_SEASON_COOKIE, getAdminSeason } from "@/lib/season";
 import { approvedYears } from "@/lib/households";
+import { createApplication, parseGoogleFormCsv } from "@/lib/applications";
 import { optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
 import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
@@ -641,4 +642,63 @@ export async function deleteNeed(id: string) {
   else await db.needItem.delete({ where: { id } });
   revalidatePath("/give");
   revalidatePath("/admin/needs");
+}
+
+// ------------------------------------------------------------------ applications from the Google Form
+
+/** Boy/girl for a child whose application didn't say (e.g. imported from the Google Form). */
+export async function setChildGender(angelId: string, fd: FormData) {
+  await requireAdmin();
+  const gender = str(fd, "gender");
+  if (gender !== "GIRL" && gender !== "BOY") return;
+  const angel = await db.angel.update({ where: { id: angelId }, data: { gender } });
+  await db.child.update({ where: { id: angel.childId }, data: { gender } });
+  revalidatePath(`/admin/applications/${angel.applicationId}`);
+}
+
+/**
+ * Imports applications from the Google Form's CSV export into the season being viewed.
+ * Rows already imported are skipped, so uploading the same (or a newer) export again
+ * only adds what's new. Stops early if it runs long; upload again to finish.
+ */
+export async function importApplications(fd: FormData) {
+  await requireAdmin();
+  const season = await getAdminSeason();
+  const file = fd.get("csv");
+  if (!season || !(file instanceof File) || file.size === 0) redirect("/admin/applications/import?error=file");
+  let rows: ReturnType<typeof parseGoogleFormCsv>;
+  try {
+    rows = parseGoogleFormCsv(await file.text());
+  } catch {
+    redirect("/admin/applications/import?error=format");
+  }
+  const started = Date.now();
+  let added = 0;
+  let already = 0;
+  let left = 0;
+  const problems: string[] = [];
+  for (const r of rows) {
+    if (!r.data) {
+      problems.push(`Row ${r.row}: ${r.error}`);
+      continue;
+    }
+    if (Date.now() - started > 7000) {
+      left++;
+      continue;
+    }
+    if (await db.application.findUnique({ where: { importKey: r.data.importKey }, select: { id: true } })) {
+      already++;
+      continue;
+    }
+    const data = { ...r.data, seasonId: season.id };
+    const result = await db.$transaction((tx) => createApplication(tx, data), { timeout: 20000 });
+    if (result.duplicate) {
+      already++;
+      problems.push(`Row ${r.row}: ${r.data.parentFirstName} ${r.data.parentLastName} already has an application this season (same phone).`);
+    } else added++;
+  }
+  revalidatePath("/admin/applications");
+  const q = new URLSearchParams({ added: String(added), already: String(already), left: String(left) });
+  if (problems.length) q.set("problems", problems.slice(0, 20).join("\n"));
+  redirect(`/admin/applications/import?${q}`);
 }

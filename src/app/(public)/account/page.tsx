@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { currentGiver } from "@/lib/auth";
-import { formatDateShort, money } from "@/lib/format";
+import { ageText, formatDateShort, genderLabel, money } from "@/lib/format";
 import { Notice, PageHero } from "@/components/ui";
 import { createProfile, logout, requestLogin, saveTracking, updateProfile } from "./actions";
 import { ShipTo } from "@/components/ShipTo";
@@ -110,7 +110,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                   <div key={s.id} className="rounded-xl border border-black/5 p-4">
                     <div className="flex flex-wrap justify-between gap-2">
                       <p className="font-semibold">
-                        Angel #{s.angel.number} · {s.angel.gender === "GIRL" ? "Girl" : "Boy"}, age {s.angel.ageAtSeason}
+                        Angel #{s.angel.number} · {genderLabel(s.angel.gender)}, {ageText(s.angel.ageAtSeason)}
                       </p>
                       <span className="text-sm text-black/55">Christmas {s.season.year}</span>
                     </div>

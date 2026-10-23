@@ -115,7 +115,7 @@ export default async function FamilyPage({
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2 className="text-2xl">{angel.child.firstName}</h2>
                     <p className="text-sm text-black/55">
-                      {t.ageLine(angel.gender === "GIRL" ? f.girl : f.boy, angel.ageAtSeason)}
+                      {t.ageLine(angel.gender === "GIRL" ? f.girl : angel.gender === "BOY" ? f.boy : f.childWord, angel.ageAtSeason)}
                       {angel.number != null && <> · Angel #{angel.number}</>}
                     </p>
                   </div>
