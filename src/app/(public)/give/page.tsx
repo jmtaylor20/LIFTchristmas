@@ -47,7 +47,7 @@ export default async function Give({
         <Option
           n={1}
           title="Sponsor an angel's whole Christmas"
-          body={`Take on one child's complete wish list. It's perfect for families, small groups, Sunday school classes, and businesses. We suggest around ${money(season?.perChildBudgetCents ?? 15000)} per child.`}
+          body={`Take on one child's complete wish list. It's perfect for families, small groups, Sunday school classes, and businesses.${season?.perChildBudgetCents ? ` We suggest around ${money(season.perChildBudgetCents)} per child.` : ""}`}
         >
           {open ? (
             <Link href="/angels?view=whole" className="btn-primary">Choose an angel</Link>

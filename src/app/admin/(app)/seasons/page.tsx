@@ -67,7 +67,7 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
               Accept applications (turn off to close early)
             </label>
             <div className="grid gap-4 sm:grid-cols-3">
-              <Input label="Suggested spend per child" name="perChildBudget" defaultValue={money(editing.perChildBudgetCents)} />
+              <Input label="Suggested spend per child (optional)" name="perChildBudget" defaultValue={editing.perChildBudgetCents != null ? money(editing.perChildBudgetCents) : ""} placeholder="No suggested amount" />
               <Input label="Max wish-list items per child" name="maxItemsPerChild" type="number" defaultValue={editing.maxItemsPerChild} />
               <Input label="Approval cap (years per family)" name="approvalCapYears" type="number" defaultValue={editing.approvalCapYears} />
             </div>

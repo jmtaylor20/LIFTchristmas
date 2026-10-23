@@ -24,8 +24,8 @@ model Season {
   applicationDeadline  DateTime?
   wishlistDeadline     DateTime?
   giftDeadline         DateTime?
-  // Suggested spend per child, shown to sponsors as a guide.
-  perChildBudgetCents  Int       @default(15000)
+  // Suggested spend per child, shown to sponsors as a guide. Blank = no suggested amount.
+  perChildBudgetCents  Int?
   maxItemsPerChild     Int       @default(8)
   // Households may be approved at most this many seasons in total.
   approvalCapYears     Int       @default(5)
