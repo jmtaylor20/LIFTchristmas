@@ -133,8 +133,6 @@ const en = {
     approved: "Good news: you're approved!",
     approvedHow: (max: number) => `Please add up to ${max} wish-list items for each child, then press “Submit wish lists” at the bottom.`,
     listsDue: "Lists are due by",
-    tip: (budget: string | null) =>
-      `Tip: ${budget ? `a sponsor usually spends about ${budget} per child. ` : ""}Include a mix of needs (clothes, shoes, coats) and wants, and add a few lower-priced items.`,
     submittedOn: (date: string) => `Your wish lists were submitted on ${date}. Your children are on our Angel Tree.`,
     needChange: "Need to change something? Email",
     pastDeadline: "The wish-list deadline has passed. Please contact us if you need help.",
@@ -152,7 +150,7 @@ const en = {
     noItems: "No items yet.",
     about: (price: string) => `about ${price}`,
     item: "Item",
-    itemPh: "e.g. Winter coat",
+    itemPh: "Gift",
     details: "Size / color / details",
     detailsPh: "Youth L, blue",
     price: "About how much?",
@@ -344,8 +342,6 @@ const es: Dict = {
     approvedHow: (max) =>
       `Agregue hasta ${max} regalos a la lista de cada niño y luego presione “Enviar listas de deseos” al final de la página.`,
     listsDue: "Las listas se deben enviar a más tardar el",
-    tip: (budget) =>
-      `Consejo: ${budget ? `un patrocinador normalmente gasta unos ${budget} por niño. ` : ""}Incluya cosas que necesitan (ropa, zapatos, abrigos) y cosas que desean, y algunos artículos de menor precio.`,
     submittedOn: (date) => `Sus listas de deseos se enviaron el ${date}. Sus niños ya están en nuestro Árbol de Ángeles.`,
     needChange: "¿Necesita cambiar algo? Escriba a",
     pastDeadline: "La fecha límite para las listas ya pasó. Comuníquese con nosotros si necesita ayuda.",
@@ -363,7 +359,7 @@ const es: Dict = {
     noItems: "Todavía no hay regalos.",
     about: (price) => `aprox. ${price}`,
     item: "Regalo",
-    itemPh: "ej. Abrigo de invierno",
+    itemPh: "Regalo",
     details: "Talla / color / detalles",
     detailsPh: "Talla L juvenil, azul",
     price: "¿Cuánto cuesta más o menos?",
