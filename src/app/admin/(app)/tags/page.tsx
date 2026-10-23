@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { requireAdminSeason } from "@/lib/season";
-import { genderLabel } from "@/lib/format";
+import { ageText, genderLabel } from "@/lib/format";
 import { AdminTitle } from "@/components/admin";
 import { PrintButton } from "@/components/PrintButton";
 import { Star } from "@/components/SiteChrome";
@@ -43,7 +43,7 @@ export default async function Tags({ searchParams }: { searchParams: Promise<{ k
               <span className="font-display text-2xl font-semibold text-dusk-800">Angel #{a.number}</span>
               <Star className="h-5 w-5 text-gold-500" />
             </div>
-            <p className="text-black/70">{genderLabel(a.gender)}, age {a.ageAtSeason}</p>
+            <p className="text-black/70">{genderLabel(a.gender)}, {ageText(a.ageAtSeason)}</p>
             {kind === "bag" ? (
               <>
                 <p className="mt-2 text-lg font-bold">{a.application.household.parentLastName} family</p>

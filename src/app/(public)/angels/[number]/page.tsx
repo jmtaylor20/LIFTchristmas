@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
 import { currentGiver } from "@/lib/auth";
-import { formatDate, genderLabel, money } from "@/lib/format";
+import { ageText, formatDate, genderLabel, money } from "@/lib/format";
 import { Notice } from "@/components/ui";
 import { Star } from "@/components/SiteChrome";
 import { sponsorItems } from "../actions";
@@ -48,7 +48,7 @@ export default async function AngelPage({
         <div className="card h-fit bg-gradient-to-b from-dusk-600 to-dusk-500 text-white">
           <Star className="h-8 w-8 text-star-500" />
           <h1 className="mt-3 text-4xl text-white">Angel #{angel.number}</h1>
-          <p className="mt-1 text-white/80">{genderLabel(angel.gender)} · age {angel.ageAtSeason}</p>
+          <p className="mt-1 text-white/80">{genderLabel(angel.gender)} · {ageText(angel.ageAtSeason)}</p>
           <dl className="mt-5 space-y-1 text-sm text-white/85">
             <Row k="Shirt" v={angel.shirtSize} />
             <Row k="Pants" v={angel.pantsSize} />

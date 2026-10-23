@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { formatDateShort, genderLabel, money } from "@/lib/format";
+import { ageText, formatDateShort, genderLabel, money } from "@/lib/format";
 import { AdminTitle, ItemBadge } from "@/components/admin";
 import { Notice } from "@/components/ui";
 import {
@@ -46,7 +46,7 @@ export default async function AdminAngel({ params, searchParams }: { params: Pro
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="card">
           <p className="text-sm text-black/60">
-            {genderLabel(angel.gender)}, age {angel.ageAtSeason} · Shirt {angel.shirtSize || "—"} · Pants {angel.pantsSize || "—"} · Shoes {angel.shoeSize || "—"}
+            {genderLabel(angel.gender)}, {ageText(angel.ageAtSeason)} · Shirt {angel.shirtSize || "—"} · Pants {angel.pantsSize || "—"} · Shoes {angel.shoeSize || "—"}
             {angel.interests && <> · Loves {angel.interests}</>}
           </p>
           <p className="mt-1 text-sm">

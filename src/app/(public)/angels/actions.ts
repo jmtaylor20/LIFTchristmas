@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { str } from "@/lib/format";
+import { ageText, genderLabel, str } from "@/lib/format";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
 import { recognitionFields, upsertGiver } from "@/lib/givers";
@@ -67,7 +67,7 @@ export async function sponsorItems(fd: FormData) {
     to: email,
     subject: `Thank you for sponsoring Angel #${angel.number}!`,
     html: layout(`<p>Dear ${esc(firstName)},</p>
-<p>Thank you for sponsoring <strong>Angel #${angel.number}</strong> (${angel.gender === "GIRL" ? "girl" : "boy"}, age ${angel.ageAtSeason})! Here's what you've committed to give:</p>
+<p>Thank you for sponsoring <strong>Angel #${angel.number}</strong> (${genderLabel(angel.gender).toLowerCase()}, ${ageText(angel.ageAtSeason)})! Here's what you've committed to give:</p>
 <ul>${list}</ul>
 <p>Sizes: shirt ${esc(angel.shirtSize) || "—"}, pants ${esc(angel.pantsSize) || "—"}, shoes ${esc(angel.shoeSize) || "—"}.</p>
 ${

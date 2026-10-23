@@ -45,7 +45,7 @@ export default async function Family({ params }: { params: Promise<{ id: string 
               {h.children.map((c) => (
                 <tr key={c.id}>
                   <td>{c.firstName} {c.lastName}</td>
-                  <td className="text-xs">{genderLabel(c.gender)} · born {formatDate(c.birthDate, { timeZone: "UTC", month: "short" })}</td>
+                  <td className="text-xs">{genderLabel(c.gender)}{c.birthDate && <> · born {formatDate(c.birthDate, { timeZone: "UTC", month: "short" })}</>}{c.race && <> · {c.race}</>}</td>
                   <td className="text-xs">Served: {c.angels.map((a) => a.season.year).sort().join(", ") || "—"}</td>
                 </tr>
               ))}

@@ -9,7 +9,7 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 ## What's in it
 
 **Families**, in English or Spanish:
-- `/apply`: Christmas sponsorship application. It closes automatically at the application deadline.
+- `/apply`: Christmas sponsorship application, matching the ministry's Google Form: job, past help, other agencies, photo ID and income proof (photo or PDF, visible only to admins), and up to 5 children with sizes, race, and up to 5 wish-list items each. It closes automatically at the application deadline.
 - `/family/<private link>`: emailed to the parent. They see their status, build a wish list for each child once approved, see pickup details, and **send thank-you notes** (with an optional photo of a card) to their sponsors.
 - `/family`: re-sends a lost link.
 
@@ -38,6 +38,7 @@ Built with Next.js, Postgres (Supabase), and Prisma. Hosted on Netlify.
 
 **Ministry admin** (`/admin`):
 - Dashboard: applications to review, angel coverage, money received, fund balance, the dollar value still needed, items waiting on you, and reminder buttons.
+- **Import from Google Form** (Applications → Import): upload the form's CSV export. Each response becomes a pending application with its children and wish lists; re-uploading skips responses already imported. ID and pay-stub links open in the form owner's Google Drive. Children are marked girl/boy only when the parent's sizes say so; the owner sets the rest on each application.
 - Applications: approve, waitlist, or deny, with an email to the family in their language. **Each family can be approved at most 5 years**; the cap is adjustable per season and enforced on the server. To approve a family past the cap anyway, use **Override the cap** on their application. It needs the override password (`CAP_OVERRIDE_PASSWORD`, set in Netlify), and each override is recorded.
 - Sign-in: after 8 wrong passwords from one address, sign-in locks for 15 minutes.
 - Angels & Lists: each item's status (needed, committed, received, or "ministry buying" with the actual $ spent), how sponsors are delivering, tracking numbers, and adding sponsors by hand.

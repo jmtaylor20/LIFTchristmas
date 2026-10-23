@@ -71,6 +71,11 @@ export function toDateInput(d: Date | null | undefined) {
   return d.toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
 }
 
-export function genderLabel(g: "GIRL" | "BOY") {
-  return g === "GIRL" ? "Girl" : "Boy";
+export function genderLabel(g: "GIRL" | "BOY" | null | undefined) {
+  return g === "GIRL" ? "Girl" : g === "BOY" ? "Boy" : "Child";
+}
+
+/** "age 7", or "under 1" for babies. */
+export function ageText(age: number) {
+  return age < 1 ? "under 1" : `age ${age}`;
 }

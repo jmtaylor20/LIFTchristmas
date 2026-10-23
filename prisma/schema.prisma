@@ -78,8 +78,11 @@ model Child {
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   firstName   String
   lastName    String
-  birthDate   DateTime
-  gender      Gender
+  // Applications ask for age, so older records have a birth date and newer ones may not.
+  birthDate   DateTime?
+  // Unknown until the owner sets it for applications imported without it.
+  gender      Gender?
+  race        String?
   createdAt   DateTime  @default(now())
 
   angels Angel[]
@@ -112,10 +115,24 @@ model Application {
   address             String
   city                String
   zip                 String
-  adultsInHome        Int
+  adultsInHome        Int?
   monthlyIncomeCents  Int?
+  // Other agencies helping the family (names).
   assistancePrograms  String?
-  circumstances       String
+  circumstances       String?
+  employer            String?
+  jobLength           String?
+  // Has Community Christmas helped them before, and which years (as they told us).
+  priorHelp           Boolean?
+  priorHelpYears      String?
+  otherAgencyHelp     Boolean?
+  // Typed signature and the date they signed.
+  signatureName       String?
+  signedAt            DateTime?
+  // "web", or "import" for applications brought in from the Google Form.
+  source              String            @default("web")
+  // Identifies an imported row so importing the same file twice adds nothing.
+  importKey           String?           @unique
   churchHome          String?
   referredBy          String?
   agreedToTerms       Boolean           @default(false)
@@ -134,6 +151,7 @@ model Application {
   angels Angel[]
 
   thankYouNotes ThankYouNote[]
+  documents     ApplicationDocument[]
 
   @@unique([seasonId, householdId])
   @@index([status])
@@ -150,7 +168,7 @@ model Angel {
   // Public, anonymous tag number, e.g. "Angel #12". Assigned on approval.
   number        Int?
   ageAtSeason   Int
-  gender        Gender
+  gender        Gender?
   shirtSize     String?
   pantsSize     String?
   shoeSize      String?
@@ -164,6 +182,27 @@ model Angel {
   thankYouNotes ThankYouNote[]
 
   @@unique([seasonId, number])
+  @@index([applicationId])
+}
+
+enum DocumentKind {
+  PHOTO_ID
+  INCOME
+}
+
+// Photo ID and income proof attached to an application. Only admins can view them.
+model ApplicationDocument {
+  id            String       @id @default(cuid())
+  applicationId String
+  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  kind          DocumentKind
+  // Uploaded through the site...
+  data          Bytes?
+  contentType   String?
+  // ...or a link to the file (e.g. in the Google Form's Drive folder).
+  url           String?
+  createdAt     DateTime     @default(now())
+
   @@index([applicationId])
 }
 
