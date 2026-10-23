@@ -96,7 +96,7 @@ export default async function FamilyPage({
                     {t.listsDue} <strong>{longDate(season.wishlistDeadline, lang)}</strong>.
                   </>
                 )}
-                <span className="mt-1 block">{t.tip(money(season.perChildBudgetCents))}</span>
+                <span className="mt-1 block">{t.tip(season.perChildBudgetCents != null ? money(season.perChildBudgetCents) : null)}</span>
               </Notice>
             ) : app.listSubmittedAt ? (
               !app.pickedUpAt && (

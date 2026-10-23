@@ -68,7 +68,7 @@ function seasonFields(fd: FormData) {
     applicationDeadline: parseDeadline(str(fd, "applicationDeadline")),
     wishlistDeadline: parseDeadline(str(fd, "wishlistDeadline")),
     giftDeadline: parseDeadline(str(fd, "giftDeadline")),
-    perChildBudgetCents: parseMoneyToCents(fd.get("perChildBudget")) ?? 15000,
+    perChildBudgetCents: parseMoneyToCents(fd.get("perChildBudget")),
     maxItemsPerChild: Math.max(1, Math.min(25, Number(str(fd, "maxItemsPerChild")) || 8)),
     approvalCapYears: Math.max(1, Math.min(50, Number(str(fd, "approvalCapYears")) || 5)),
     amazonWishlistUrl: optStr(fd, "amazonWishlistUrl"),

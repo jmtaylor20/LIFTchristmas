@@ -135,7 +135,7 @@ export default async function Home() {
               n="01"
               icon="✦"
               title="Sponsor an angel"
-              body={`Take on a child's whole wish list as a family, class, or business (about ${money(season?.perChildBudgetCents ?? 15000)}), or choose just a few gifts.`}
+              body={`Take on a child's whole wish list as a family, class, or business${season?.perChildBudgetCents ? ` (about ${money(season.perChildBudgetCents)})` : ""}, or choose just a few gifts.`}
               href="/angels"
               cta="Visit the Angel Tree"
             />
