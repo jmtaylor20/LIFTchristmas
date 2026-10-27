@@ -7,7 +7,12 @@ import "./globals.css";
 const gelasio = Gelasio({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-gelasio", display: "swap" });
 const source = Source_Sans_3({ subsets: ["latin"], variable: "--font-source", display: "swap" });
 
+// Absolute base for share images and other metadata URLs. Without it Next.js
+// falls back to http://localhost:3000, which breaks link previews.
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://liftchristmas.com").replace(/\/$/, "");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: `${site.name} · ${site.communities}`, template: `%s · ${site.name}` },
   description: site.tagline,
   openGraph: { images: [brand.full] },
