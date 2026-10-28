@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { communityFor, createApplication, MAX_CHILDREN, MAX_DOCUMENT_BYTES, parseAge, WISHES_PER_CHILD, type NewApplication, type NewChild } from "@/lib/applications";
+import { isClothingSize, isShoeSize } from "@/lib/applicationLimits";
 import { phoneDigits, str } from "@/lib/format";
 import { applicationsAreOpen, getActiveSeason } from "@/lib/season";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
@@ -64,13 +65,14 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
     const firstName = at("childFirstName");
     if (!firstName || !at("childLastName") || age == null || (gender !== "GIRL" && gender !== "BOY")) return { error: t.errors.child };
     if (age > 18) return { error: t.errors.age(firstName) };
+    if (!isClothingSize(at("childClothing")) || !isShoeSize(at("childShoe"))) return { error: t.errors.sizes(firstName) };
     children.push({
       firstName,
       lastName: at("childLastName"),
       age,
       gender,
-      clothing: at("childClothing").slice(0, 100) || null,
-      shoe: at("childShoe").slice(0, 50) || null,
+      clothing: at("childClothing"),
+      shoe: at("childShoe"),
       race: at("childRace").slice(0, 100) || null,
       wishes: wishes
         .slice(i * WISHES_PER_CHILD, (i + 1) * WISHES_PER_CHILD)

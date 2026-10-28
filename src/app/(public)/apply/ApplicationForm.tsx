@@ -4,7 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { Field } from "@/components/ui";
 import { dict, type Lang } from "@/content/i18n";
 import { shrinkImage } from "@/lib/shrinkImage";
-import { MAX_CHILDREN, WISHES_PER_CHILD } from "@/lib/applicationLimits";
+import { CLOTHING_SIZES, MAX_CHILDREN, SHOE_SIZES, sizeGroupLabel, sizeLabel, WISHES_PER_CHILD } from "@/lib/applicationLimits";
 import { submitApplication, type ApplyState } from "./actions";
 
 export function ApplicationForm({ lang }: { lang: Lang }) {
@@ -102,8 +102,8 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
                   <option value="BOY">{t.boy}</option>
                 </select>
               </label>
-              <Field label={t.clothing} name="childClothing" placeholder={t.clothingPh} />
-              <Field label={t.shoe} name="childShoe" placeholder="3Y" />
+              <SizeSelect label={t.clothing} name="childClothing" groups={CLOTHING_SIZES} lang={lang} choose={t.choose} />
+              <SizeSelect label={t.shoe} name="childShoe" groups={SHOE_SIZES} lang={lang} choose={t.choose} />
               <Field label={t.race} name="childRace" className="sm:col-span-2" />
             </div>
             <div className="mt-3">
@@ -146,6 +146,41 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
         </button>
       </fieldset>
     </form>
+  );
+}
+
+function SizeSelect({
+  label,
+  name,
+  groups,
+  lang,
+  choose,
+}: {
+  label: string;
+  name: string;
+  groups: { group: string; sizes: string[] }[];
+  lang: Lang;
+  choose: string;
+}) {
+  return (
+    <label className="block">
+      <span className="label">
+        {label}
+        <span className="text-star-700"> *</span>
+      </span>
+      <select name={name} required className="input" defaultValue="">
+        <option value="">{choose}</option>
+        {groups.map((g) => (
+          <optgroup key={g.group} label={sizeGroupLabel(g.group, lang)}>
+            {g.sizes.map((s) => (
+              <option key={s} value={s}>
+                {sizeLabel(s, lang)}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
   );
 }
 
