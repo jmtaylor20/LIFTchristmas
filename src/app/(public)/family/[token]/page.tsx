@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { money } from "@/lib/format";
-import { wishlistsAreOpen } from "@/lib/season";
+import { getActiveSeason, wishlistsAreOpen } from "@/lib/season";
+import { SAMPLE_FAMILY_TOKEN, sampleFamily } from "@/lib/sampleFamily";
 import { Notice, PageHero } from "@/components/ui";
 import { LangToggle } from "@/components/LangToggle";
 import { site } from "@/content/site";
@@ -18,11 +19,15 @@ export default async function FamilyPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ error?: string; lang?: string; emailSaved?: string }>;
+  searchParams: Promise<{ error?: string; lang?: string; emailSaved?: string; step?: string }>;
 }) {
   const { token } = await params;
   const sp = await searchParams;
-  const app = await db.application.findUnique({
+  const isSample = token === SAMPLE_FAMILY_TOKEN;
+  const sampleSeason = isSample ? await getActiveSeason() : null;
+  const app = isSample
+    ? sampleSeason && sampleFamily(sampleSeason, sp.step === "lists" ? "lists" : "ready")
+    : await db.application.findUnique({
     where: { accessToken: token },
     include: {
       season: true,
@@ -41,7 +46,7 @@ export default async function FamilyPage({
   const f = dict[lang].form;
   const { season } = app;
   const listsOpen = wishlistsAreOpen(season);
-  const editable = app.status === "APPROVED" && !app.listSubmittedAt && listsOpen;
+  const editable = app.status === "APPROVED" && !app.listSubmittedAt && (listsOpen || isSample);
   const contact = <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>;
   const statusText =
     app.status === "APPROVED"
@@ -64,7 +69,19 @@ export default async function FamilyPage({
       </PageHero>
 
       <section className="container-page mt-10 max-w-4xl space-y-6">
-        <InstallApp app="LIFT Family" lang={lang} />
+        {isSample && (
+          <Notice tone="warn">
+            <strong>Sample page.</strong> This made-up family shows what parents see on their private page. Nothing here is saved,
+            and it isn&rsquo;t on the Angel Tree.{" "}
+            {sp.step === "lists" ? (
+              <a href={`/family/${SAMPLE_FAMILY_TOKEN}`} className="font-semibold">See it after lists are submitted →</a>
+            ) : (
+              <a href={`/family/${SAMPLE_FAMILY_TOKEN}?step=lists`} className="font-semibold">See it while making wish lists →</a>
+            )}
+          </Notice>
+        )}
+        <fieldset disabled={isSample} className="m-0 min-w-0 space-y-6 border-0 p-0">
+        {!isSample && <InstallApp app="LIFT Family" lang={lang} />}
         {app.status === "PENDING" && <Notice>{app.household.email ? t.pending(app.household.email) : t.pendingNoEmail}</Notice>}
         {sp.emailSaved && <Notice tone="success">{t.emailSaved}</Notice>}
         {!app.household.email && (
@@ -219,6 +236,7 @@ export default async function FamilyPage({
             )}
           </>
         )}
+        </fieldset>
         <p className="pt-4 text-center text-xs text-black/45">
           <a href={`/family?other=1&lang=${lang}`} className="text-black/45">{lang === "es" ? "¿No es su familia? Busque su página" : "Not your family? Find your page"}</a>
         </p>
