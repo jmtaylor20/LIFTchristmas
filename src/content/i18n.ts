@@ -135,6 +135,8 @@ const en = {
     addEmailButton: "Save my email",
     emailSaved: "Thank you! We emailed you this page's link, and we'll send updates there.",
     emailInvalid: "Please enter a valid email address.",
+    smsPickup: (first: string, details: string) =>
+      `Hi ${first}, this is LIFT Community Christmas with a reminder about gift pickup.\n\n${details}`,
     smsText: (first: string, link: string) =>
       `Hi ${first}, this is LIFT Community Christmas. Here is your family's private Christmas page, where you can check your status, see your children's wish lists, and find pickup details: ${link} Please save this link and don't share it.`,
     waitlist: "Your application is on our waiting list. We'll contact you if a spot opens up. Thank you for your patience.",
@@ -216,6 +218,12 @@ ${extra}${button}${pickup ? `<p><strong>Gift pickup:</strong> ${pickup}</p>` : "
     denied: (first: string, extra: string) => `<p>Hi ${first},</p>
 <p>Thank you for applying. We're sorry, but we are unable to sponsor your family this year.</p>${extra}
 <p>We'll be praying for you and your family this Christmas season.</p>`,
+    pickupSubject: "Reminder: Christmas gift pickup",
+    pickup: (first: string, details: string, button: string) => `<p>Hi ${first},</p>
+<p>This is a friendly reminder about picking up your children's Christmas gifts.</p>
+<p>${details}</p>
+${button}
+<p>Merry Christmas!</p>`,
     reminderSubject: "Reminder: please finish your children's wish lists",
     reminder: (first: string, due: string, button: string) => `<p>Hi ${first},</p>
 <p>This is a friendly reminder to finish and submit your children's Christmas wish lists by <strong>${due}</strong>. Sponsors can't choose your children until their lists are submitted.</p>
@@ -352,6 +360,7 @@ const es: Dict = {
     addEmailButton: "Guardar mi correo",
     emailSaved: "¡Gracias! Le enviamos el enlace de esta página por correo, y ahí le mandaremos las novedades.",
     emailInvalid: "Por favor escriba un correo electrónico válido.",
+    smsPickup: (first, details) => `Hola ${first}, le escribe LIFT Community Christmas para recordarle la entrega de regalos.\n\n${details}`,
     smsText: (first, link) =>
       `Hola ${first}, le escribe LIFT Community Christmas. Esta es la página navideña privada de su familia, donde puede ver el estado de su solicitud, las listas de deseos de sus niños y los detalles para recoger los regalos: ${link} Guarde este enlace y no lo comparta.`,
     waitlist: "Su solicitud está en nuestra lista de espera. Le avisaremos si se abre un lugar. Gracias por su paciencia.",
@@ -434,6 +443,12 @@ ${extra}${button}${pickup ? `<p><strong>Entrega de regalos:</strong> ${pickup}</
     denied: (first, extra) => `<p>Hola ${first}:</p>
 <p>Gracias por su solicitud. Lo sentimos, pero este año no podemos patrocinar a su familia.</p>${extra}
 <p>Estaremos orando por usted y su familia en esta Navidad.</p>`,
+    pickupSubject: "Recordatorio: entrega de regalos de Navidad",
+    pickup: (first, details, button) => `<p>Hola ${first}:</p>
+<p>Le recordamos los detalles para recoger los regalos de Navidad de sus niños.</p>
+<p>${details}</p>
+${button}
+<p>¡Feliz Navidad!</p>`,
     reminderSubject: "Recordatorio: por favor termine las listas de deseos de sus niños",
     reminder: (first, due, button) => `<p>Hola ${first}:</p>
 <p>Le recordamos terminar y enviar las listas de deseos navideñas de sus niños a más tardar el <strong>${due}</strong>. Los patrocinadores no pueden elegir a sus niños hasta que las listas se envíen.</p>

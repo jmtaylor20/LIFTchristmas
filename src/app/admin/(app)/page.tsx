@@ -5,8 +5,8 @@ import { seasonStats } from "@/lib/stats";
 import { formatDate, formatDateShort, money } from "@/lib/format";
 import { AdminTitle, Stat } from "@/components/admin";
 import { Notice, ProgressBar } from "@/components/ui";
-import { familiesNeedingLists, REMINDER_DAYS_BEFORE, sponsorsWithOpenGifts } from "@/lib/reminders";
-import { remindFamilies, remindSponsors } from "../actions";
+import { familiesNeedingLists, sponsorsWithOpenGifts } from "@/lib/reminders";
+import { remindFamilies, remindPickup, remindSponsors } from "../actions";
 import { InstallApp } from "@/components/InstallApp";
 
 export const metadata = { title: "Admin" };
@@ -41,6 +41,7 @@ export default async function Dashboard({
     ["Applications close", season.applicationDeadline],
     ["Wish lists due", season.wishlistDeadline],
     ["Gifts & money due", season.giftDeadline],
+    ["Pickup day", season.pickupDate],
   ] as const;
 
   return (
@@ -116,7 +117,7 @@ export default async function Dashboard({
 
           <h3 className="mt-6 text-lg">Reminders</h3>
           <p className="text-xs text-black/55">
-            Sent automatically {REMINDER_DAYS_BEFORE} days before each deadline. You can also send them now.
+            Sent automatically a few days before each deadline and before pickup day. You can also send them now.
           </p>
           <div className="mt-3 space-y-2 text-sm">
             <form action={remindFamilies} className="flex items-center justify-between gap-2">
@@ -127,6 +128,14 @@ export default async function Dashboard({
               <span>{openSponsors.length} sponsor{openSponsors.length === 1 ? " has" : "s have"} gifts not yet in</span>
               <button className="btn-outline btn-sm" disabled={openSponsors.length === 0}>Remind</button>
             </form>
+            <form action={remindPickup} className="flex items-center justify-between gap-2">
+              <span>Pickup reminder to approved families with email{!season.pickupInstructions && " (add pickup details first)"}</span>
+              <button className="btn-outline btn-sm" disabled={!season.pickupInstructions}>Send</button>
+            </form>
+            <Link href="/admin/pickup?show=noemail" className="flex items-center justify-between gap-2 text-dusk-700 no-underline">
+              <span>Families with no email: text them the pickup details</span>
+              <span className="btn-outline btn-sm">Open</span>
+            </Link>
             <a href="/admin/season-thanks" className="flex items-center justify-between gap-2 text-dusk-700 no-underline">
               <span>Christmas thank-you email to every giver</span>
               <span className="btn-outline btn-sm">Preview</span>

@@ -74,6 +74,33 @@ export async function sendListReminders(opts: Opts = {}) {
   return { sent, remaining: Math.max(0, todo.length - limit) };
 }
 
+/** Approved families who haven't picked up yet get the pickup details by email, once, a few days before pickup day. */
+export async function sendPickupReminders(opts: Opts = {}) {
+  const season = await getActiveSeason();
+  if (!season?.pickupInstructions || (season.pickupDate && season.pickupDate < new Date())) return { sent: 0, remaining: 0 };
+  const apps = await db.application.findMany({
+    where: { seasonId: season.id, status: "APPROVED", pickedUpAt: null, household: { email: { not: null } } },
+    include: { household: true },
+    orderBy: { pickupReminderSentAt: { sort: "asc", nulls: "first" } },
+  });
+  const todo = apps.filter((a) => due(a.pickupReminderSentAt, season.pickupDate, !!opts.force));
+  const limit = opts.limit ?? BATCH_SIZE;
+  const details = esc(season.pickupInstructions).replace(/\n/g, "<br/>");
+  let sent = 0;
+  for (const app of todo.slice(0, limit)) {
+    const t = dict[toLang(app.language)].email;
+    await sendEmail({
+      to: app.household.email!,
+      subject: t.pickupSubject,
+      html: layout(t.pickup(esc(app.household.parentFirstName), details, button(siteUrl(`/family/${app.accessToken}`), t.pageButton))),
+    });
+    await db.application.update({ where: { id: app.id }, data: { pickupReminderSentAt: new Date() } });
+    sent++;
+    await pause();
+  }
+  return { sent, remaining: Math.max(0, todo.length - limit) };
+}
+
 export async function sendSponsorReminders(opts: Opts = {}) {
   const season = await getActiveSeason();
   if (!season || (season.giftDeadline && season.giftDeadline < new Date())) return { sent: 0, remaining: 0 };
