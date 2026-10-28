@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { wishlistsAreOpen } from "@/lib/season";
 import { ageText, formatDate, genderLabel, money, phoneDigits } from "@/lib/format";
 import { siteUrl } from "@/lib/email";
 import { AdminTitle, AppBadge, ItemBadge } from "@/components/admin";
@@ -41,6 +42,7 @@ export default async function ApplicationDetail({
   const digits = phoneDigits(h.phone);
   const smsHref =
     digits.length === 10 ? `sms:+1${digits}?&body=${encodeURIComponent(dict[toLang(app.language)].family.smsText(h.parentFirstName, portal))}` : null;
+  const listsOpen = wishlistsAreOpen(app.season);
   const unknownGender = app.angels.filter((a) => !a.gender).length;
   const yn = (v: boolean | null) => (v == null ? null : v ? "Yes" : "No");
 
@@ -177,7 +179,11 @@ export default async function ApplicationDetail({
                 {app.listSubmittedAt ? (
                   <>
                     <span>Lists submitted {formatDate(app.listSubmittedAt)}.</span>
-                    <form action={unlockLists.bind(null, app.id)}><button className="btn-outline btn-sm">Unlock so parent can edit</button></form>
+                    {listsOpen ? (
+                      <form action={unlockLists.bind(null, app.id)}><button className="btn-outline btn-sm">Unlock so parent can edit</button></form>
+                    ) : (
+                      <span className="text-black/55">Locked after the wish-list deadline. Use &ldquo;Edit list&rdquo; on a child to make changes.</span>
+                    )}
                   </>
                 ) : (
                   <>

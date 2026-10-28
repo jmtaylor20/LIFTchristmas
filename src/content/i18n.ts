@@ -211,6 +211,12 @@ ${button}
 ${extra}${button}${pickup ? `<p><strong>Gift pickup:</strong> ${pickup}</p>` : ""}
 <p>Merry Christmas,<br/>${site}</p>`,
     approvedButton: "Make our wish lists",
+    approvedListsInSubject: "You're approved for Christmas sponsorship!",
+    approvedListsIn: (first: string, extra: string, button: string, pickup: string, site: string, contact: string) => `<p>Hi ${first},</p>
+<p><strong>Good news: your family has been approved for Christmas sponsorship!</strong></p>
+<p>Your children's wish lists from your application are now on our Angel Tree. If something needs to change, please email ${contact}.</p>
+${extra}${button}${pickup ? `<p><strong>Gift pickup:</strong> ${pickup}</p>` : ""}
+<p>Merry Christmas,<br/>${site}</p>`,
     decisionSubject: "Your Christmas sponsorship application",
     waitlist: (first: string, extra: string, button: string) => `<p>Hi ${first},</p>
 <p>Thank you for applying. Your family has been placed on our waiting list. We'll contact you if a spot opens.</p>${extra}${button}`,
@@ -436,6 +442,12 @@ ${button}
 ${extra}${button}${pickup ? `<p><strong>Entrega de regalos:</strong> ${pickup}</p>` : ""}
 <p>Feliz Navidad,<br/>${site}</p>`,
     approvedButton: "Hacer nuestras listas de deseos",
+    approvedListsInSubject: "¡Su familia fue aprobada para el patrocinio navideño!",
+    approvedListsIn: (first, extra, button, pickup, site, contact) => `<p>Hola ${first}:</p>
+<p><strong>¡Buenas noticias: su familia fue aprobada para el patrocinio navideño!</strong></p>
+<p>Las listas de deseos de sus niños que puso en su solicitud ya están en nuestro Árbol de Ángeles. Si necesita cambiar algo, escriba a ${contact}.</p>
+${extra}${button}${pickup ? `<p><strong>Entrega de regalos:</strong> ${pickup}</p>` : ""}
+<p>Feliz Navidad,<br/>${site}</p>`,
     decisionSubject: "Su solicitud de patrocinio navideño",
     waitlist: (first, extra, button) => `<p>Hola ${first}:</p>
 <p>Gracias por su solicitud. Su familia está en nuestra lista de espera. Le avisaremos si se abre un lugar.</p>${extra}${button}`,

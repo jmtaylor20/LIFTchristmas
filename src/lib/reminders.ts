@@ -74,6 +74,21 @@ export async function sendListReminders(opts: Opts = {}) {
   return { sent, remaining: Math.max(0, todo.length - limit) };
 }
 
+/**
+ * Once the wish-list deadline passes, every approved family's lists are locked
+ * in as they are (submitted or not) and go on the Angel Tree. Changes after
+ * that go through the ministry.
+ */
+export async function lockListsAfterDeadline() {
+  const season = await getActiveSeason();
+  if (!season?.wishlistDeadline || season.wishlistDeadline > new Date()) return { locked: 0 };
+  const r = await db.application.updateMany({
+    where: { seasonId: season.id, status: "APPROVED", listSubmittedAt: null },
+    data: { listSubmittedAt: new Date() },
+  });
+  return { locked: r.count };
+}
+
 /** Approved families who haven't picked up yet get the pickup details by email, once, a few days before pickup day. */
 export async function sendPickupReminders(opts: Opts = {}) {
   const season = await getActiveSeason();
