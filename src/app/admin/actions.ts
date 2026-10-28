@@ -7,7 +7,7 @@ import type { ApplicationStatus, ItemStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { clearAdminSession, requireAdmin, setAdminSession } from "@/lib/auth";
 import { safeEqual } from "@/lib/tokens";
-import { ADMIN_SEASON_COOKIE, getAdminSeason } from "@/lib/season";
+import { ADMIN_SEASON_COOKIE, getAdminSeason, wishlistsAreOpen } from "@/lib/season";
 import { approvedYears } from "@/lib/households";
 import { createApplication, parseGoogleFormCsv } from "@/lib/applications";
 import { normalizeEmail, optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
@@ -149,12 +149,15 @@ export async function decideApplication(id: string, fd: FormData) {
     }
   }
 
+  // After the wish-list deadline, approving locks in the list from the application.
+  const lockLists = status === "APPROVED" && !app.listSubmittedAt && !wishlistsAreOpen(app.season);
   await db.$transaction(async (tx) => {
     await tx.application.update({
       where: { id },
       data: {
         status,
         decidedAt: status === "PENDING" ? null : new Date(),
+        ...(lockLists ? { listSubmittedAt: new Date() } : {}),
         adminNotes: optStr(fd, "adminNotes") ?? app.adminNotes,
         ...(capOverride ? { capOverrideAt: new Date() } : {}),
       },
@@ -177,15 +180,18 @@ export async function decideApplication(id: string, fd: FormData) {
     const extra = message ? `<p>${esc(message).replace(/\n/g, "<br/>")}</p>` : "";
     const due = app.season.wishlistDeadline ? longDate(app.season.wishlistDeadline, lang) : null;
     const pickup = app.season.pickupInstructions ? esc(app.season.pickupInstructions).replace(/\n/g, "<br/>") : "";
+    const listsLocked = lockLists || !!app.listSubmittedAt;
     const html =
       status === "APPROVED"
-        ? t.approved(first, due, extra, button(link, t.approvedButton), pickup, esc(site.name))
+        ? listsLocked
+          ? t.approvedListsIn(first, extra, button(link, t.pageButton), pickup, esc(site.name), esc(site.contactEmail))
+          : t.approved(first, due, extra, button(link, t.approvedButton), pickup, esc(site.name))
         : status === "WAITLIST"
           ? t.waitlist(first, extra, button(link, t.statusButton))
           : t.denied(first, extra);
     await sendEmail({
       to: app.household.email,
-      subject: status === "APPROVED" ? t.approvedSubject : t.decisionSubject,
+      subject: status === "APPROVED" ? (listsLocked ? t.approvedListsInSubject : t.approvedSubject) : t.decisionSubject,
       html: layout(html),
     });
   }
