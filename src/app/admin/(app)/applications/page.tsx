@@ -76,7 +76,7 @@ export default async function Applications({ searchParams }: { searchParams: Pro
             </thead>
             <tbody>
               {apps.map((a) => {
-                const prior = a.household.applications.filter((x) => x.seasonId !== season.id).length;
+                const prior = a.household.applications.filter((x) => x.seasonId !== season.id).length + (a.household.priorYearsSponsored ?? 0);
                 const atCap = prior >= season.approvalCapYears;
                 return (
                   <tr key={a.id}>
@@ -91,6 +91,7 @@ export default async function Applications({ searchParams }: { searchParams: Pro
                     <td data-label="Years approved">
                       <span className={atCap ? "font-semibold text-star-700" : ""}>
                         {prior} prior
+                        {a.household.priorYearsSponsored == null && a.priorHelp && " (not checked)"}
                         {atCap && " · at cap"}
                       </span>
                     </td>

@@ -44,7 +44,8 @@ export default async function Families({ searchParams }: { searchParams: Promise
             <tbody>
               {households.map((h) => {
                 const approved = h.applications.filter((a) => a.status === "APPROVED").map((a) => a.season.year);
-                const remaining = Math.max(0, season.approvalCapYears - approved.length);
+                const before = h.priorYearsSponsored ?? 0;
+                const remaining = Math.max(0, season.approvalCapYears - approved.length - before);
                 return (
                   <tr key={h.id}>
                     <td data-label="Family">
@@ -53,7 +54,7 @@ export default async function Families({ searchParams }: { searchParams: Promise
                     </td>
                     <td data-label="Children">{h._count.children}</td>
                     <td data-label="Years applied" className="text-xs">{h.applications.map((a) => a.season.year).join(", ")}</td>
-                    <td data-label="Years approved">{approved.length} <span className="text-xs text-black/45">{approved.length > 0 && `(${approved.join(", ")})`}</span></td>
+                    <td data-label="Years approved">{approved.length + before} <span className="text-xs text-black/45">{[before > 0 && `${before} before this website`, approved.length > 0 && approved.join(", ")].filter(Boolean).join(" · ")}</span></td>
                     <td data-label="Remaining" className={remaining === 0 ? "font-semibold text-star-700" : ""}>{remaining === 0 ? "At cap" : remaining}</td>
                   </tr>
                 );
