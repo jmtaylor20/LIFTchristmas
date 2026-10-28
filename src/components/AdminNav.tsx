@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export const adminNav = [
   { href: "/admin", label: "Dashboard", icon: "⌂" },
-  { href: "/admin/applications", label: "Applications", icon: "✎" },
+  { href: "/admin/applications", label: "Applications", short: "Apps", icon: "✎" },
   { href: "/admin/angels", label: "Angels & Lists", short: "Angels", icon: "✦" },
   { href: "/admin/sponsors", label: "Givers", icon: "♡" },
   { href: "/admin/donations", label: "Money & Gifts", short: "Money", icon: "$" },
@@ -69,7 +69,7 @@ export function MobileHeader({
 
   return (
     <div className="no-print sticky top-0 z-40 lg:hidden">
-      <div className="flex items-center justify-between gap-3 bg-dusk-900 px-4 py-3 text-white">
+      <div className="flex items-center justify-between gap-3 bg-dusk-900 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 text-white">
         <Link href="/admin" className="flex items-center gap-2 text-white no-underline">
           <span className="text-gold-300">✦</span>
           <span className="font-display text-lg">LIFT Admin</span>
@@ -85,7 +85,7 @@ export function MobileHeader({
         </button>
       </div>
       {open && (
-        <div className="max-h-[calc(100dvh-56px)] overflow-y-auto bg-dusk-800 px-4 pt-3 pb-6 text-white shadow-xl">
+        <div className="max-h-[calc(100dvh-8rem)] overflow-y-auto bg-dusk-800 px-4 pt-3 pb-6 text-white shadow-xl">
           <div className="mb-3">{seasonSwitcher}</div>
           <nav className="grid grid-cols-2 gap-2">
             {items.map((n) => (
@@ -115,7 +115,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Admin shortcuts"
-      className="no-print fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-black/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="no-print fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-black/10 bg-white pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-2px_10px_rgba(0,0,0,0.05)] lg:hidden"
     >
       {tabs.map((href) => {
         const n = adminNav.find((x) => x.href === href)!;
@@ -124,10 +124,10 @@ export function MobileTabBar() {
           <Link
             key={href}
             href={href}
-            className={`flex flex-col items-center gap-0.5 py-2 text-[11px] no-underline ${on ? "font-semibold text-dusk-700" : "text-black/50"}`}
+            className={`flex min-w-0 flex-col items-center gap-1 px-0.5 pt-3 pb-2 text-[0.8rem] leading-tight no-underline ${on ? "font-semibold text-dusk-700" : "text-black/60"}`}
           >
-            <span aria-hidden className={`text-lg leading-none ${on ? "text-gold-500" : ""}`}>{n.icon}</span>
-            {n.short ?? n.label}
+            <span aria-hidden className={`text-2xl leading-none ${on ? "text-gold-500" : ""}`}>{n.icon}</span>
+            <span className="max-w-full truncate">{n.short ?? n.label}</span>
           </Link>
         );
       })}

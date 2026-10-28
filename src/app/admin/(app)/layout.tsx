@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const seasonSwitcher =
     seasons.length > 0 ? (
       <form action={switchSeason}>
-        <label className="text-[11px] tracking-wider text-white/50 uppercase">Viewing season</label>
+        <label className="text-xs tracking-wider text-white/60 uppercase">Viewing season</label>
         <div className="mt-1 flex gap-2">
           <select name="seasonId" defaultValue={season?.id} className="w-full rounded-md bg-white/10 px-2 py-1.5 text-sm text-white">
             {seasons.map((s) => (
@@ -45,7 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="text-2xl text-gold-300">✦</span>
           <div className="leading-tight">
             <p className="font-display text-lg text-white">LIFT Admin</p>
-            <p className="text-[11px] tracking-widest text-gold-300 uppercase">Community Christmas</p>
+            <p className="text-xs tracking-widest text-gold-300 uppercase">Community Christmas</p>
           </div>
         </div>
         {seasonSwitcher && <div className="px-5 pb-4">{seasonSwitcher}</div>}
@@ -55,7 +55,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {signOut}
         </div>
       </aside>
-      <div className="min-w-0 px-4 pt-5 pb-28 sm:px-8 sm:pt-8 lg:pb-10">
+      <div className="min-w-0 px-4 pt-5 pb-36 sm:px-8 sm:pt-8 lg:pb-10">
         {!season && (
           <div className="card mb-6 max-w-2xl border-star-100 bg-star-50/60">
             <h1 className="text-2xl">Welcome! Let&rsquo;s set up your Christmas season</h1>

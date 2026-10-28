@@ -29,6 +29,22 @@
 }
 
 @layer base {
+  /* Slightly larger type everywhere (sizes are in rem, so this scales the
+     whole site), a little more on phones. Print stays at the normal size so
+     gift tags and labels keep their layout. */
+  html {
+    font-size: 106.25%;
+  }
+  @media (max-width: 640px) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+  @media print {
+    html {
+      font-size: 100%;
+    }
+  }
   body {
     @apply bg-cream font-sans text-ink antialiased;
   }
