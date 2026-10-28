@@ -19,7 +19,7 @@ import { isSandbox } from "@/lib/sandbox";
 import { parseNeedLines } from "@/lib/needs";
 import { deleteAllData, loadSampleData } from "@/lib/sampleData";
 import { sendSeasonThanks, thankForInKindGift, thankForReceivedGifts, thankPartnerIfLive } from "@/lib/thanks";
-import { sendListReminders, sendSponsorReminders } from "@/lib/reminders";
+import { sendListReminders, sendPickupReminders, sendSponsorReminders } from "@/lib/reminders";
 import { dict, longDate, toLang } from "@/content/i18n";
 
 // ------------------------------------------------------------------ session
@@ -68,6 +68,7 @@ function seasonFields(fd: FormData) {
     applicationDeadline: parseDeadline(str(fd, "applicationDeadline")),
     wishlistDeadline: parseDeadline(str(fd, "wishlistDeadline")),
     giftDeadline: parseDeadline(str(fd, "giftDeadline")),
+    pickupDate: parseDeadline(str(fd, "pickupDate")),
     perChildBudgetCents: parseMoneyToCents(fd.get("perChildBudget")),
     maxItemsPerChild: Math.max(1, Math.min(25, Number(str(fd, "maxItemsPerChild")) || 8)),
     approvalCapYears: Math.max(1, Math.min(50, Number(str(fd, "approvalCapYears")) || 5)),
@@ -466,6 +467,12 @@ export async function remindSponsors() {
   await requireAdmin();
   const r = await sendSponsorReminders({ force: true });
   redirect(`/admin?reminded=sponsors&sent=${r.sent}&remaining=${r.remaining}`);
+}
+
+export async function remindPickup() {
+  await requireAdmin();
+  const r = await sendPickupReminders({ force: true });
+  redirect(`/admin?reminded=families about pickup&sent=${r.sent}&remaining=${r.remaining}`);
 }
 
 // --------------------------------------------------------------- pickup day

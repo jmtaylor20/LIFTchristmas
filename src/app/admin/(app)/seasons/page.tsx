@@ -61,6 +61,7 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
               <DateField label="Applications close" name="applicationDeadline" value={editing.applicationDeadline} />
               <DateField label="Wish lists due" name="wishlistDeadline" value={editing.wishlistDeadline} />
               <DateField label="Gifts, money & sponsors due" name="giftDeadline" value={editing.giftDeadline} />
+              <DateField label="Pickup day" name="pickupDate" value={editing.pickupDate} />
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="applicationsOpen" defaultChecked={editing.applicationsOpen} className="h-4 w-4 accent-dusk-700" />
@@ -78,7 +79,7 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
             <Area label="Gift drop-off instructions (shown to sponsors)" name="dropOffInstructions" defaultValue={editing.dropOffInstructions} placeholder="Drop off unwrapped gifts at … between …" />
             <Area label="Shipping address for online orders (leave blank to turn off shipping)" name="shippingAddress" defaultValue={editing.shippingAddress} placeholder={"123 Main St\nTallassee, AL 36078"} />
             <Area label="Check / in-person giving instructions (shown on Donate page)" name="donationInstructions" defaultValue={editing.donationInstructions} placeholder="Make checks payable to … and mail to …" />
-            <Area label="Gift pickup details (shown to approved families, in their approval email)" name="pickupInstructions" defaultValue={editing.pickupInstructions} placeholder="Pickup is Saturday, Dec. 19, 9am–noon at … Please bring your ID." />
+            <Area label="Gift pickup details (shown to approved families, in their approval email, and in the pickup reminder sent before pickup day)" name="pickupInstructions" defaultValue={editing.pickupInstructions} placeholder="Pickup is Saturday, Dec. 19, 9am–noon at … Please bring your ID." />
             <button className="btn-green">Save settings</button>
           </form>
         )}

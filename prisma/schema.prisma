@@ -38,6 +38,8 @@ model Season {
   donationInstructions String?
   // Shown to approved families: when and where to pick up gifts.
   pickupInstructions   String?
+  // Pickup day; families get a reminder with the pickup details a few days before.
+  pickupDate           DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -143,6 +145,7 @@ model Application {
   listSubmittedAt     DateTime?
   listReminderSentAt  DateTime?
   pickedUpAt          DateTime?
+  pickupReminderSentAt DateTime?
   // Set when the owner approved a family past the approval cap using the override password.
   capOverrideAt       DateTime?
   createdAt           DateTime          @default(now())
