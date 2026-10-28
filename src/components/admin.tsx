@@ -13,7 +13,7 @@ export function Stat({ label, value, sub, tone = "default" }: { label: string; v
   const tones = { default: "text-dusk-800", red: "text-star-700", green: "text-dusk-600", gold: "text-gold-500" };
   return (
     <div className="card p-4">
-      <p className="text-[11px] font-semibold tracking-wide text-black/50 uppercase sm:text-xs">{label}</p>
+      <p className="text-xs font-semibold tracking-wide text-black/55 uppercase">{label}</p>
       <p className={`mt-1 font-display text-2xl font-semibold sm:text-3xl ${tones[tone]}`}>{value}</p>
       {sub && <p className="mt-1 text-xs text-black/55">{sub}</p>}
     </div>
