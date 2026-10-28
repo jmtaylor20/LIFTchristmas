@@ -140,7 +140,7 @@ export async function decideApplication(id: string, fd: FormData) {
   let capOverride = false;
   if (status === "APPROVED" && app.status !== "APPROVED") {
     const years = await approvedYears(app.householdId, app.seasonId);
-    if (years.length >= app.season.approvalCapYears) {
+    if (years.length + (app.household.priorYearsSponsored ?? 0) >= app.season.approvalCapYears) {
       const given = str(fd, "overridePassword");
       const expected = process.env.CAP_OVERRIDE_PASSWORD;
       if (!given) redirect(`/admin/applications/${id}?error=cap`);
@@ -731,4 +731,17 @@ export async function setFamilyEmail(applicationId: string, fd: FormData) {
     html: layout(t.link(esc(app.household.parentFirstName), button(siteUrl(`/family/${app.accessToken}`), t.pageButton))),
   });
   redirect(`/admin/applications/${applicationId}?saved=email`);
+}
+
+/** The owner's own count of years a family was sponsored before this website. */
+export async function setPriorYears(applicationId: string, fd: FormData) {
+  await requireAdmin();
+  const raw = str(fd, "priorYears");
+  const n = raw === "" ? null : Math.max(0, Math.min(20, Math.floor(Number(raw))));
+  if (n !== null && Number.isNaN(n)) return;
+  const app = await db.application.findUnique({ where: { id: applicationId }, select: { householdId: true } });
+  if (!app) return;
+  await db.household.update({ where: { id: app.householdId }, data: { priorYearsSponsored: n } });
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/applications/${applicationId}?saved=years`);
 }

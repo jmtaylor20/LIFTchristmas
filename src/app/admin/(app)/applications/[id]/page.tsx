@@ -6,7 +6,7 @@ import { ageText, formatDate, genderLabel, money, phoneDigits } from "@/lib/form
 import { siteUrl } from "@/lib/email";
 import { AdminTitle, AppBadge, ItemBadge } from "@/components/admin";
 import { Notice } from "@/components/ui";
-import { decideApplication, lockLists, setChildGender, setFamilyEmail, unlockLists } from "../../../actions";
+import { decideApplication, lockLists, setChildGender, setFamilyEmail, setPriorYears, unlockLists } from "../../../actions";
 import { dict, toLang } from "@/content/i18n";
 
 export const metadata = { title: "Application" };
@@ -37,7 +37,9 @@ export default async function ApplicationDetail({
   if (!app) notFound();
   const h = app.household;
   const otherApproved = h.applications.filter((a) => a.status === "APPROVED" && a.id !== app.id);
-  const atCap = otherApproved.length >= app.season.approvalCapYears;
+  const priorYears = h.priorYearsSponsored ?? 0;
+  const yearsUsed = otherApproved.length + priorYears;
+  const atCap = yearsUsed >= app.season.approvalCapYears;
   const portal = siteUrl(`/family/${app.accessToken}`);
   const digits = phoneDigits(h.phone);
   const smsHref =
@@ -57,7 +59,7 @@ export default async function ApplicationDetail({
         {sp.error === "email" && <Notice tone="error">That email address doesn&rsquo;t look right.</Notice>}
         {sp.error === "cap" && (
           <Notice tone="error">
-            This family has already been approved {otherApproved.length} years, which meets the {app.season.approvalCapYears}-year cap. To
+            This family has already been sponsored {yearsUsed} years, which meets the {app.season.approvalCapYears}-year cap. To
             make an exception, use &ldquo;Override the cap&rdquo; below.
           </Notice>
         )}
@@ -70,14 +72,18 @@ export default async function ApplicationDetail({
             Set <strong>boy or girl</strong> for {unknownGender} child{unknownGender === 1 ? "" : "ren"} below. Sponsors see it on the Angel Tree.
           </Notice>
         )}
-        {app.priorHelp && app.priorHelpYears && (
+        {app.priorHelp && app.priorHelpYears && h.priorYearsSponsored == null && (
           <Notice>
-            <strong>Helped before (as the family told us):</strong> {app.priorHelpYears}. Check this against the {app.season.approvalCapYears}-year cap.
+            <strong>Helped before (as the family told us):</strong> {app.priorHelpYears}. Set the real number under &ldquo;Years sponsored
+            before&rdquo; so it counts toward the {app.season.approvalCapYears}-year cap.
           </Notice>
         )}
         {atCap && !sp.error && (
           <Notice tone="warn">
-            <strong>Approval cap reached:</strong> approved in {otherApproved.map((a) => a.season.year).join(", ")} ({otherApproved.length} of {app.season.approvalCapYears} years).
+            <strong>Approval cap reached:</strong> {yearsUsed} of {app.season.approvalCapYears} years
+            {priorYears > 0 && <> ({priorYears} before this website{otherApproved.length > 0 && ", "}</>}
+            {otherApproved.length > 0 && <>{priorYears === 0 && " ("}approved in {otherApproved.map((a) => a.season.year).join(", ")}</>}
+            {(priorYears > 0 || otherApproved.length > 0) && ")"}.
           </Notice>
         )}
       </div>
@@ -197,6 +203,24 @@ export default async function ApplicationDetail({
         </div>
 
         <div className="space-y-6">
+          <form action={setPriorYears.bind(null, app.id)} className="card space-y-2">
+              <label className="block">
+                <span className="text-lg font-display text-dusk-700">Years sponsored before this website</span>
+                <select name="priorYears" defaultValue={h.priorYearsSponsored ?? ""} className="input">
+                  <option value="">Not checked yet</option>
+                  {Array.from({ length: 11 }, (_, n) => (
+                    <option key={n} value={n}>
+                      {n === 0 ? "None" : `${n} year${n === 1 ? "" : "s"}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="btn-outline btn-sm">Save</button>
+              <p className="text-xs text-black/50">
+                Your own count from ministry records, not what the family wrote
+                {app.priorHelpYears ? <> (they said: &ldquo;{app.priorHelpYears}&rdquo;)</> : null}. It counts toward the cap.
+              </p>
+            </form>
           <form action={decideApplication.bind(null, app.id)} className="card space-y-3">
             <h2 className="text-xl">Decision</h2>
             <div className="grid grid-cols-2 gap-2">
@@ -269,7 +293,8 @@ export default async function ApplicationDetail({
           <div className="card">
             <h2 className="text-lg">History</h2>
             <p className="text-sm text-black/60">
-              Approved {otherApproved.length + (app.status === "APPROVED" ? 1 : 0)} of {app.season.approvalCapYears} allowed years
+              Sponsored {yearsUsed + (app.status === "APPROVED" ? 1 : 0)} of {app.season.approvalCapYears} allowed years
+              {priorYears > 0 && <> (including {priorYears} before this website)</>}
             </p>
             <ul className="mt-2 space-y-1 text-sm">
               {h.applications.map((a) => (

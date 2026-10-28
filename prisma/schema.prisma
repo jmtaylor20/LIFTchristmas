@@ -64,6 +64,9 @@ model Household {
   city            String?
   zip             String?
   adminNotes      String?
+  // Years the ministry sponsored this family before this website, as the owner
+  // verified them (not what the family reported). Counts toward the approval cap.
+  priorYearsSponsored Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
