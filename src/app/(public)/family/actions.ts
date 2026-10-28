@@ -146,3 +146,22 @@ export async function submitThankYou(token: string, _prev: ThankYouState, fd: Fo
   revalidatePath(`/family/${token}`);
   return { ok: true };
 }
+
+/** A family with no email on file adds one, and we email them their link. */
+export async function addFamilyEmail(token: string, fd: FormData) {
+  const app = await db.application.findUnique({ where: { accessToken: token }, include: { household: true } });
+  if (!app) return;
+  const lang = toLang(app.language);
+  const email = str(fd, "email").slice(0, 200);
+  // Only fills in a missing email; changing one on file goes through the ministry.
+  if (app.household.email) redirect(`/family/${token}`);
+  if (!/^\S+@\S+\.\S+$/.test(email)) redirect(`/family/${token}?error=email#email`);
+  await db.household.update({ where: { id: app.householdId }, data: { email, emailNormalized: normalizeEmail(email) } });
+  const t = dict[lang].email;
+  await sendEmail({
+    to: email,
+    subject: t.linkSubject(site.name),
+    html: layout(t.link(esc(app.household.parentFirstName), button(siteUrl(`/family/${token}`), t.pageButton))),
+  });
+  redirect(`/family/${token}?emailSaved=1#email`);
+}

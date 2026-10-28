@@ -6,7 +6,7 @@ import { Notice, PageHero } from "@/components/ui";
 import { LangToggle } from "@/components/LangToggle";
 import { site } from "@/content/site";
 import { dict, longDate, toLang } from "@/content/i18n";
-import { addItem, removeItem, submitLists, updateAngelDetails } from "../actions";
+import { addFamilyEmail, addItem, removeItem, submitLists, updateAngelDetails } from "../actions";
 import { ThankYouForm } from "./ThankYouForm";
 import { InstallApp } from "@/components/InstallApp";
 
@@ -18,7 +18,7 @@ export default async function FamilyPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ error?: string; lang?: string }>;
+  searchParams: Promise<{ error?: string; lang?: string; emailSaved?: string }>;
 }) {
   const { token } = await params;
   const sp = await searchParams;
@@ -65,7 +65,19 @@ export default async function FamilyPage({
 
       <section className="container-page mt-10 max-w-4xl space-y-6">
         <InstallApp app="LIFT Family" lang={lang} />
-        {app.status === "PENDING" && <Notice>{t.pending(app.household.email ?? "")}</Notice>}
+        {app.status === "PENDING" && <Notice>{app.household.email ? t.pending(app.household.email) : t.pendingNoEmail}</Notice>}
+        {sp.emailSaved && <Notice tone="success">{t.emailSaved}</Notice>}
+        {!app.household.email && (
+          <form id="email" action={addFamilyEmail.bind(null, token)} className="card space-y-3">
+            <h2 className="text-xl">{t.addEmailTitle}</h2>
+            <p className="text-sm text-black/65">{t.addEmailBody}</p>
+            {sp.error === "email" && <p className="text-sm text-star-800">{t.emailInvalid}</p>}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input name="email" type="email" required autoComplete="email" placeholder={f.email} aria-label={f.email} className="input sm:max-w-sm" />
+              <button className="btn-green">{t.addEmailButton}</button>
+            </div>
+          </form>
+        )}
         {app.status === "WAITLIST" && <Notice tone="warn">{t.waitlist}</Notice>}
         {app.status === "DENIED" && (
           <Notice tone="warn">

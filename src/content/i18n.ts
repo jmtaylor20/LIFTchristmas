@@ -128,6 +128,15 @@ const en = {
     statusDenied: "Not approved this year",
     pending: (email: string) =>
       `Thank you for applying! Our team is reviewing applications now. We'll email ${email} when a decision is made. You can come back to this page any time.`,
+    pendingNoEmail:
+      "Thank you for applying! Our team is reviewing applications now. We'll call or text you when a decision is made. You can come back to this page any time.",
+    addEmailTitle: "Get updates by email",
+    addEmailBody: "Add your email and we'll send you this page's link, plus updates about your application, wish lists, and gift pickup.",
+    addEmailButton: "Save my email",
+    emailSaved: "Thank you! We emailed you this page's link, and we'll send updates there.",
+    emailInvalid: "Please enter a valid email address.",
+    smsText: (first: string, link: string) =>
+      `Hi ${first}, this is LIFT Community Christmas. Here is your family's private Christmas page, where you can check your status, see your children's wish lists, and find pickup details: ${link} Please save this link and don't share it.`,
     waitlist: "Your application is on our waiting list. We'll contact you if a spot opens up. Thank you for your patience.",
     denied: "We're sorry, we aren't able to sponsor your family this year. If you have questions, please email",
     approved: "Good news: you're approved!",
@@ -336,6 +345,15 @@ const es: Dict = {
     statusDenied: "No aprobada este año",
     pending: (email) =>
       `¡Gracias por su solicitud! Nuestro equipo está revisando las solicitudes. Le escribiremos a ${email} cuando se tome una decisión. Puede volver a esta página cuando quiera.`,
+    pendingNoEmail:
+      "¡Gracias por su solicitud! Nuestro equipo está revisando las solicitudes. Le llamaremos o le enviaremos un mensaje de texto cuando se tome una decisión. Puede volver a esta página cuando quiera.",
+    addEmailTitle: "Reciba novedades por correo",
+    addEmailBody: "Agregue su correo y le enviaremos el enlace de esta página, además de novedades sobre su solicitud, las listas de deseos y la entrega de regalos.",
+    addEmailButton: "Guardar mi correo",
+    emailSaved: "¡Gracias! Le enviamos el enlace de esta página por correo, y ahí le mandaremos las novedades.",
+    emailInvalid: "Por favor escriba un correo electrónico válido.",
+    smsText: (first, link) =>
+      `Hola ${first}, le escribe LIFT Community Christmas. Esta es la página navideña privada de su familia, donde puede ver el estado de su solicitud, las listas de deseos de sus niños y los detalles para recoger los regalos: ${link} Guarde este enlace y no lo comparta.`,
     waitlist: "Su solicitud está en nuestra lista de espera. Le avisaremos si se abre un lugar. Gracias por su paciencia.",
     denied: "Lo sentimos, este año no podemos patrocinar a su familia. Si tiene preguntas, escriba a",
     approved: "¡Buenas noticias: su familia fue aprobada!",

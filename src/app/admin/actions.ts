@@ -10,7 +10,7 @@ import { safeEqual } from "@/lib/tokens";
 import { ADMIN_SEASON_COOKIE, getAdminSeason } from "@/lib/season";
 import { approvedYears } from "@/lib/households";
 import { createApplication, parseGoogleFormCsv } from "@/lib/applications";
-import { optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
+import { normalizeEmail, optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
 import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
 import { site } from "@/content/site";
@@ -701,4 +701,21 @@ export async function importApplications(fd: FormData) {
   const q = new URLSearchParams({ added: String(added), already: String(already), left: String(left) });
   if (problems.length) q.set("problems", problems.slice(0, 20).join("\n"));
   redirect(`/admin/applications/import?${q}`);
+}
+
+/** Saves a parent's email (e.g. for a family imported without one) and emails them their family link. */
+export async function setFamilyEmail(applicationId: string, fd: FormData) {
+  await requireAdmin();
+  const email = str(fd, "email").slice(0, 200);
+  const app = await db.application.findUnique({ where: { id: applicationId }, include: { household: true } });
+  if (!app) return;
+  if (!/^\S+@\S+\.\S+$/.test(email)) redirect(`/admin/applications/${applicationId}?error=email`);
+  await db.household.update({ where: { id: app.householdId }, data: { email, emailNormalized: normalizeEmail(email) } });
+  const t = dict[toLang(app.language)].email;
+  await sendEmail({
+    to: email,
+    subject: t.linkSubject(site.name),
+    html: layout(t.link(esc(app.household.parentFirstName), button(siteUrl(`/family/${app.accessToken}`), t.pageButton))),
+  });
+  redirect(`/admin/applications/${applicationId}?saved=email`);
 }

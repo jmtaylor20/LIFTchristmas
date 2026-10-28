@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { ageText, formatDate, genderLabel, money } from "@/lib/format";
+import { ageText, formatDate, genderLabel, money, phoneDigits } from "@/lib/format";
 import { siteUrl } from "@/lib/email";
 import { AdminTitle, AppBadge, ItemBadge } from "@/components/admin";
 import { Notice } from "@/components/ui";
-import { decideApplication, lockLists, setChildGender, unlockLists } from "../../../actions";
+import { decideApplication, lockLists, setChildGender, setFamilyEmail, unlockLists } from "../../../actions";
+import { dict, toLang } from "@/content/i18n";
 
 export const metadata = { title: "Application" };
 
@@ -37,6 +38,9 @@ export default async function ApplicationDetail({
   const otherApproved = h.applications.filter((a) => a.status === "APPROVED" && a.id !== app.id);
   const atCap = otherApproved.length >= app.season.approvalCapYears;
   const portal = siteUrl(`/family/${app.accessToken}`);
+  const digits = phoneDigits(h.phone);
+  const smsHref =
+    digits.length === 10 ? `sms:+1${digits}?&body=${encodeURIComponent(dict[toLang(app.language)].family.smsText(h.parentFirstName, portal))}` : null;
   const unknownGender = app.angels.filter((a) => !a.gender).length;
   const yn = (v: boolean | null) => (v == null ? null : v ? "Yes" : "No");
 
@@ -46,7 +50,9 @@ export default async function ApplicationDetail({
         <Link href="/admin/applications" className="btn-outline btn-sm">← All applications</Link>
       </AdminTitle>
       <div className="mb-4 space-y-3">
-        {sp.saved && <Notice tone="success">Saved.</Notice>}
+        {sp.saved === "email" && <Notice tone="success">Email saved, and we emailed the family their link.</Notice>}
+        {sp.saved && sp.saved !== "email" && <Notice tone="success">Saved.</Notice>}
+        {sp.error === "email" && <Notice tone="error">That email address doesn&rsquo;t look right.</Notice>}
         {sp.error === "cap" && (
           <Notice tone="error">
             This family has already been approved {otherApproved.length} years, which meets the {app.season.approvalCapYears}-year cap. To
@@ -200,7 +206,7 @@ export default async function ApplicationDetail({
             </label>
             {!h.email && (
               <p className="text-xs text-star-800">
-                No email on file. Call or text {h.phone} with the decision. You can text them their private link (below) so they can see their status.
+                No email on file, so no email will go out. Call or text {h.phone} with the decision, or tap &ldquo;Text family their link&rdquo; below so they can check their status.
               </p>
             )}
             <textarea name="message" placeholder="Optional personal note to include in the email" className="input min-h-16" />
@@ -233,10 +239,25 @@ export default async function ApplicationDetail({
             </form>
           )}
 
-          <div className="card space-y-2 text-sm">
+          <div className="card space-y-3 text-sm">
             <h2 className="text-lg">Family&rsquo;s private link</h2>
-            <p className="text-xs text-black/55">Share this if they lost their email. It lets them see status and build lists.</p>
-            <input readOnly value={portal} className="input font-mono text-xs" />
+            <p className="text-xs text-black/55">
+              Their family page shows their status, wish lists, and pickup details. It needs no password, so send it only to the parent.
+            </p>
+            {smsHref && (
+              <a href={smsHref} className="btn-green w-full">
+                Text family their link
+              </a>
+            )}
+            <input readOnly value={portal} aria-label="Family's private link" className="input font-mono text-xs" />
+            <form action={setFamilyEmail.bind(null, app.id)} className="space-y-2 border-t border-black/5 pt-3">
+              <label className="block">
+                <span className="label">{h.email ? "Parent's email" : "Add the parent's email"}</span>
+                <input name="email" type="email" required defaultValue={h.email ?? ""} placeholder="parent@example.com" className="input" />
+              </label>
+              <button className="btn-outline btn-sm">{h.email ? "Save & email their link again" : "Save & email their link"}</button>
+              <p className="text-xs text-black/50">Once they have an email on file, they get decision, reminder, and pickup emails automatically.</p>
+            </form>
           </div>
 
           <div className="card">
