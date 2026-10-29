@@ -151,7 +151,7 @@ export default async function Home() {
               n="03"
               icon="✳"
               title="Give what you can"
-              body="Give by Venmo, check, or cash. Gifts of any size help us fill in the gaps so no child is left out."
+              body={`Give by Venmo${season?.venmoHandle ? ` (@${season.venmoHandle.replace(/^@/, "")})` : ""}, check, or cash. Gifts of any size help us fill in the gaps so no child is left out.`}
               href="/donate"
               cta="Make a gift"
             />
