@@ -3,6 +3,7 @@ import { site } from "@/content/site";
 import { PageHero } from "@/components/ui";
 import { Star } from "@/components/SiteChrome";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
+import { VenmoButton } from "@/components/VenmoButton";
 import { formatDate, money } from "@/lib/format";
 import { db } from "@/lib/db";
 import { logAmazonGift } from "./actions";
@@ -122,7 +123,15 @@ export default async function Give({
         </Option>
 
         <Option n={5} title="Give money" body="Gifts of any size help us buy the items no one has chosen yet, plus wrapping supplies, so every angel is covered.">
-          <Link href="/donate" className="btn-primary">Donate</Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/donate" className="btn-primary">Donate</Link>
+            {season?.venmoHandle && <VenmoButton handle={season.venmoHandle} />}
+          </div>
+          {season?.venmoHandle && (
+            <p className="mt-2 text-xs text-black/55">
+              Venmo goes straight to the ministry. For a giving receipt, use Donate first so we can match your gift.
+            </p>
+          )}
         </Option>
 
         {season?.dropOffInstructions && (

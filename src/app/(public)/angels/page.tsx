@@ -4,6 +4,7 @@ import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { publicAngelWhere } from "@/lib/angels";
 import { ageText, formatDate, genderLabel, money } from "@/lib/format";
 import { PageHero, ProgressBar } from "@/components/ui";
+import { cleanHandle, venmoPayUrl } from "@/lib/venmo";
 import { Star } from "@/components/SiteChrome";
 
 export const metadata = { title: "Angel Tree" };
@@ -59,6 +60,15 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
         </p>
         {season?.giftDeadline && open && (
           <p className="mt-2 text-base">Gifts are due by <strong>{formatDate(season.giftDeadline)}</strong>.</p>
+        )}
+        {season?.venmoHandle && (
+          <p className="mt-2 text-sm">
+            Rather give money? Send any amount on Venmo to{" "}
+            <a href={venmoPayUrl(season.venmoHandle, null, "LIFT Community Christmas")} target="_blank" rel="noopener noreferrer" className="font-semibold">
+              @{cleanHandle(season.venmoHandle)}
+            </a>{" "}
+            or see <Link href="/donate" className="font-semibold">other ways to give</Link>.
+          </p>
         )}
       </PageHero>
 

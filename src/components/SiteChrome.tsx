@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/content/site";
+import { cleanHandle, venmoPayUrl } from "@/lib/venmo";
 
 export function Star({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
@@ -60,7 +61,8 @@ export function SiteHeader() {
   );
 }
 
-export function SiteFooter() {
+/** `venmo`: the season's Venmo username, shown under "Get in touch" when set. */
+export function SiteFooter({ venmo }: { venmo?: string | null }) {
   return (
     <footer className="no-print">
       <div className="bg-dusk-700 text-white">
@@ -92,6 +94,13 @@ export function SiteFooter() {
             {site.contactPhone && (
               <p>
                 <a className="text-dusk-100" href={`tel:${site.contactPhone.replace(/\D/g, "")}`}>{site.contactPhone}</a>
+              </p>
+            )}
+            {venmo && (
+              <p>
+                <a className="text-white" href={venmoPayUrl(venmo, null, "LIFT Community Christmas")} target="_blank" rel="noopener noreferrer">
+                  Venmo @{cleanHandle(venmo)}
+                </a>
               </p>
             )}
             {site.facebookUrl && (
