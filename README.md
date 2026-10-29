@@ -1,6 +1,6 @@
 # LIFT Community Christmas
 
-Website and ministry admin for **LIFT Ministries Community Christmas**, serving children in Reeltown & Tallassee, Alabama. LIFT stands for *Living In Faith Together*.
+Website and ministry admin for **LIFT Ministries Community Christmas**, serving children in East Central Alabama. LIFT stands for *Living In Faith Together*.
 
 Contact: liftministriesal@gmail.com · (334) 328-1513 · [Facebook](https://www.facebook.com/LIFTMinistries)
 

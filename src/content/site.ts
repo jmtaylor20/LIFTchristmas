@@ -8,8 +8,8 @@ export const site = {
   ministry: "LIFT Ministries",
   ministryMotto: "Living In Faith Together",
   ministryLogo: "/brand/lift-ministries-logo.png",
-  communities: "Reeltown & Tallassee",
-  region: "Reeltown & Tallassee, Alabama",
+  communities: "East Central Alabama",
+  region: "East Central Alabama",
   tagline: "Sharing the love of Christ with children in our community, one Christmas gift at a time.",
   motto: "Neighbors lifting neighbors.",
   contactEmail: "liftministriesal@gmail.com",
@@ -30,7 +30,7 @@ export const site = {
   },
 
   mission: [
-    "LIFT Community Christmas is a ministry of LIFT Ministries (Living In Faith Together), rooted in the Christian faith. Each year, neighbors, churches, businesses, and families across Reeltown and Tallassee come together to help families in our community during the holiday season, so children wake up on Christmas morning to gifts chosen just for them.",
+    "LIFT Community Christmas is a ministry of LIFT Ministries (Living In Faith Together), rooted in the Christian faith. Each year, neighbors, churches, businesses, and families across East Central Alabama come together to help families in our community during the holiday season, so children wake up on Christmas morning to gifts chosen just for them.",
     "We believe every child is made in God's image and deserves to know they are loved. Because God gave us the greatest gift in His Son, Jesus, we give joyfully to others.",
   ],
 
