@@ -745,3 +745,21 @@ export async function setPriorYears(applicationId: string, fd: FormData) {
   revalidatePath("/admin", "layout");
   redirect(`/admin/applications/${applicationId}?saved=years`);
 }
+
+/** Saves the prices typed on the Gift prices page. Blank leaves a gift as it is. */
+export async function saveItemPrices(fd: FormData) {
+  await requireAdmin();
+  const updates: { id: string; cents: number }[] = [];
+  for (const [key, value] of fd.entries()) {
+    if (!key.startsWith("price:") || typeof value !== "string" || !value.trim()) continue;
+    const cents = parseMoneyToCents(value);
+    if (cents != null && cents >= 0 && cents <= 10_000_00) updates.push({ id: key.slice(6), cents });
+  }
+  // Only touch gifts whose price actually changed.
+  const current = await db.wishItem.findMany({ where: { id: { in: updates.map((u) => u.id) } }, select: { id: true, estPriceCents: true } });
+  const changed = updates.filter((u) => current.find((c) => c.id === u.id && c.estPriceCents !== u.cents));
+  await db.$transaction(changed.map((u) => db.wishItem.update({ where: { id: u.id }, data: { estPriceCents: u.cents } })));
+  revalidatePath("/angels", "layout");
+  const back = str(fd, "back") === "/admin/prices?show=all" ? "/admin/prices?show=all&" : "/admin/prices?";
+  redirect(`${back}saved=${changed.length}`);
+}

@@ -30,7 +30,8 @@ export default async function ItemsByPrice({ searchParams }: { searchParams: Pro
               : {}),
           },
           include: { angel: { select: { number: true, gender: true, ageAtSeason: true } } },
-          orderBy: [{ estPriceCents: { sort: "asc", nulls: "last" } }],
+          // Cheapest first; gifts without a price follow, by angel number.
+          orderBy: [{ estPriceCents: { sort: "asc", nulls: "last" } }, { angel: { number: "asc" } }, { sortOrder: "asc" }],
           take: 300,
         })
       : [];
@@ -62,7 +63,7 @@ export default async function ItemsByPrice({ searchParams }: { searchParams: Pro
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-semibold text-dusk-800">{i.estPriceCents != null ? `~${money(i.estPriceCents)}` : ""}</span>
+                    {i.estPriceCents != null && <span className="font-semibold text-dusk-800">~{money(i.estPriceCents)}</span>}
                     <Link href={`/angels/${i.angel.number}?item=${i.id}`} className="btn-primary btn-sm">Give this</Link>
                   </div>
                 </li>

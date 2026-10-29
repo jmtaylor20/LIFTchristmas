@@ -8,6 +8,7 @@ export const adminNav = [
   { href: "/admin", label: "Dashboard", icon: "⌂" },
   { href: "/admin/applications", label: "Applications", short: "Apps", icon: "✎" },
   { href: "/admin/angels", label: "Angels & Lists", short: "Angels", icon: "✦" },
+  { href: "/admin/prices", label: "Gift Prices", icon: "¢" },
   { href: "/admin/sponsors", label: "Givers", icon: "♡" },
   { href: "/admin/donations", label: "Money & Gifts", short: "Money", icon: "$" },
   { href: "/admin/partners", label: "Business Partners", icon: "★" },
