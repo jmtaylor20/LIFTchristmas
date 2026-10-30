@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { communityFor, createApplication, MAX_CHILDREN, MAX_DOCUMENT_BYTES, parseAge, WISHES_PER_CHILD, type NewApplication, type NewChild } from "@/lib/applications";
 import { isClothingSize, isShoeSize } from "@/lib/applicationLimits";
-import { phoneDigits, str } from "@/lib/format";
+import { parseMoneyToCents, phoneDigits, str } from "@/lib/format";
+import { autoReview } from "@/lib/autoReview";
 import { applicationsAreOpen, getActiveSeason } from "@/lib/season";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { site } from "@/content/site";
@@ -31,16 +32,23 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
   if (phoneDigits(parent.phone).length !== 10) return { error: t.errors.phone };
   if (!/^\S+@\S+\.\S+$/.test(parent.email)) return { error: t.errors.email };
 
-  const employer = str(fd, "employer").slice(0, 200);
-  const jobLength = str(fd, "jobLength").slice(0, 200);
+  const hasJob = str(fd, "hasJob");
+  const employer = hasJob === "yes" ? str(fd, "employer").slice(0, 200) : "";
+  const jobLength = hasJob === "yes" ? str(fd, "jobLength").slice(0, 200) : "";
+  const lookingForWork = hasJob === "no" ? str(fd, "lookingForWork") : "";
   const priorHelp = str(fd, "priorHelp");
   const otherAgency = str(fd, "otherAgencyHelp");
-  if (!employer || !jobLength || !priorHelp || !otherAgency) return { error: t.errors.work };
+  if (!["yes", "no"].includes(hasJob) || (hasJob === "yes" && (!employer || !jobLength)) || (hasJob === "no" && !lookingForWork) || !priorHelp || !otherAgency) {
+    return { error: t.errors.work };
+  }
+  const annualIncomeCents = parseMoneyToCents(fd.get("annualIncome"));
+  if (annualIncomeCents == null || annualIncomeCents < 0) return { error: t.errors.income };
 
+  // Documents can come later: the automatic check asks the family for anything missing.
   const documents: NewApplication["documents"] = [];
   for (const [key, kind] of [["photoId", "PHOTO_ID"], ["incomeProof", "INCOME"]] as const) {
     const file = fd.get(key);
-    if (!(file instanceof File) || file.size === 0) return { error: t.errors.docs };
+    if (!(file instanceof File) || file.size === 0) continue;
     const okType = file.type.startsWith("image/") || file.type === "application/pdf";
     if (!okType || file.size > MAX_DOCUMENT_BYTES) return { error: t.errors.docType };
     documents.push({ kind, data: new Uint8Array(await file.arrayBuffer()), contentType: file.type });
@@ -86,8 +94,11 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
       createApplication(tx, {
         seasonId: season.id,
         ...parent,
-        employer,
-        jobLength,
+        employer: employer || null,
+        jobLength: jobLength || null,
+        hasJob: hasJob === "yes",
+        lookingForWork: hasJob === "no" ? lookingForWork === "yes" : null,
+        annualIncomeCents,
         priorHelp: priorHelp === "yes",
         priorHelpYears: str(fd, "priorHelpYears").slice(0, 300) || null,
         otherAgencyHelp: otherAgency === "yes",
@@ -107,16 +118,23 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
     return { error: t.errors.duplicate };
   }
 
-  const link = siteUrl(`/family/${accessToken}`);
-  await sendEmail({
-    to: parent.email,
-    subject: t.email.receivedSubject(site.name),
-    html: layout(t.email.received(esc(parent.parentFirstName), button(link, t.email.pageButton), esc(site.name))),
-  });
-  await notifyAdmin(
-    "New sponsorship application",
-    `<p>${esc(parent.parentFirstName)} ${esc(parent.parentLastName)} (${esc(community)}) applied with ${children.length} child${children.length === 1 ? "" : "ren"}${lang === "es" ? " (in Spanish)" : ""}.</p>${button(siteUrl(`/admin/applications/${result.appId}`), "Review application")}`,
-  );
+  // Approve, flag for the owner, or ask for missing documents. Approved and
+  // missing-document families get their own email instead of "we received it".
+  const review = await autoReview(result.appId, { emailFamily: true });
+  if (review === "flagged" || review === "skipped") {
+    const link = siteUrl(`/family/${accessToken}`);
+    await sendEmail({
+      to: parent.email,
+      subject: t.email.receivedSubject(site.name),
+      html: layout(t.email.received(esc(parent.parentFirstName), button(link, t.email.pageButton), esc(site.name))),
+    });
+  }
+  if (review === "skipped") {
+    await notifyAdmin(
+      "New sponsorship application",
+      `<p>${esc(parent.parentFirstName)} ${esc(parent.parentLastName)} (${esc(community)}) applied with ${children.length} child${children.length === 1 ? "" : "ren"}${lang === "es" ? " (in Spanish)" : ""}.</p>${button(siteUrl(`/admin/applications/${result.appId}`), "Review application")}`,
+    );
+  }
 
   redirect(`/apply/thanks?t=${encodeURIComponent(accessToken)}&lang=${lang}`);
 }

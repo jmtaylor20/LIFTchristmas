@@ -40,6 +40,13 @@ const en = {
     choose: "Choose…",
     optional: "Optional",
     work: "Work and help",
+    hasJobQ: "Do you currently have a job?",
+    lookingQ: "Are you actively looking for work?",
+    income: "Total household income per year",
+    incomeAmountHint: "Before taxes, for everyone in your home. An estimate is fine.",
+    docsHint: "We need both before we can approve your application. Don't have them handy? You can add them later from your family page.",
+    photoIdShort: "Photo ID (driver's license or state ID)",
+    incomeProofShort: "Proof of income (most recent pay stub or benefits letter)",
     employer: "Job / employer name",
     employerHint: "Not working? Write “Not employed”, “Disabled”, or “Stay-at-home parent”.",
     jobLength: "How long have you worked at this job?",
@@ -87,6 +94,7 @@ const en = {
     phone: "Please enter a 10-digit phone number.",
     email: "Please enter a valid email address.",
     work: "Please answer the job and help questions.",
+    income: "Please enter your household's total yearly income.",
     docs: "Please add your photo ID and proof of income.",
     docType: "Each document must be a photo or a PDF under 3 MB.",
     agree: "Please check the agreement box.",
@@ -107,6 +115,12 @@ const en = {
     body: "We emailed you a private link to your family's Christmas page. Once you're approved, you can review each child's wish list there.",
     bookmark: "You can also bookmark it now:",
     go: "Go to my family's page",
+    approvedTitle: "Good news: you're approved!",
+    approvedIntro: "Your family has been approved for Christmas sponsorship. We emailed you the details.",
+    approvedBody: "Your family's page has your children's wish lists and gift pickup details.",
+    needInfoTitle: "Almost done",
+    needInfoIntro: "We received your application. Before we can approve it, we need your documents.",
+    needInfoBody: "Open your family's page to add them. We also emailed you a link.",
   },
 
   lookup: {
@@ -128,6 +142,10 @@ const en = {
     statusDenied: "Not approved this year",
     pending: (email: string) =>
       `Thank you for applying! Our team is reviewing applications now. We'll email ${email} when a decision is made. You can come back to this page any time.`,
+    needInfoTitle: "We need a little more information",
+    needInfoBody: "Before we can approve your application, please add:",
+    needInfoUpload: "Send",
+    needInfoSaved: "Thank you! We received your documents.",
     pendingNoEmail:
       "Thank you for applying! Our team is reviewing applications now. We'll call or text you when a decision is made. You can come back to this page any time.",
     addEmailTitle: "Get updates by email",
@@ -211,6 +229,14 @@ ${button}
 ${extra}${button}${pickup ? `<p><strong>Gift pickup:</strong> ${pickup}</p>` : ""}
 <p>Merry Christmas,<br/>${site}</p>`,
     approvedButton: "Make our wish lists",
+    needInfoSubject: "Please finish your Christmas application",
+    needInfo: (first: string, list: string, button: string, site: string) => `<p>Hi ${first},</p>
+<p>Thank you for applying for Christmas sponsorship! Before we can approve your application, we need:</p>
+${list}
+<p>You can add them from your family's page. Take a picture with your phone or upload a file.</p>
+${button}
+<p>Merry Christmas,<br/>${site}</p>`,
+    needInfoButton: "Finish my application",
     approvedListsInSubject: "You're approved for Christmas sponsorship!",
     approvedListsIn: (first: string, extra: string, button: string, pickup: string, site: string, contact: string) => `<p>Hi ${first},</p>
 <p><strong>Good news: your family has been approved for Christmas sponsorship!</strong></p>
@@ -271,6 +297,13 @@ const es: Dict = {
     choose: "Elija…",
     optional: "Opcional",
     work: "Trabajo y ayuda",
+    hasJobQ: "¿Tiene trabajo actualmente?",
+    lookingQ: "¿Está buscando trabajo activamente?",
+    income: "Ingreso total del hogar por año",
+    incomeAmountHint: "Antes de impuestos, de todas las personas en su hogar. Un cálculo aproximado está bien.",
+    docsHint: "Necesitamos los dos antes de aprobar su solicitud. ¿No los tiene a la mano? Puede agregarlos después desde la página de su familia.",
+    photoIdShort: "Identificación con foto (licencia de conducir o identificación estatal)",
+    incomeProofShort: "Comprobante de ingresos (talón de pago más reciente o carta de beneficios)",
     employer: "Trabajo / nombre del empleador",
     employerHint: "¿No trabaja? Escriba “Sin empleo”, “Discapacidad” o “En casa con mis hijos”.",
     jobLength: "¿Cuánto tiempo lleva en este trabajo?",
@@ -318,6 +351,7 @@ const es: Dict = {
     phone: "Por favor escriba un número de teléfono de 10 dígitos.",
     email: "Por favor escriba un correo electrónico válido.",
     work: "Por favor conteste las preguntas sobre su trabajo y la ayuda que recibe.",
+    income: "Por favor escriba el ingreso total de su hogar por año.",
     docs: "Por favor agregue su identificación con foto y su comprobante de ingresos.",
     docType: "Cada documento debe ser una foto o un PDF de menos de 3 MB.",
     agree: "Por favor marque la casilla del acuerdo.",
@@ -338,6 +372,12 @@ const es: Dict = {
     body: "Le enviamos por correo un enlace privado a la página navideña de su familia. Cuando sea aprobado, podrá revisar ahí la lista de deseos de cada niño.",
     bookmark: "También puede guardarla ahora:",
     go: "Ir a la página de mi familia",
+    approvedTitle: "¡Buenas noticias: fue aprobado!",
+    approvedIntro: "Su familia fue aprobada para el patrocinio navideño. Le enviamos los detalles por correo.",
+    approvedBody: "La página de su familia tiene las listas de deseos de sus niños y los detalles para recoger los regalos.",
+    needInfoTitle: "Ya casi termina",
+    needInfoIntro: "Recibimos su solicitud. Antes de aprobarla, necesitamos sus documentos.",
+    needInfoBody: "Abra la página de su familia para agregarlos. También le enviamos un enlace por correo.",
   },
 
   lookup: {
@@ -359,6 +399,10 @@ const es: Dict = {
     statusDenied: "No aprobada este año",
     pending: (email) =>
       `¡Gracias por su solicitud! Nuestro equipo está revisando las solicitudes. Le escribiremos a ${email} cuando se tome una decisión. Puede volver a esta página cuando quiera.`,
+    needInfoTitle: "Necesitamos un poco más de información",
+    needInfoBody: "Antes de aprobar su solicitud, por favor agregue:",
+    needInfoUpload: "Enviar",
+    needInfoSaved: "¡Gracias! Recibimos sus documentos.",
     pendingNoEmail:
       "¡Gracias por su solicitud! Nuestro equipo está revisando las solicitudes. Le llamaremos o le enviaremos un mensaje de texto cuando se tome una decisión. Puede volver a esta página cuando quiera.",
     addEmailTitle: "Reciba novedades por correo",
@@ -442,6 +486,14 @@ ${button}
 ${extra}${button}${pickup ? `<p><strong>Entrega de regalos:</strong> ${pickup}</p>` : ""}
 <p>Feliz Navidad,<br/>${site}</p>`,
     approvedButton: "Hacer nuestras listas de deseos",
+    needInfoSubject: "Por favor termine su solicitud de Navidad",
+    needInfo: (first, list, button, site) => `<p>Hola ${first}:</p>
+<p>¡Gracias por su solicitud de patrocinio navideño! Antes de aprobarla, necesitamos:</p>
+${list}
+<p>Puede agregarlos desde la página de su familia. Tome una foto con su teléfono o suba un archivo.</p>
+${button}
+<p>Feliz Navidad,<br/>${site}</p>`,
+    needInfoButton: "Terminar mi solicitud",
     approvedListsInSubject: "¡Su familia fue aprobada para el patrocinio navideño!",
     approvedListsIn: (first, extra, button, pickup, site, contact) => `<p>Hola ${first}:</p>
 <p><strong>¡Buenas noticias: su familia fue aprobada para el patrocinio navideño!</strong></p>

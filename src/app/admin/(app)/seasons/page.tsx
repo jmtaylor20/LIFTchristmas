@@ -72,6 +72,19 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
               <Input label="Max wish-list items per child" name="maxItemsPerChild" type="number" defaultValue={editing.maxItemsPerChild} />
               <Input label="Approval cap (years per family)" name="approvalCapYears" type="number" defaultValue={editing.approvalCapYears} />
             </div>
+            <div className="rounded-xl bg-cream p-4 space-y-3">
+              <label className="flex items-start gap-2 text-sm">
+                <input type="checkbox" name="autoApprove" defaultChecked={editing.autoApprove} className="mt-0.5 h-4 w-4 accent-dusk-700" />
+                <span>
+                  <strong>Approve website applications automatically</strong> when they have a job, are at or under the income limit,
+                  uploaded a photo ID and proof of income, and are under the approval cap. Everything else is flagged for you, and
+                  families missing documents are emailed to add them.
+                </span>
+              </label>
+              <div className="max-w-xs">
+                <Input label="Income limit (yearly household income)" name="incomeLimit" defaultValue={money(editing.incomeLimitCents)} />
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Venmo username for donations" name="venmoHandle" defaultValue={editing.venmoHandle ?? ""} placeholder="@LIFT-Ministries" />
               <Input label="Amazon wish list link" name="amazonWishlistUrl" defaultValue={editing.amazonWishlistUrl ?? ""} placeholder="https://www.amazon.com/hz/wishlist/ls/…" />

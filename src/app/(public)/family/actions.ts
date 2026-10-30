@@ -8,6 +8,8 @@ import { getActiveSeason, wishlistsAreOpen } from "@/lib/season";
 import { button, esc, layout, notifyAdmin, sendEmail, siteUrl } from "@/lib/email";
 import { site } from "@/content/site";
 import { randomToken } from "@/lib/tokens";
+import { autoReview } from "@/lib/autoReview";
+import { MAX_DOCUMENT_BYTES } from "@/lib/applicationLimits";
 import { dict, toLang } from "@/content/i18n";
 
 export async function resendFamilyLink(fd: FormData) {
@@ -164,4 +166,25 @@ export async function addFamilyEmail(token: string, fd: FormData) {
     html: layout(t.link(esc(app.household.parentFirstName), button(siteUrl(`/family/${token}`), t.pageButton))),
   });
   redirect(`/family/${token}?emailSaved=1#email`);
+}
+
+/** A family adds documents the automatic check asked for; then the application is checked again. */
+export async function addMissingDocuments(token: string, fd: FormData) {
+  const app = await db.application.findUnique({ where: { accessToken: token }, select: { id: true, status: true, missingInfo: true } });
+  if (!app || app.status !== "PENDING" || app.missingInfo.length === 0) redirect(`/family/${token}`);
+  let added = 0;
+  for (const [key, kind] of [["photoId", "PHOTO_ID"], ["incomeProof", "INCOME"]] as const) {
+    if (!app.missingInfo.includes(kind)) continue;
+    const file = fd.get(key);
+    if (!(file instanceof File) || file.size === 0) continue;
+    const okType = file.type.startsWith("image/") || file.type === "application/pdf";
+    if (!okType || file.size > MAX_DOCUMENT_BYTES) redirect(`/family/${token}?error=doc#documents`);
+    await db.applicationDocument.create({
+      data: { applicationId: app.id, kind, data: new Uint8Array(await file.arrayBuffer()), contentType: file.type },
+    });
+    added++;
+  }
+  if (added === 0) redirect(`/family/${token}?error=doc#documents`);
+  await autoReview(app.id);
+  redirect(`/family/${token}?docs=1`);
 }

@@ -14,6 +14,7 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
   const [preparing, setPreparing] = useState(false);
   const [kids, setKids] = useState([0]);
   const [next, setNext] = useState(1);
+  const [hasJob, setHasJob] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -60,10 +61,15 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
 
       <fieldset className="card space-y-4">
         <legend className="font-display text-xl text-dusk-800">{t.work}</legend>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t.employer} name="employer" required hint={t.employerHint} />
-          <Field label={t.jobLength} name="jobLength" required />
-        </div>
+        <YesNo label={t.hasJobQ} name="hasJob" yes={t.yes} no={t.no} onChange={setHasJob} />
+        {hasJob === "yes" && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t.employer} name="employer" required />
+            <Field label={t.jobLength} name="jobLength" required />
+          </div>
+        )}
+        {hasJob === "no" && <YesNo label={t.lookingQ} name="lookingForWork" yes={t.yes} no={t.no} />}
+        <Field label={t.income} name="annualIncome" required inputMode="decimal" placeholder="$" hint={t.incomeAmountHint} className="sm:max-w-xs" />
         <YesNo label={t.priorHelpQ} name="priorHelp" yes={t.yes} no={t.no} />
         <Field label={t.priorYears} name="priorHelpYears" />
         <YesNo label={t.agencyQ} name="otherAgencyHelp" yes={t.yes} no={t.no} />
@@ -73,6 +79,7 @@ export function ApplicationForm({ lang }: { lang: Lang }) {
       <fieldset className="card space-y-4">
         <legend className="font-display text-xl text-dusk-800">{t.documents}</legend>
         <p className="text-sm text-black/60">{t.documentsIntro}</p>
+        <p className="text-sm text-black/60">{t.docsHint}</p>
         <FileField label={t.photoId} name="photoId" />
         <FileField label={t.incomeProof} name="incomeProof" hint={t.incomeHint} />
       </fieldset>
@@ -184,16 +191,16 @@ function SizeSelect({
   );
 }
 
-function YesNo({ label, name, yes, no }: { label: string; name: string; yes: string; no: string }) {
+function YesNo({ label, name, yes, no, onChange }: { label: string; name: string; yes: string; no: string; onChange?: (v: string) => void }) {
   return (
     <div>
       <span className="label">{label}</span>
       <div className="flex gap-4 text-sm">
         <label className="flex items-center gap-2">
-          <input type="radio" name={name} value="yes" required className="h-4 w-4 accent-dusk-700" /> {yes}
+          <input type="radio" name={name} value="yes" required onChange={() => onChange?.("yes")} className="h-4 w-4 accent-dusk-700" /> {yes}
         </label>
         <label className="flex items-center gap-2">
-          <input type="radio" name={name} value="no" className="h-4 w-4 accent-dusk-700" /> {no}
+          <input type="radio" name={name} value="no" onChange={() => onChange?.("no")} className="h-4 w-4 accent-dusk-700" /> {no}
         </label>
       </div>
     </div>
@@ -204,7 +211,7 @@ function FileField({ label, name, hint }: { label: string; name: string; hint?: 
   return (
     <label className="block">
       <span className="label">{label}</span>
-      <input type="file" name={name} required accept="image/*,application/pdf" className="input file:mr-3 file:rounded-md file:border-0 file:bg-dusk-50 file:px-3 file:py-1 file:text-dusk-800" />
+      <input type="file" name={name} accept="image/*,application/pdf" className="input file:mr-3 file:rounded-md file:border-0 file:bg-dusk-50 file:px-3 file:py-1 file:text-dusk-800" />
       {hint && <span className="mt-1 block text-xs text-black/55">{hint}</span>}
     </label>
   );
