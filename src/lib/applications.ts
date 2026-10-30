@@ -33,6 +33,9 @@ export type NewApplication = {
   zip: string;
   employer: string | null;
   jobLength: string | null;
+  hasJob?: boolean | null;
+  lookingForWork?: boolean | null;
+  annualIncomeCents?: number | null;
   priorHelp: boolean | null;
   priorHelpYears: string | null;
   otherAgencyHelp: boolean | null;
@@ -100,6 +103,9 @@ export async function createApplication(tx: Tx, a: NewApplication) {
       zip: a.zip,
       employer: a.employer,
       jobLength: a.jobLength,
+      hasJob: a.hasJob ?? null,
+      lookingForWork: a.lookingForWork ?? null,
+      annualIncomeCents: a.annualIncomeCents ?? null,
       priorHelp: a.priorHelp,
       priorHelpYears: a.priorHelpYears,
       otherAgencyHelp: a.otherAgencyHelp,

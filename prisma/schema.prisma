@@ -29,6 +29,11 @@ model Season {
   maxItemsPerChild     Int       @default(8)
   // Households may be approved at most this many seasons in total.
   approvalCapYears     Int       @default(5)
+  // Check new website applications automatically: approve the ones that meet
+  // the criteria, flag the rest for the owner, and ask families for missing documents.
+  autoApprove          Boolean   @default(true)
+  // Yearly household income at or under this qualifies for automatic approval.
+  incomeLimitCents     Int       @default(5000000)
   amazonWishlistUrl    String?
   // Venmo username (without the @) that donations go to.
   venmoHandle          String?
@@ -127,6 +132,16 @@ model Application {
   circumstances       String?
   employer            String?
   jobLength           String?
+  hasJob              Boolean?
+  // Asked when they don't have a job.
+  lookingForWork      Boolean?
+  annualIncomeCents   Int?
+  // Result of the automatic check: reasons the owner needs to look, documents
+  // still needed from the family, and when it approved the family on its own.
+  reviewFlags         String[]          @default([])
+  missingInfo         String[]          @default([])
+  infoRequestedAt     DateTime?
+  autoApprovedAt      DateTime?
   // Has Community Christmas helped them before, and which years (as they told us).
   priorHelp           Boolean?
   priorHelpYears      String?

@@ -9,6 +9,7 @@ import { site } from "@/content/site";
 import { dict, longDate, toLang } from "@/content/i18n";
 import { addFamilyEmail, addItem, removeItem, submitLists, updateAngelDetails } from "../actions";
 import { ThankYouForm } from "./ThankYouForm";
+import { DocumentsForm } from "./DocumentsForm";
 import { InstallApp } from "@/components/InstallApp";
 
 export const metadata = { title: "My family's Christmas page", robots: { index: false } };
@@ -19,7 +20,7 @@ export default async function FamilyPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ error?: string; lang?: string; emailSaved?: string; step?: string }>;
+  searchParams: Promise<{ error?: string; lang?: string; emailSaved?: string; step?: string; docs?: string }>;
 }) {
   const { token } = await params;
   const sp = await searchParams;
@@ -82,7 +83,17 @@ export default async function FamilyPage({
         )}
         <fieldset disabled={isSample} className="m-0 min-w-0 space-y-6 border-0 p-0">
         {!isSample && <InstallApp app="LIFT Family" lang={lang} />}
-        {app.status === "PENDING" && <Notice>{app.household.email ? t.pending(app.household.email) : t.pendingNoEmail}</Notice>}
+        {sp.docs && <Notice tone="success">{t.needInfoSaved}</Notice>}
+        {app.status === "PENDING" && "missingInfo" in app && app.missingInfo.length > 0 ? (
+          <div id="documents" className="card space-y-3 border-star-100 bg-star-50/60">
+            <h2 className="text-xl">{t.needInfoTitle}</h2>
+            <p className="text-sm text-black/70">{t.needInfoBody}</p>
+            {sp.error === "doc" && <p className="text-sm text-star-800">{dict[lang].errors.docType}</p>}
+            <DocumentsForm token={token} lang={lang} missing={app.missingInfo} />
+          </div>
+        ) : (
+          app.status === "PENDING" && <Notice>{app.household.email ? t.pending(app.household.email) : t.pendingNoEmail}</Notice>
+        )}
         {sp.emailSaved && <Notice tone="success">{t.emailSaved}</Notice>}
         {!app.household.email && (
           <form id="email" action={addFamilyEmail.bind(null, token)} className="card space-y-3">

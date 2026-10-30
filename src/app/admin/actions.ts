@@ -7,9 +7,11 @@ import type { ApplicationStatus, ItemStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { clearAdminSession, requireAdmin, setAdminSession } from "@/lib/auth";
 import { safeEqual } from "@/lib/tokens";
-import { ADMIN_SEASON_COOKIE, getAdminSeason, wishlistsAreOpen } from "@/lib/season";
+import { ADMIN_SEASON_COOKIE, getAdminSeason } from "@/lib/season";
 import { approvedYears } from "@/lib/households";
 import { createApplication, parseGoogleFormCsv } from "@/lib/applications";
+import { setDecision } from "@/lib/decisions";
+import { autoReview } from "@/lib/autoReview";
 import { normalizeEmail, optStr, parseDeadline, parseMoneyToCents, str } from "@/lib/format";
 import { button, esc, layout, sendEmail, siteUrl } from "@/lib/email";
 import { sendAllStatements, sendDonationReceipt, sendStatement, upsertGiver } from "@/lib/givers";
@@ -20,7 +22,7 @@ import { parseNeedLines } from "@/lib/needs";
 import { deleteAllData, loadSampleData } from "@/lib/sampleData";
 import { sendSeasonThanks, thankForInKindGift, thankForReceivedGifts, thankPartnerIfLive } from "@/lib/thanks";
 import { sendListReminders, sendPickupReminders, sendSponsorReminders } from "@/lib/reminders";
-import { dict, longDate, toLang } from "@/content/i18n";
+import { dict, toLang } from "@/content/i18n";
 
 // ------------------------------------------------------------------ session
 
@@ -72,6 +74,8 @@ function seasonFields(fd: FormData) {
     perChildBudgetCents: parseMoneyToCents(fd.get("perChildBudget")),
     maxItemsPerChild: Math.max(1, Math.min(25, Number(str(fd, "maxItemsPerChild")) || 8)),
     approvalCapYears: Math.max(1, Math.min(50, Number(str(fd, "approvalCapYears")) || 5)),
+    autoApprove: fd.get("autoApprove") === "on",
+    incomeLimitCents: parseMoneyToCents(fd.get("incomeLimit")) ?? 5_000_000,
     amazonWishlistUrl: optStr(fd, "amazonWishlistUrl"),
     venmoHandle: optStr(fd, "venmoHandle")?.replace(/^@/, "") ?? null,
     dropOffInstructions: optStr(fd, "dropOffInstructions"),
@@ -149,52 +153,7 @@ export async function decideApplication(id: string, fd: FormData) {
     }
   }
 
-  // After the wish-list deadline, approving locks in the list from the application.
-  const lockLists = status === "APPROVED" && !app.listSubmittedAt && !wishlistsAreOpen(app.season);
-  await db.$transaction(async (tx) => {
-    await tx.application.update({
-      where: { id },
-      data: {
-        status,
-        decidedAt: status === "PENDING" ? null : new Date(),
-        ...(lockLists ? { listSubmittedAt: new Date() } : {}),
-        adminNotes: optStr(fd, "adminNotes") ?? app.adminNotes,
-        ...(capOverride ? { capOverrideAt: new Date() } : {}),
-      },
-    });
-    if (status === "APPROVED") {
-      // Give each child a public angel number.
-      const max = await tx.angel.aggregate({ where: { seasonId: app.seasonId }, _max: { number: true } });
-      let n = max._max.number ?? 0;
-      for (const angel of app.angels.filter((a) => a.number == null)) {
-        await tx.angel.update({ where: { id: angel.id }, data: { number: ++n } });
-      }
-    }
-  });
-
-  if (notify && app.household.email && status !== "PENDING") {
-    const lang = toLang(app.language);
-    const t = dict[lang].email;
-    const first = esc(app.household.parentFirstName);
-    const link = siteUrl(`/family/${app.accessToken}`);
-    const extra = message ? `<p>${esc(message).replace(/\n/g, "<br/>")}</p>` : "";
-    const due = app.season.wishlistDeadline ? longDate(app.season.wishlistDeadline, lang) : null;
-    const pickup = app.season.pickupInstructions ? esc(app.season.pickupInstructions).replace(/\n/g, "<br/>") : "";
-    const listsLocked = lockLists || !!app.listSubmittedAt;
-    const html =
-      status === "APPROVED"
-        ? listsLocked
-          ? t.approvedListsIn(first, extra, button(link, t.pageButton), pickup, esc(site.name), esc(site.contactEmail))
-          : t.approved(first, due, extra, button(link, t.approvedButton), pickup, esc(site.name))
-        : status === "WAITLIST"
-          ? t.waitlist(first, extra, button(link, t.statusButton))
-          : t.denied(first, extra);
-    await sendEmail({
-      to: app.household.email,
-      subject: status === "APPROVED" ? (listsLocked ? t.approvedListsInSubject : t.approvedSubject) : t.decisionSubject,
-      html: layout(html),
-    });
-  }
+  await setDecision(id, status, { notify, message, adminNotes: optStr(fd, "adminNotes"), capOverride });
   revalidatePath("/admin", "layout");
   redirect(`/admin/applications/${id}?saved=1`);
 }
@@ -762,4 +721,12 @@ export async function saveItemPrices(fd: FormData) {
   revalidatePath("/angels", "layout");
   const back = str(fd, "back") === "/admin/prices?show=all" ? "/admin/prices?show=all&" : "/admin/prices?";
   redirect(`${back}saved=${changed.length}`);
+}
+
+/** Runs the automatic check again, e.g. after the owner fixes something on the application. */
+export async function rerunAutoReview(applicationId: string) {
+  await requireAdmin();
+  const result = await autoReview(applicationId, { emailFamily: true });
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/applications/${applicationId}?checked=${result}`);
 }

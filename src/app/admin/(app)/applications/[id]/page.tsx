@@ -6,7 +6,7 @@ import { ageText, formatDate, genderLabel, money, phoneDigits } from "@/lib/form
 import { siteUrl } from "@/lib/email";
 import { AdminTitle, AppBadge, ItemBadge } from "@/components/admin";
 import { Notice } from "@/components/ui";
-import { decideApplication, lockLists, setChildGender, setFamilyEmail, setPriorYears, unlockLists } from "../../../actions";
+import { decideApplication, lockLists, rerunAutoReview, setChildGender, setFamilyEmail, setPriorYears, unlockLists } from "../../../actions";
 import { dict, toLang } from "@/content/i18n";
 
 export const metadata = { title: "Application" };
@@ -16,7 +16,7 @@ export default async function ApplicationDetail({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; checked?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -57,6 +57,36 @@ export default async function ApplicationDetail({
         {sp.saved === "email" && <Notice tone="success">Email saved, and we emailed the family their link.</Notice>}
         {sp.saved && sp.saved !== "email" && <Notice tone="success">Saved.</Notice>}
         {sp.error === "email" && <Notice tone="error">That email address doesn&rsquo;t look right.</Notice>}
+        {sp.checked && (
+          <Notice tone={sp.checked === "approved" ? "success" : "info"}>
+            Automatic check ran:{" "}
+            {sp.checked === "approved"
+              ? "the family met every requirement and was approved."
+              : sp.checked === "flagged"
+                ? "still needs your review (see below)."
+                : sp.checked === "missing"
+                  ? "still waiting on documents from the family; they were emailed."
+                  : "it only checks pending website applications while automatic approval is on."}
+          </Notice>
+        )}
+        {app.autoApprovedAt && (
+          <Notice tone="success">Approved automatically on {formatDate(app.autoApprovedAt)}: met every requirement.</Notice>
+        )}
+        {app.status === "PENDING" && app.reviewFlags.length > 0 && (
+          <Notice tone="warn">
+            <strong>Flagged by the automatic check.</strong> Review and decide:
+            <ul className="mt-1 list-disc pl-5">
+              {app.reviewFlags.map((f) => <li key={f}>{f}</li>)}
+            </ul>
+          </Notice>
+        )}
+        {app.status === "PENDING" && app.missingInfo.length > 0 && (
+          <Notice tone="warn">
+            <strong>Waiting on the family</strong> for {app.missingInfo.map((m) => (m === "PHOTO_ID" ? "photo ID" : "proof of income")).join(" and ")}
+            {app.infoRequestedAt && <> (asked {formatDate(app.infoRequestedAt)})</>}. When they add it on their family page, the
+            application is checked again automatically.
+          </Notice>
+        )}
         {sp.error === "cap" && (
           <Notice tone="error">
             This family has already been sponsored {yearsUsed} years, which meets the {app.season.approvalCapYears}-year cap. To
@@ -101,6 +131,9 @@ export default async function ApplicationDetail({
               <D k="Email" v={h.email ?? "None given"} />
               <D k="Address" v={[app.address, app.city !== "" && !app.address.toLowerCase().includes(app.city.toLowerCase()) ? app.city : null, app.zip && !app.address.includes(app.zip) ? app.zip : null].filter(Boolean).join(", ")} />
               <D k="Community" v={app.community} />
+              {app.hasJob != null && <D k="Has a job" v={app.hasJob ? "Yes" : "No"} />}
+              {app.hasJob === false && <D k="Looking for work" v={app.lookingForWork ? "Yes" : "No"} />}
+              {app.annualIncomeCents != null && <D k="Yearly household income" v={money(app.annualIncomeCents)} />}
               <D k="Job / employer" v={app.employer} />
               <D k="At this job" v={app.jobLength} />
               <D k="Helped by Community Christmas before" v={[yn(app.priorHelp), app.priorHelpYears].filter(Boolean).join(" · ") || null} />
@@ -242,6 +275,11 @@ export default async function ApplicationDetail({
             <textarea name="message" placeholder="Optional personal note to include in the email" className="input min-h-16" />
             <textarea name="adminNotes" defaultValue={app.adminNotes ?? ""} placeholder="Private notes (only admins see these)" className="input min-h-16" />
             <button className="btn-green w-full">Save decision</button>
+            {app.status === "PENDING" && app.source === "web" && app.season.autoApprove && (
+              <button formAction={rerunAutoReview.bind(null, app.id)} className="btn-outline btn-sm w-full">
+                Run the automatic check again
+              </button>
+            )}
           </form>
 
           {atCap && app.status !== "APPROVED" && (
