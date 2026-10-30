@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
-import { publicAngelWhere } from "@/lib/angels";
+import { publicAngelWhere, shuffled } from "@/lib/angels";
 import { ageText, formatDate, genderLabel, money } from "@/lib/format";
 import { PageHero, ProgressBar } from "@/components/ui";
 import { cleanHandle, venmoPayUrl } from "@/lib/venmo";
@@ -32,7 +32,9 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
       })
     : [];
 
-  const cards = angels
+  // Shuffled on every visit so no angel is always first; angels still needing
+  // gifts stay ahead of the ones that are fully covered.
+  const cards = shuffled(angels)
     .map((a) => {
       const open = a.items.filter((i) => i.status === "NEEDED");
       return {
@@ -43,8 +45,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
       };
     })
     .filter((a) => (sp.view === "whole" ? a.untouched && a.openCount > 0 : true))
-    // Angels still needing gifts first.
-    .sort((a, b) => Number(b.openCount > 0) - Number(a.openCount > 0) || a.number! - b.number!);
+    .sort((a, b) => Number(b.openCount > 0) - Number(a.openCount > 0));
 
   const qs = (patch: Partial<Search>) => {
     const p = new URLSearchParams(Object.entries({ ...sp, ...patch }).filter(([, v]) => v) as [string, string][]);

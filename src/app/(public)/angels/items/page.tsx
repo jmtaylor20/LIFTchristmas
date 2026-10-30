@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
-import { publicAngelWhere } from "@/lib/angels";
+import { publicAngelWhere, shuffled } from "@/lib/angels";
 import { ageText, genderLabel, money } from "@/lib/format";
 import { PageHero } from "@/components/ui";
 
@@ -19,7 +19,7 @@ export default async function ItemsByPrice({ searchParams }: { searchParams: Pro
   const { price } = await searchParams;
   const season = await getActiveSeason();
   const band = price ? bands[price] : undefined;
-  const items =
+  const found =
     season && sponsoringIsOpen(season)
       ? await db.wishItem.findMany({
           where: {
@@ -30,11 +30,14 @@ export default async function ItemsByPrice({ searchParams }: { searchParams: Pro
               : {}),
           },
           include: { angel: { select: { number: true, gender: true, ageAtSeason: true } } },
-          // Cheapest first; gifts without a price follow, by angel number.
           orderBy: [{ estPriceCents: { sort: "asc", nulls: "last" } }, { angel: { number: "asc" } }, { sortOrder: "asc" }],
           take: 300,
         })
       : [];
+  // Cheapest first; gifts at the same price (and those without one, at the end)
+  // are shuffled on every visit so no angel always comes first.
+  const cents = (c: number | null) => c ?? Number.MAX_SAFE_INTEGER;
+  const items = shuffled(found).sort((a, b) => cents(a.estPriceCents) - cents(b.estPriceCents));
 
   return (
     <>
