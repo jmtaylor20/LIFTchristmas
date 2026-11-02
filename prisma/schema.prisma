@@ -49,6 +49,8 @@ model Season {
   announcement         String?
   // Where the banner's button goes (e.g. /apply); no button when blank.
   announcementLink     String?
+  // The banner hides itself after the end of this day (US Central); blank = keep showing.
+  announcementUntil    DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
