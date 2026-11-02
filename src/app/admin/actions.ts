@@ -83,6 +83,7 @@ function seasonFields(fd: FormData) {
     donationInstructions: optStr(fd, "donationInstructions"),
     pickupInstructions: optStr(fd, "pickupInstructions"),
     announcement: optStr(fd, "announcement")?.slice(0, 300) ?? null,
+    announcementUntil: parseDeadline(str(fd, "announcementUntil")),
     // Only links within the site (like /apply) or to https pages.
     announcementLink: (() => {
       const link = optStr(fd, "announcementLink");

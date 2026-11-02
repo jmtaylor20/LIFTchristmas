@@ -100,9 +100,13 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
                 defaultValue={editing.announcement}
                 placeholder="In the continued spirit of giving, we've extended the application deadline one final week!"
               />
-              <div className="max-w-sm">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Input label="Banner button goes to (optional)" name="announcementLink" defaultValue={editing.announcementLink ?? ""} placeholder="/apply" />
+                <DateField label="Hide the banner after (optional)" name="announcementUntil" value={editing.announcementUntil} />
               </div>
+              {editing.announcement && editing.announcementUntil && editing.announcementUntil < new Date() && (
+                <p className="text-xs text-black/55">This banner&rsquo;s end date has passed, so it&rsquo;s hidden.</p>
+              )}
             </div>
             <button className="btn-green">Save settings</button>
           </form>
