@@ -93,6 +93,17 @@ export default async function Seasons({ searchParams }: { searchParams: Promise<
             <Area label="Shipping address for online orders (leave blank to turn off shipping)" name="shippingAddress" defaultValue={editing.shippingAddress} placeholder={"123 Main St\nTallassee, AL 36078"} />
             <Area label="Check / in-person giving instructions (shown on Donate page)" name="donationInstructions" defaultValue={editing.donationInstructions} placeholder="Make checks payable to … and mail to …" />
             <Area label="Gift pickup details (shown to approved families, in their approval email, and in the pickup reminder sent before pickup day)" name="pickupInstructions" defaultValue={editing.pickupInstructions} placeholder="Pickup is Saturday, Dec. 19, 9am–noon at … Please bring your ID." />
+            <div className="space-y-3 rounded-xl bg-cream p-4">
+              <Area
+                label="Site announcement (a banner across the top of every page; leave blank to hide it)"
+                name="announcement"
+                defaultValue={editing.announcement}
+                placeholder="In the continued spirit of giving, we've extended the application deadline one final week!"
+              />
+              <div className="max-w-sm">
+                <Input label="Banner button goes to (optional)" name="announcementLink" defaultValue={editing.announcementLink ?? ""} placeholder="/apply" />
+              </div>
+            </div>
             <button className="btn-green">Save settings</button>
           </form>
         )}

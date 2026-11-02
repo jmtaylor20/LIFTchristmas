@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { SandboxBanner } from "@/components/SandboxBanner";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { getActiveSeason } from "@/lib/season";
 
 export const metadata: Metadata = {
@@ -10,10 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const venmo = (await getActiveSeason().catch(() => null))?.venmoHandle;
+  const season = await getActiveSeason().catch(() => null);
+  const venmo = season?.venmoHandle;
   return (
     <>
       <SandboxBanner />
+      <AnnouncementBanner text={season?.announcement} link={season?.announcementLink} />
       <SiteHeader />
       <main id="main" className="pb-24 has-[>.flush-end]:pb-0">{children}</main>
       <SiteFooter venmo={venmo} />
