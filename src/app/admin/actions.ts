@@ -82,6 +82,12 @@ function seasonFields(fd: FormData) {
     shippingAddress: optStr(fd, "shippingAddress"),
     donationInstructions: optStr(fd, "donationInstructions"),
     pickupInstructions: optStr(fd, "pickupInstructions"),
+    announcement: optStr(fd, "announcement")?.slice(0, 300) ?? null,
+    // Only links within the site (like /apply) or to https pages.
+    announcementLink: (() => {
+      const link = optStr(fd, "announcementLink");
+      return link && (/^\/[\w\-/?=&#.]*$/.test(link) || /^https:\/\//.test(link)) ? link : null;
+    })(),
   };
 }
 

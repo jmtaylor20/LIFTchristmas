@@ -45,6 +45,10 @@ model Season {
   pickupInstructions   String?
   // Pickup day; families get a reminder with the pickup details a few days before.
   pickupDate           DateTime?
+  // Optional banner across the top of every public page, e.g. a deadline extension.
+  announcement         String?
+  // Where the banner's button goes (e.g. /apply); no button when blank.
+  announcementLink     String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
