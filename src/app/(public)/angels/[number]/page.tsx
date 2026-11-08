@@ -9,6 +9,7 @@ import { Notice } from "@/components/ui";
 import { Star } from "@/components/SiteChrome";
 import { sponsorItems } from "../actions";
 import { RecognitionFields } from "@/components/RecognitionFields";
+import { site } from "@/content/site";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,11 @@ export default async function AngelPage({
         <div className="card">
           {error && <div className="mb-4"><Notice tone="error">{error}</Notice></div>}
           <h2 className="text-2xl">Wish list</h2>
+          {open && needed.length > 0 && (
+            <p className="mt-2 rounded-lg bg-dusk-50 px-3 py-2 text-sm text-dusk-800">
+              <span className="font-semibold">A request from our team:</span> {site.clothingFirst}
+            </p>
+          )}
           {!open && <p className="mt-2 text-sm text-black/60">Sponsorships are closed for this season.</p>}
 
           {needed.length === 0 ? (

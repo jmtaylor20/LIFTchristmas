@@ -70,6 +70,7 @@ export async function sponsorItems(fd: FormData) {
 <p>Thank you for sponsoring <strong>Angel #${angel.number}</strong> (${genderLabel(angel.gender).toLowerCase()}, ${ageText(angel.ageAtSeason)})! Here's what you've committed to give:</p>
 <ul>${list}</ul>
 <p>Sizes: shirt ${esc(angel.shirtSize) || "—"}, pants ${esc(angel.pantsSize) || "—"}, shoes ${esc(angel.shoeSize) || "—"}.</p>
+<p><em>A request from our team:</em> ${esc(site.clothingFirst)}</p>
 ${
     delivery === "SHIP"
       ? `<p><strong>Please have your order arrive${season.giftDeadline ? ` by ${formatDate(season.giftDeadline)}` : " soon"}</strong>, shipped to:</p>${shipToHtml(angel.number, season.shippingAddress!)}
