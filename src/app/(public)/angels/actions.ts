@@ -26,10 +26,10 @@ export async function sponsorItems(fd: FormData) {
   const email = str(fd, "email");
   if (!firstName || !lastName || !/^\S+@\S+\.\S+$/.test(email)) return back("Please enter your name and a valid email.");
 
-  const neededIds = angel.items.filter((i) => i.status === "NEEDED").map((i) => i.id);
-  const wantsWhole = fd.get("whole") === "1";
-  const chosen = wantsWhole ? neededIds : fd.getAll("itemId").map(String).filter((id) => neededIds.includes(id));
-  if (chosen.length === 0) return back("Please choose at least one gift.");
+  // Sponsors take an angel's whole list (or, if part is already covered, all
+  // of the rest). Picking single gifts isn't offered.
+  const chosen = angel.items.filter((i) => i.status === "NEEDED").map((i) => i.id);
+  if (chosen.length === 0) return back("This angel's whole list has already been sponsored. Thank you!");
 
   const giver = await upsertGiver({
     firstName,

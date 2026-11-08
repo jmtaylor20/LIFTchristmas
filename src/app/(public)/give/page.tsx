@@ -5,7 +5,6 @@ import { Star } from "@/components/SiteChrome";
 import { getActiveSeason, sponsoringIsOpen } from "@/lib/season";
 import { VenmoButton } from "@/components/VenmoButton";
 import { formatDate, money } from "@/lib/format";
-import { db } from "@/lib/db";
 import { logAmazonGift } from "./actions";
 import { RecognitionFields } from "@/components/RecognitionFields";
 import { NeedsList } from "@/components/NeedsList";
@@ -23,13 +22,6 @@ export default async function Give({
   const season = await getActiveSeason();
   const open = sponsoringIsOpen(season);
   const needs = season ? await seasonNeeds(season.id) : [];
-  const cheapest = season
-    ? await db.wishItem.findFirst({
-        where: { status: "NEEDED", estPriceCents: { not: null }, angel: { seasonId: season.id, hidden: false, application: { status: "APPROVED", listSubmittedAt: { not: null } } } },
-        orderBy: { estPriceCents: "asc" },
-        select: { estPriceCents: true },
-      })
-    : null;
 
   return (
     <>
@@ -57,23 +49,11 @@ export default async function Give({
           )}
         </Option>
 
-        <Option
-          n={2}
-          title="Pick a few gifts"
-          body={`Can't cover a whole list? Choose one or more items from any angel's list${cheapest?.estPriceCents ? `, starting around ${money(cheapest.estPriceCents)}` : ""}. Every item matters.`}
-        >
-          {open ? (
-            <Link href="/angels/items" className="btn-primary">Browse gifts by price</Link>
-          ) : (
-            <p className="text-sm text-black/60">Sponsorships are closed for this season.</p>
-          )}
-        </Option>
-
         <div id="amazon">
           <Option
-            n={3}
+            n={2}
             title={needs.length ? "Shop what the ministry needs" : "Shop our Amazon wish list"}
-            body="Order from our Amazon list and it ships straight to the ministry. Tell us what you bought so we can thank you and include it on your giving record."
+            body="Rather give something smaller than a whole wish list? Buy items from our list of general needs. Tell us what you bought so we can thank you and include it on your giving record."
           >
             {needs.length > 0 && (
               <div id="needs" className="mb-5 scroll-mt-6">
@@ -115,14 +95,14 @@ export default async function Give({
         </div>
 
         <Option
-          n={4}
+          n={3}
           title="Partner as a business"
           body="Businesses giving $100 or more are featured on our home page with their logo: Gold ($1,000+), Silver ($500+), or Bronze ($100+)."
         >
           <Link href="/partners" className="btn-primary">Become a Christmas partner</Link>
         </Option>
 
-        <Option n={5} title="Give money" body="Gifts of any size help us buy the items no one has chosen yet, plus wrapping supplies, so every angel is covered.">
+        <Option n={4} title="Give money" body="Gifts of any size help us buy the items no one has chosen yet, plus wrapping supplies, so every angel is covered.">
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/donate" className="btn-primary">Donate</Link>
             {season?.venmoHandle && <VenmoButton handle={season.venmoHandle} />}

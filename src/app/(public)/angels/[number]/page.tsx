@@ -21,10 +21,10 @@ export default async function AngelPage({
   searchParams,
 }: {
   params: Promise<{ number: string }>;
-  searchParams: Promise<{ item?: string; error?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { number } = await params;
-  const { item: preselect, error } = await searchParams;
+  const { error } = await searchParams;
   const season = await getActiveSeason();
   const n = Number(number);
   if (!season || !Number.isInteger(n)) notFound();
@@ -76,14 +76,8 @@ export default async function AngelPage({
             <ul className="divide-y divide-black/5">
               {angel.items.map((i) => (
                 <li key={i.id} className="flex items-start gap-3 py-2.5">
-                  {i.status === "NEEDED" && open ? (
-                    <input
-                      type="checkbox"
-                      name="itemId"
-                      value={i.id}
-                      defaultChecked={preselect ? preselect === i.id : false}
-                      className="item-box mt-1 h-4 w-4 accent-star-700"
-                    />
+                  {i.status === "NEEDED" ? (
+                    <span className="mt-0.5 text-star-500" aria-hidden>✦</span>
                   ) : (
                     <span className="mt-0.5 text-dusk-600">✓</span>
                   )}
@@ -106,14 +100,20 @@ export default async function AngelPage({
 
             {open && needed.length > 0 && (
               <>
-                {whole && (
-                  <label className="flex items-center gap-2 rounded-xl bg-star-50 px-4 py-3 text-sm font-semibold text-star-800">
-                    <input type="checkbox" name="whole" value="1" className="h-4 w-4 accent-star-700" defaultChecked={!preselect} />
-                    Sponsor Angel #{angel.number}&rsquo;s entire list
-                  </label>
-                )}
-                <p className="text-xs text-black/55">
-                  {whole ? "Or uncheck the box above and choose just the items you'd like to give." : "Choose the items you'd like to give."}
+                <input type="hidden" name="whole" value="1" />
+                <p className="rounded-xl bg-star-50 px-4 py-3 text-sm text-star-800">
+                  {whole ? (
+                    <>
+                      <strong>Sponsoring an angel means giving their whole wish list.</strong> You&rsquo;ll get everything above for
+                      Angel #{angel.number}.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Part of this list is already covered.</strong> Sponsor the rest of Angel #{angel.number}&rsquo;s list
+                      (the {needed.length} gift{needed.length === 1 ? "" : "s"} marked ✦).
+                    </>
+                  )}{" "}
+                  Want to give a smaller gift instead? <Link href="/give#amazon" className="font-semibold">Shop our general needs list</Link>.
                 </p>
 
                 <div className="grid gap-3 border-t border-black/5 pt-5 sm:grid-cols-2">
@@ -141,7 +141,9 @@ export default async function AngelPage({
                     </label>
                   )}
                 </fieldset>
-                <button className="btn-primary w-full py-3 text-base">Sponsor these gifts</button>
+                <button className="btn-primary w-full py-3 text-base">
+                  {whole ? `Sponsor Angel #${angel.number}` : `Sponsor the rest of Angel #${angel.number}'s list`}
+                </button>
                 {season.giftDeadline && (
                   <p className="text-center text-xs text-black/55">Unwrapped gifts are due by {formatDate(season.giftDeadline)}.</p>
                 )}
