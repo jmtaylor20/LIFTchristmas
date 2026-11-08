@@ -57,7 +57,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
     <>
       <PageHero eyebrow={`Christmas ${season?.year ?? ""}`} title="The Angel Tree">
         <p>
-          Each angel is a child in our community. Sponsor a whole wish list, or choose just a few items. Names are kept private.
+          Each angel is a child in our community. Sponsor an angel&rsquo;s whole wish list. Names are kept private.
         </p>
         {season?.giftDeadline && open && (
           <p className="mt-2 text-base">Gifts are due by <strong>{formatDate(season.giftDeadline)}</strong>.</p>
@@ -81,7 +81,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
         )}
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <FilterLink href={qs({ view: undefined })} active={!sp.view}>All angels</FilterLink>
-          <FilterLink href={qs({ view: "whole" })} active={sp.view === "whole"}>Whole list available</FilterLink>
+          <FilterLink href={qs({ view: "whole" })} active={sp.view === "whole"}>Not yet sponsored</FilterLink>
           <span className="mx-2 h-5 w-px bg-black/10" />
           <FilterLink href={qs({ gender: undefined })} active={!sp.gender}>All</FilterLink>
           <FilterLink href={qs({ gender: "GIRL" })} active={sp.gender === "GIRL"}>Girls</FilterLink>
@@ -91,7 +91,7 @@ export default async function AngelTree({ searchParams }: { searchParams: Promis
           {Object.keys(ageRanges).map((r) => (
             <FilterLink key={r} href={qs({ age: r })} active={sp.age === r}>Ages {r}</FilterLink>
           ))}
-          <Link href="/angels/items" className="ml-auto font-semibold text-star-700">Shop gifts by price →</Link>
+          <Link href="/give#amazon" className="ml-auto font-semibold text-star-700">Rather give a smaller gift? →</Link>
         </div>
 
         {cards.length === 0 ? (

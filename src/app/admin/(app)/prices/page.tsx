@@ -8,8 +8,8 @@ import { saveItemPrices } from "../../actions";
 
 export const metadata = { title: "Gift prices" };
 
-// Families' wish lists rarely include prices, but sponsors browse "Gifts for
-// every budget" by price. This page lets the owner price many gifts at once.
+// Families' wish lists rarely include prices. Sponsors see these estimates on
+// each angel's page (and the total still needed). This page prices many gifts at once.
 export default async function Prices({ searchParams }: { searchParams: Promise<{ show?: string; saved?: string }> }) {
   const { show, saved } = await searchParams;
   const season = await requireAdminSeason();
@@ -31,8 +31,8 @@ export default async function Prices({ searchParams }: { searchParams: Promise<{
       <div className="mb-4 space-y-3">
         {saved != null && <Notice tone="success">Saved {saved} price{saved === "1" ? "" : "s"}.</Notice>}
         <p className="max-w-2xl text-sm text-black/60">
-          Sponsors can shop &ldquo;Gifts for every budget&rdquo; by price, but most wish lists came in without prices. Type a rough
-          price for each gift (whole dollars are fine) and save. Gifts without a price still appear, after the priced ones.
+          Sponsors see a rough price next to each gift on an angel&rsquo;s page, plus about how much the whole list costs. Most wish
+          lists came in without prices. Type a rough price for each gift (whole dollars are fine) and save.
         </p>
         <div className="flex gap-2 text-sm">
           <Link href="/admin/prices" className={!all ? "btn-green btn-sm" : "btn-outline btn-sm"}>Needs a price ({all ? unpriced : items.length})</Link>

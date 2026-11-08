@@ -126,7 +126,7 @@ export default async function Home() {
             <p className="eyebrow">Share the season</p>
             <h2 id="help-title" className="mt-4 text-[clamp(2.4rem,4vw,3.6rem)] leading-[1.12]">There is a place for you here.</h2>
             <p className="mt-4 text-black/65">
-              Every gift fits a budget, whether you take on a child&rsquo;s whole list or a single pair of socks.
+              Sponsor a child&rsquo;s whole wish list, shop our list of general needs, or give what you can.
               {season?.giftDeadline && <> Gifts and donations are due by <strong className="text-ink">{formatDate(season.giftDeadline)}</strong>.</>}
             </p>
           </div>
@@ -135,7 +135,7 @@ export default async function Home() {
               n="01"
               icon="✦"
               title="Sponsor an angel"
-              body={`Take on a child's whole wish list as a family, class, or business${season?.perChildBudgetCents ? ` (about ${money(season.perChildBudgetCents)})` : ""}, or choose just a few gifts.`}
+              body={`Take on a child's whole wish list as a family, class, or business${season?.perChildBudgetCents ? ` (about ${money(season.perChildBudgetCents)})` : ""}.`}
               href="/angels"
               cta="Visit the Angel Tree"
             />
