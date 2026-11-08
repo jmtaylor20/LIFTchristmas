@@ -5,6 +5,7 @@ import { BATCH_SIZE, pause } from "./givers";
 import { getActiveSeason } from "./season";
 import { dict, longDate, toLang } from "@/content/i18n";
 import { shipToHtml } from "./shipping";
+import { site } from "@/content/site";
 
 const DAY = 24 * 60 * 60 * 1000;
 // Automatic reminders go out this many days before a deadline.
@@ -133,6 +134,7 @@ export async function sendSponsorReminders(opts: Opts = {}) {
 <p>Thank you again for sponsoring <strong>Angel #${s.angel.number}</strong>! This is a friendly reminder that these gifts are due${season.giftDeadline ? ` by <strong>${formatDate(season.giftDeadline)}</strong>` : " soon"}:</p>
 <ul>${list}</ul>
 <p>Sizes: shirt ${esc(s.angel.shirtSize) || "—"}, pants ${esc(s.angel.pantsSize) || "—"}, shoes ${esc(s.angel.shoeSize) || "—"}.</p>
+<p><em>A request from our team:</em> ${esc(site.clothingFirst)}</p>
 ${
   s.delivery === "SHIP" && season.shippingAddress
     ? `<p>Please ship your order to:</p>${shipToHtml(s.angel.number, season.shippingAddress)}`

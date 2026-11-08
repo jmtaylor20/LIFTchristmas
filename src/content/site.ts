@@ -18,6 +18,8 @@ export const site = {
   // From the Community Christmas flyer.
   helpLine:
     "Lift Ministries Community Christmas is here to help families in our community during the holiday season. If you are in need of assistance this year, please complete the application below.",
+  // A gentle request to sponsors (not a rule), shown on angel pages and in sponsor emails.
+  clothingFirst: "If you can, please shop for clothing and shoes first, then the other gifts on the list. Sizes are listed with each angel.",
   thanksLine: "Thank you for allowing us to be a part of blessing families in our community this Christmas!",
 
   verse: {
