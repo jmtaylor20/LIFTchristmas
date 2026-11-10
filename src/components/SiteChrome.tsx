@@ -121,6 +121,12 @@ export function SiteFooter({ venmo }: { venmo?: string | null }) {
           </span>
           <Link href="/admin" className="text-dusk-100/70">Ministry login</Link>
         </div>
+        <div className="container-page pb-5 text-[11px] text-dusk-100/60">
+          Designed and managed by{" "}
+          <a href="https://taylormadegrowth.com" className="text-inherit underline underline-offset-2 hover:text-dusk-100">
+            TaylorMade Brands, LLC
+          </a>
+        </div>
       </div>
     </footer>
   );
