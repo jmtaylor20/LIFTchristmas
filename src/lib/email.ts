@@ -15,6 +15,8 @@ type Email = { to: string; subject: string; html: string; text?: string; replyTo
  * loses a family's application or a sponsor's commitment.
  */
 export async function sendEmail(msg: Email): Promise<boolean> {
+  // Placeholder addresses (e.g. a partner added without an email) are never sent to.
+  if (/\.invalid$/i.test(msg.to.trim())) return false;
   if (isSandbox()) {
     // Test mode: keep the email for the Test Outbox instead of sending it.
     await db.sandboxEmail.create({ data: { to: msg.to, subject: msg.subject, html: msg.html } });
