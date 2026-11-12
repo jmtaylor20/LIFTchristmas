@@ -3,7 +3,8 @@ import { requireAdminSeason } from "@/lib/season";
 import { seasonPartners, tierLabel, TIERS } from "@/lib/recognition";
 import { formatDateShort, money } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
-import { approvePartner, declinePartner, updatePartner } from "../../actions";
+import { adminAddPartner, approvePartner, declinePartner, updatePartner } from "../../actions";
+import { Notice } from "@/components/ui";
 
 export const metadata = { title: "Business partners" };
 
@@ -13,7 +14,8 @@ const statusTone = {
   DECLINED: "bg-black/10 text-black/60",
 } as const;
 
-export default async function AdminPartners() {
+export default async function AdminPartners({ searchParams }: { searchParams: Promise<{ added?: string; error?: string }> }) {
+  const sp = await searchParams;
   const season = await requireAdminSeason();
   const partners = await seasonPartners(season.id);
   const pending = partners.filter((p) => p.status === "PENDING");
@@ -28,6 +30,41 @@ export default async function AdminPartners() {
         it&rsquo;s approved <em>and</em> their gift is marked received under Money &amp; Gifts. Tiers follow the money received:{" "}
         {TIERS.map((t) => `${t.label} ${money(t.minCents)}+`).join(", ")}. You can set a tier by hand, for example for donated goods.
       </p>
+      {sp.added && (
+        <div className="mb-4">
+          <Notice tone="success">{sp.added} was added, with their logo approved and gift recorded as received.</Notice>
+        </div>
+      )}
+      <details id="add" className="card mb-6" open={!!sp.error}>
+        <summary className="cursor-pointer text-lg font-display text-dusk-700">+ Add a business partner yourself</summary>
+        <p className="mt-2 text-sm text-black/60">
+          For a business that already gave (for example, a check handed to you). Their logo goes straight onto the home page partner
+          wall at the tier their gift earns, and the gift is recorded as received under Money &amp; Gifts.
+        </p>
+        {sp.error && <div className="mt-3"><Notice tone="error">{sp.error}</Notice></div>}
+        <form action={adminAddPartner} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input name="businessName" required placeholder="Business name" className="input sm:col-span-2" />
+          <input name="amount" required inputMode="decimal" placeholder="Amount received ($)" className="input" />
+          <select name="method" defaultValue="CHECK" className="input" aria-label="How they gave">
+            <option value="CHECK">Check</option>
+            <option value="CASH">Cash</option>
+            <option value="VENMO">Venmo</option>
+            <option value="OTHER">Other</option>
+          </select>
+          <input name="website" placeholder="Website (optional)" className="input sm:col-span-2" />
+          <input name="firstName" placeholder="Contact first name (optional)" className="input" />
+          <input name="lastName" placeholder="Contact last name (optional)" className="input" />
+          <input name="email" type="email" placeholder="Contact email (optional)" className="input sm:col-span-2" />
+          <p className="text-xs text-black/55 sm:col-span-2">
+            With an email, the business gets a giving receipt and a thank-you that their logo is live. Without one, no email is sent.
+          </p>
+          <label className="block sm:col-span-2">
+            <span className="label">Logo (PNG, JPG, WebP, or SVG, under 3 MB)</span>
+            <input type="file" name="logo" required accept="image/png,image/jpeg,image/webp,image/svg+xml" className="input" />
+          </label>
+          <button className="btn-green sm:col-span-2 sm:justify-self-start">Add partner</button>
+        </form>
+      </details>
       {pending.length > 0 && (
         <p className="mb-4 rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
           {pending.length} partner{pending.length === 1 ? "" : "s"} waiting for your review.

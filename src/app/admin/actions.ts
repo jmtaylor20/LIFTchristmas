@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import type { ApplicationStatus, ItemStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { clearAdminSession, requireAdmin, setAdminSession } from "@/lib/auth";
-import { safeEqual } from "@/lib/tokens";
+import { randomToken, safeEqual } from "@/lib/tokens";
 import { ADMIN_SEASON_COOKIE, getAdminSeason } from "@/lib/season";
 import { approvedYears } from "@/lib/households";
 import { createApplication, parseGoogleFormCsv } from "@/lib/applications";
@@ -736,4 +736,97 @@ export async function rerunAutoReview(applicationId: string) {
   const result = await autoReview(applicationId, { emailFamily: true });
   revalidatePath("/admin", "layout");
   redirect(`/admin/applications/${applicationId}?checked=${result}`);
+}
+
+// ------------------------------------------------------------------ partners added by the owner
+
+const PARTNER_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+
+/**
+ * Adds a business partner whose gift the ministry already has (e.g. a check
+ * handed to the owner): logo approved and gift recorded as received, so it goes
+ * straight onto the partner wall. With a contact email, the business also gets
+ * the receipt and partner thank-you; without one, no email is sent.
+ */
+export async function adminAddPartner(fd: FormData) {
+  await requireAdmin();
+  const season = await getAdminSeason();
+  if (!season) redirect("/admin/seasons?setup=1");
+  const back = (error: string): never => redirect(`/admin/partners?error=${encodeURIComponent(error)}#add`);
+  const businessName = str(fd, "businessName").slice(0, 120);
+  if (!businessName) back("Enter the business name.");
+  const amountCents = parseMoneyToCents(fd.get("amount"));
+  if (!amountCents || amountCents <= 0) back("Enter the amount the business gave.");
+  const method = str(fd, "method");
+  if (!["CHECK", "CASH", "VENMO", "OTHER"].includes(method)) back("Choose how they gave.");
+  const logo = fd.get("logo");
+  if (!(logo instanceof File) || logo.size === 0) back("Add the business's logo.");
+  const file = logo as File;
+  if (file.size > 3 * 1024 * 1024 || !PARTNER_LOGO_TYPES.includes(file.type)) back("The logo should be a PNG, JPG, WebP, or SVG under 3 MB.");
+
+  const email = str(fd, "email");
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) back("That email address doesn't look right.");
+  // Every giver record needs an email; without one, use a placeholder that is never sent to.
+  const giverEmail = email || `partner-${randomToken(8).toLowerCase()}@no-email.invalid`;
+  const website = (() => {
+    const raw = str(fd, "website");
+    if (!raw) return null;
+    try {
+      const u = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+      return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const giver = await upsertGiver({
+    firstName: str(fd, "firstName") || businessName,
+    lastName: str(fd, "lastName"),
+    email: giverEmail,
+    organization: businessName,
+    displayName: businessName,
+  });
+  const partner = await db.corporatePartner.upsert({
+    where: { seasonId_sponsorId: { seasonId: season.id, sponsorId: giver.id } },
+    create: {
+      seasonId: season.id,
+      sponsorId: giver.id,
+      businessName,
+      website,
+      logoData: new Uint8Array(await file.arrayBuffer()),
+      logoType: file.type,
+      logoKey: randomToken(18),
+      pledgeCents: amountCents,
+      status: "APPROVED",
+      approvedAt: new Date(),
+    },
+    update: {
+      businessName,
+      website,
+      logoData: new Uint8Array(await file.arrayBuffer()),
+      logoType: file.type,
+      logoKey: randomToken(18),
+      status: "APPROVED",
+      approvedAt: new Date(),
+    },
+  });
+  const donation = await db.donation.create({
+    data: {
+      seasonId: season.id,
+      sponsorId: giver.id,
+      donorName: businessName,
+      donorEmail: email || null,
+      amountCents: amountCents!,
+      method: method as "CHECK" | "CASH" | "VENMO" | "OTHER",
+      status: "PAID",
+      receivedAt: new Date(),
+      note: "Business partner gift recorded by the ministry",
+    },
+  });
+  if (email) {
+    await sendDonationReceipt(donation.id);
+    await thankPartnerIfLive(partner.id);
+  }
+  revalidatePath("/", "layout");
+  redirect(`/admin/partners?added=${encodeURIComponent(businessName)}`);
 }
