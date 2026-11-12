@@ -830,3 +830,20 @@ export async function adminAddPartner(fd: FormData) {
   revalidatePath("/", "layout");
   redirect(`/admin/partners?added=${encodeURIComponent(businessName)}`);
 }
+
+/** Swaps in a new logo for a partner, keeping its approval and tier. */
+export async function replacePartnerLogo(id: string, fd: FormData) {
+  await requireAdmin();
+  const logo = fd.get("logo");
+  if (!(logo instanceof File) || logo.size === 0) return;
+  if (logo.size > 3 * 1024 * 1024 || !PARTNER_LOGO_TYPES.includes(logo.type)) {
+    redirect(`/admin/partners?error=${encodeURIComponent("The logo should be a PNG, JPG, WebP, or SVG under 3 MB.")}`);
+  }
+  await db.corporatePartner.update({
+    where: { id },
+    // A new key gives the logo a fresh address so browsers don't show the old one.
+    data: { logoData: new Uint8Array(await logo.arrayBuffer()), logoType: logo.type, logoKey: randomToken(18) },
+  });
+  revalidatePath("/", "layout");
+  redirect("/admin/partners?logo=1");
+}

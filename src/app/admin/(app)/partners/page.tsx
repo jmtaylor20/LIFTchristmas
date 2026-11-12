@@ -3,7 +3,7 @@ import { requireAdminSeason } from "@/lib/season";
 import { seasonPartners, tierLabel, TIERS } from "@/lib/recognition";
 import { formatDateShort, money } from "@/lib/format";
 import { AdminTitle, Empty } from "@/components/admin";
-import { adminAddPartner, approvePartner, declinePartner, updatePartner } from "../../actions";
+import { adminAddPartner, approvePartner, declinePartner, replacePartnerLogo, updatePartner } from "../../actions";
 import { Notice } from "@/components/ui";
 
 export const metadata = { title: "Business partners" };
@@ -14,7 +14,7 @@ const statusTone = {
   DECLINED: "bg-black/10 text-black/60",
 } as const;
 
-export default async function AdminPartners({ searchParams }: { searchParams: Promise<{ added?: string; error?: string }> }) {
+export default async function AdminPartners({ searchParams }: { searchParams: Promise<{ added?: string; error?: string; logo?: string }> }) {
   const sp = await searchParams;
   const season = await requireAdminSeason();
   const partners = await seasonPartners(season.id);
@@ -30,6 +30,11 @@ export default async function AdminPartners({ searchParams }: { searchParams: Pr
         it&rsquo;s approved <em>and</em> their gift is marked received under Money &amp; Gifts. Tiers follow the money received:{" "}
         {TIERS.map((t) => `${t.label} ${money(t.minCents)}+`).join(", ")}. You can set a tier by hand, for example for donated goods.
       </p>
+      {sp.logo && (
+        <div className="mb-4">
+          <Notice tone="success">Logo replaced.</Notice>
+        </div>
+      )}
       {sp.added && (
         <div className="mb-4">
           <Notice tone="success">{sp.added} was added, with their logo approved and gift recorded as received.</Notice>
@@ -84,6 +89,11 @@ export default async function AdminPartners({ searchParams }: { searchParams: Pr
                   <span className="text-xs text-black/40">No logo</span>
                 )}
               </div>
+              <form action={replacePartnerLogo.bind(null, p.id)} className="flex flex-col gap-1 text-xs md:col-start-1 md:row-start-2">
+                <span className="text-black/55">Replace logo</span>
+                <input type="file" name="logo" required accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label={`New logo for ${p.businessName}`} className="text-xs" />
+                <button className="btn-outline btn-sm self-start">Upload</button>
+              </form>
               <div className="min-w-0 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-2xl">{p.businessName}</h2>
