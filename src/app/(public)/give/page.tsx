@@ -69,9 +69,7 @@ export default async function Give({
               <a href={season.amazonWishlistUrl} target="_blank" rel="noopener noreferrer" className={needs.length ? "btn-outline" : "btn-primary"}>
                 {needs.length ? "See our full Amazon wish list ↗" : "Open the Amazon wish list ↗"}
               </a>
-            ) : (
-              <p className="text-sm text-black/60">Our Amazon wish list is coming soon.</p>
-            )}
+            ) : null}
             {logged ? (
               <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Thank you! We&rsquo;ve recorded your Amazon gift.</p>
             ) : (

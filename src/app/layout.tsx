@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: { default: `${site.name} · ${site.communities}`, template: `%s · ${site.name}` },
   description: site.tagline,
   openGraph: { images: [brand.full] },
+  icons: { apple: "/apple-touch-icon.png" },
   themeColor: "#6b8fa5",
 };
 
