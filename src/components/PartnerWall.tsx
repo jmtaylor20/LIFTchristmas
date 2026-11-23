@@ -3,10 +3,11 @@ import type { partnerWall } from "@/lib/recognition";
 
 type Wall = Awaited<ReturnType<typeof partnerWall>>;
 
+// Gold is biggest, then Silver, then Bronze, but every logo is large enough to read.
 const sizes = {
-  GOLD: { box: "h-32 sm:h-36", img: "max-h-24 sm:max-h-28", grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" },
-  SILVER: { box: "h-24", img: "max-h-16", grid: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" },
-  BRONZE: { box: "h-20", img: "max-h-12", grid: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6" },
+  GOLD: { box: "h-52 sm:h-60", img: "max-h-44 sm:max-h-52", grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" },
+  SILVER: { box: "h-40 sm:h-48", img: "max-h-32 sm:max-h-40", grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" },
+  BRONZE: { box: "h-32 sm:h-36", img: "max-h-24 sm:max-h-28", grid: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" },
 };
 
 const badge = {
@@ -26,7 +27,7 @@ export function PartnerWall({ wall }: { wall: Wall }) {
             {g.partners.map((p) => {
               const logo = (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/partner-logo/${p.logoKey}`} alt={p.businessName} className={`w-auto max-w-[85%] object-contain ${sizes[g.tier].img}`} />
+                <img src={`/partner-logo/${p.logoKey}`} alt={p.businessName} className={`w-auto max-w-[92%] object-contain ${sizes[g.tier].img}`} />
               );
               return (
                 <li key={p.id}>
